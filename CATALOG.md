@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**96 rules** implemented in the open in this package — 12 critical, 31 high, 32 medium, 21 low.
+**118 rules** implemented in the open in this package — 12 critical, 31 high, 50 medium, 25 low.
 
 > The full CDK Insights product runs **119 rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -11,6 +11,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`api-gateway-method-auth-missing`](https://cdkinsights.dev/rules/api-gateway-method-auth-missing) | HIGH | Security | Detects API Gateway methods and routes with no authorization (AuthorizationType NONE), excluding CORS preflight. |
+| [`api-gateway-logging-disabled`](https://cdkinsights.dev/rules/api-gateway-logging-disabled) | MEDIUM | Security | Detects API Gateway stages with neither access logging nor execution logging configured. |
 | [`apigateway-default-endpoint-enabled`](https://cdkinsights.dev/rules/apigateway-default-endpoint-enabled) | LOW | Security | Detects REST APIs that leave the default execute-api endpoint enabled while a custom domain is mapped to them, letting clients bypass the domain and its edge controls. |
 | [`apigateway-throttling-missing`](https://cdkinsights.dev/rules/apigateway-throttling-missing) | LOW | Reliability | Detects API Gateway stages with no rate or burst limits from either MethodSettings or a usage plan, leaving backends exposed to traffic spikes and uncontrolled cost. |
 
@@ -19,6 +20,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`appsync-api-key-auth`](https://cdkinsights.dev/rules/appsync-api-key-auth) | MEDIUM | Security | Detects AppSync GraphQL APIs whose primary authentication is a static API key. |
+| [`appsync-logging-disabled`](https://cdkinsights.dev/rules/appsync-logging-disabled) | MEDIUM | Operational Excellence | Detects AppSync APIs without logging or X-Ray tracing configured. |
 | [`appsync-waf-missing`](https://cdkinsights.dev/rules/appsync-waf-missing) | MEDIUM | Security | Detects AppSync GraphQL APIs without a WAF WebACL association. |
 
 ## AutoScaling
@@ -56,6 +58,12 @@
 | --- | --- | --- | --- |
 | [`cloudtrail-logging-disabled`](https://cdkinsights.dev/rules/cloudtrail-logging-disabled) | HIGH | Security | Detects CloudTrail trails with IsLogging set to false, silently recording no audit events. |
 
+## CloudWatch
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`cloudwatch-alarm-actions-missing`](https://cdkinsights.dev/rules/cloudwatch-alarm-actions-missing) | MEDIUM | Operational Excellence | Detects CloudWatch alarms without alarm actions or missing-data handling. |
+
 ## Cognito
 
 | Rule | Severity | Pillar | Description |
@@ -68,9 +76,11 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`dynamodb-autoscaling-missing`](https://cdkinsights.dev/rules/dynamodb-autoscaling-missing) | MEDIUM | Cost Optimization | Detects provisioned-capacity DynamoDB tables without Application Auto Scaling. |
 | [`dynamodb-deletion-protection-disabled`](https://cdkinsights.dev/rules/dynamodb-deletion-protection-disabled) | MEDIUM | Reliability | Detects DynamoDB tables (and global-table replicas) without deletion protection, which can be destroyed by an accidental stack update or delete. |
 | [`dynamodb-encryption-aws-owned-key`](https://cdkinsights.dev/rules/dynamodb-encryption-aws-owned-key) | MEDIUM | Security | Detects DynamoDB tables without customer-controlled KMS encryption (SSESpecification). |
 | [`dynamodb-pitr-disabled`](https://cdkinsights.dev/rules/dynamodb-pitr-disabled) | MEDIUM | Reliability | Detects DynamoDB tables (and global-table replicas) without point-in-time recovery. |
+| [`dynamodb-streams-disabled`](https://cdkinsights.dev/rules/dynamodb-streams-disabled) | LOW | Operational Excellence | Detects DynamoDB tables without streams enabled for change capture. |
 
 ## EC2
 
@@ -80,15 +90,18 @@
 | [`ec2-imdsv2-not-enforced`](https://cdkinsights.dev/rules/ec2-imdsv2-not-enforced) | HIGH | Security | Detects launch templates and launch configurations that do not require IMDSv2 (MetadataOptions.HttpTokens is not "required"), leaving instances exposed to SSRF-based credential theft. |
 | [`ec2-instance-public-ip`](https://cdkinsights.dev/rules/ec2-instance-public-ip) | HIGH | Security | Detects EC2 instances whose NetworkInterfaces set AssociatePublicIpAddress to true, exposing the instance directly to the internet. |
 | [`security-group-unrestricted-ingress`](https://cdkinsights.dev/rules/security-group-unrestricted-ingress) | HIGH | Security | Detects security group ingress rules open to the whole internet (0.0.0.0/0 or ::/0). |
+| [`ec2-instance-type-outdated`](https://cdkinsights.dev/rules/ec2-instance-type-outdated) | MEDIUM | Performance Efficiency | Detects EC2 instances on the previous-generation t2 family. |
 | [`vpc-default-security-group-rules-present`](https://cdkinsights.dev/rules/vpc-default-security-group-rules-present) | MEDIUM | Security | Detects default security groups with ingress or egress rules configured. |
 | [`vpc-flow-logs-missing`](https://cdkinsights.dev/rules/vpc-flow-logs-missing) | MEDIUM | Security | Detects VPCs without flow logs configured. |
 | [`ec2-subnet-auto-public-ip`](https://cdkinsights.dev/rules/ec2-subnet-auto-public-ip) | LOW | Security | Detects subnets that auto-assign public IPs to launched instances (MapPublicIpOnLaunch). |
+| [`nat-gateway-usage`](https://cdkinsights.dev/rules/nat-gateway-usage) | LOW | Cost Optimization | Flags NAT gateways so their hourly and per-GB costs are a conscious decision. |
 
 ## ECR
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`ecr-scan-on-push-disabled`](https://cdkinsights.dev/rules/ecr-scan-on-push-disabled) | HIGH | Security | Detects ECR repositories without image scanning on push enabled. |
+| [`ecr-lifecycle-policy-missing`](https://cdkinsights.dev/rules/ecr-lifecycle-policy-missing) | MEDIUM | Cost Optimization | Detects ECR repositories without a lifecycle policy. |
 | [`ecr-mutable-tags`](https://cdkinsights.dev/rules/ecr-mutable-tags) | MEDIUM | Security | Detects ECR repositories that allow image tags to be overwritten. |
 
 ## ECS
@@ -97,8 +110,11 @@
 | --- | --- | --- | --- |
 | [`ecs-container-privileged`](https://cdkinsights.dev/rules/ecs-container-privileged) | HIGH | Security | Detects ECS task definitions with a container running in privileged mode, which can access the host and escalate a container compromise into host compromise. |
 | [`ecs-secrets-plaintext`](https://cdkinsights.dev/rules/ecs-secrets-plaintext) | HIGH | Security | Detects ECS task definitions with sensitive-looking environment variables (passwords, API keys, tokens) in plaintext. |
+| [`ecs-deployment-circuit-breaker-disabled`](https://cdkinsights.dev/rules/ecs-deployment-circuit-breaker-disabled) | MEDIUM | Operational Excellence | Detects ECS services without the deployment circuit breaker enabled. |
+| [`ecs-logging-disabled`](https://cdkinsights.dev/rules/ecs-logging-disabled) | MEDIUM | Operational Excellence | Detects ECS containers without a log configuration. |
 | [`ecs-service-connect-access-logs-missing`](https://cdkinsights.dev/rules/ecs-service-connect-access-logs-missing) | MEDIUM | Security | Detects ECS services with Service Connect enabled but no log configuration. |
 | [`ecs-resources-missing`](https://cdkinsights.dev/rules/ecs-resources-missing) | LOW | Reliability | Detects ECS containers with no CPU or memory limits and no task-level sizing. |
+| [`ecs-task-definition-mutable-image-tag`](https://cdkinsights.dev/rules/ecs-task-definition-mutable-image-tag) | LOW | Operational Excellence | Detects ECS containers referencing images by the mutable latest tag or with no tag. |
 
 ## EFS
 
@@ -129,6 +145,7 @@
 | [`elb-https-listeners-missing`](https://cdkinsights.dev/rules/elb-https-listeners-missing) | HIGH | Security | Detects load balancer HTTP listeners that neither use HTTPS nor redirect to it. |
 | [`elb-deletion-protection-disabled`](https://cdkinsights.dev/rules/elb-deletion-protection-disabled) | MEDIUM | Reliability | Detects load balancers without deletion protection enabled. |
 | [`elb-logging-disabled`](https://cdkinsights.dev/rules/elb-logging-disabled) | MEDIUM | Security | Detects load balancers without access logging to S3 enabled. |
+| [`elb-security-policy-outdated`](https://cdkinsights.dev/rules/elb-security-policy-outdated) | MEDIUM | Security | Detects HTTPS/TLS listeners using outdated SSL policies (including the TLS 1.0-era default). |
 
 ## Events
 
@@ -177,6 +194,8 @@
 | [`lambda-permission-service-unrestricted`](https://cdkinsights.dev/rules/lambda-permission-service-unrestricted) | HIGH | Security | Detects Lambda permissions that grant an AWS service principal invoke rights without a SourceArn/SourceAccount restriction (confused-deputy risk). |
 | [`lambda-runtime-deprecated`](https://cdkinsights.dev/rules/lambda-runtime-deprecated) | HIGH | Security | Detects Lambda functions on deprecated runtimes that no longer receive security patches. |
 | [`lambda-url-auth-none`](https://cdkinsights.dev/rules/lambda-url-auth-none) | HIGH | Security | Detects Lambda Function URLs configured with AuthType NONE, which allows unauthenticated public invocation. |
+| [`lambda-memory-optimization`](https://cdkinsights.dev/rules/lambda-memory-optimization) | MEDIUM | Cost Optimization | Detects Lambda functions with memory allocations above 1024 MB. |
+| [`lambda-vpc-nat-cost`](https://cdkinsights.dev/rules/lambda-vpc-nat-cost) | MEDIUM | Cost Optimization | Detects VPC-attached Lambda functions in templates with a NAT gateway, where NAT data-processing charges accumulate. |
 | [`lambda-dlq-missing`](https://cdkinsights.dev/rules/lambda-dlq-missing) | LOW | Reliability | Detects async-invoked Lambda functions without a dead-letter queue or failure destination. |
 | [`lambda-reserved-concurrency-missing`](https://cdkinsights.dev/rules/lambda-reserved-concurrency-missing) | LOW | Reliability | Detects Lambda functions without reserved concurrency configured. |
 | [`lambda-tracing-disabled`](https://cdkinsights.dev/rules/lambda-tracing-disabled) | LOW | Operational Excellence | Detects Lambda functions without active X-Ray tracing, reducing observability into latency and errors. |
@@ -185,6 +204,7 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`cloudwatch-logs-retention-missing`](https://cdkinsights.dev/rules/cloudwatch-logs-retention-missing) | MEDIUM | Cost Optimization | Detects CloudWatch log groups without a retention period (logs kept forever). |
 | [`cloudwatch-logs-encryption-disabled`](https://cdkinsights.dev/rules/cloudwatch-logs-encryption-disabled) | LOW | Security | Detects CloudWatch log groups without a customer-managed KMS key. |
 
 ## MSK
@@ -193,6 +213,7 @@
 | --- | --- | --- | --- |
 | [`msk-client-authentication-missing`](https://cdkinsights.dev/rules/msk-client-authentication-missing) | HIGH | Security | Detects MSK clusters with no client authentication configured, or with unauthenticated access enabled. |
 | [`msk-encryption-weak`](https://cdkinsights.dev/rules/msk-encryption-weak) | HIGH | Security | Detects MSK clusters that allow plaintext client-broker traffic or disable inter-broker encryption. |
+| [`msk-broker-logging-disabled`](https://cdkinsights.dev/rules/msk-broker-logging-disabled) | MEDIUM | Operational Excellence | Detects MSK clusters without broker logs to CloudWatch, Firehose, or S3. |
 
 ## OpenSearchService
 
@@ -210,7 +231,10 @@
 | [`rds-publicly-accessible`](https://cdkinsights.dev/rules/rds-publicly-accessible) | CRITICAL | Security | Detects RDS instances with PubliclyAccessible set to true, exposing the database endpoint to the internet. |
 | [`rds-backup-retention-low`](https://cdkinsights.dev/rules/rds-backup-retention-low) | MEDIUM | Reliability | Detects RDS instances and clusters with automated backups disabled or retention under 7 days. |
 | [`rds-deletion-protection-disabled`](https://cdkinsights.dev/rules/rds-deletion-protection-disabled) | MEDIUM | Reliability | Detects RDS instances and clusters without deletion protection. |
+| [`rds-enhanced-monitoring-disabled`](https://cdkinsights.dev/rules/rds-enhanced-monitoring-disabled) | MEDIUM | Operational Excellence | Detects RDS instances without enhanced (OS-level) monitoring. |
+| [`rds-logging-disabled`](https://cdkinsights.dev/rules/rds-logging-disabled) | MEDIUM | Operational Excellence | Detects RDS instances and clusters without CloudWatch log exports. |
 | [`rds-managed-secret-without-cmk`](https://cdkinsights.dev/rules/rds-managed-secret-without-cmk) | MEDIUM | Security | Detects RDS-managed master-user secrets encrypted with the default AWS-managed key instead of a customer-managed KMS key. |
+| [`rds-multi-az-gp2-storage`](https://cdkinsights.dev/rules/rds-multi-az-gp2-storage) | MEDIUM | Cost Optimization | Detects Multi-AZ RDS instances using gp2 (or default) storage where gp3 would cost less. |
 
 ## Redshift
 
@@ -237,6 +261,8 @@
 | [`s3-bucket-policy-non-ssl`](https://cdkinsights.dev/rules/s3-bucket-policy-non-ssl) | HIGH | Security | Detects S3 bucket policies without a Deny statement for non-TLS (aws:SecureTransport=false) requests. |
 | [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | MEDIUM | Security | Detects S3 buckets without server access logging configured. |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
+| [`s3-lifecycle-policy-missing`](https://cdkinsights.dev/rules/s3-lifecycle-policy-missing) | MEDIUM | Cost Optimization | Detects S3 buckets without lifecycle rules. |
+| [`s3-intelligent-tiering`](https://cdkinsights.dev/rules/s3-intelligent-tiering) | LOW | Cost Optimization | Detects S3 buckets not using Intelligent-Tiering for automatic cost optimization. |
 | [`s3-replication-missing`](https://cdkinsights.dev/rules/s3-replication-missing) | LOW | Reliability | Detects production/critical-named S3 buckets without cross-region replication. |
 
 ## SNS
@@ -259,6 +285,12 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`secrets-manager-secret-public`](https://cdkinsights.dev/rules/secrets-manager-secret-public) | CRITICAL | Security | Detects Secrets Manager resource policies that grant access to a wildcard or public principal without a scoping condition. |
+
+## StepFunctions
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`stepfunctions-logging-disabled`](https://cdkinsights.dev/rules/stepfunctions-logging-disabled) | MEDIUM | Operational Excellence | Detects Step Functions state machines without a logging configuration. |
 
 ## WAFv2
 
