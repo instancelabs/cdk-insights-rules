@@ -31,6 +31,18 @@ export { s3BucketPublicAccess } from './rules/s3/s3BucketPublicAccess.js';
 export { s3BucketVersioningDisabled } from './rules/s3/s3BucketVersioningDisabled.js';
 export { secretsManagerSecretPublic } from './rules/secretsmanager/secretsManagerSecretPublic.js';
 export { sqsQueueNoDlq } from './rules/sqs/sqsQueueNoDlq.js';
+export { efsEncryptionDisabled } from './rules/efs/efsEncryptionDisabled.js';
+export { elasticacheEncryptionDisabled } from './rules/elasticache/elasticacheEncryptionDisabled.js';
+export { eventbridgeBusPolicyWildcardPrincipal } from './rules/eventbridge/eventbridgeBusPolicyWildcardPrincipal.js';
+export { kinesisEncryptionDisabled } from './rules/kinesis/kinesisEncryptionDisabled.js';
+export { kmsKeyPolicySelfLockout } from './rules/kms/kmsKeyPolicySelfLockout.js';
+export { redshiftEncryptionDisabled } from './rules/redshift/redshiftEncryptionDisabled.js';
+export { redshiftPubliclyAccessible } from './rules/redshift/redshiftPubliclyAccessible.js';
+export { s3BucketPolicySelfLockout } from './rules/s3/s3BucketPolicySelfLockout.js';
+export { snsEncryptionDisabled } from './rules/sns/snsEncryptionDisabled.js';
+export { snsTopicPolicySelfLockout } from './rules/sns/snsTopicPolicySelfLockout.js';
+export { sqsEncryptionDisabled } from './rules/sqs/sqsEncryptionDisabled.js';
+export { sqsQueuePolicySelfLockout } from './rules/sqs/sqsQueuePolicySelfLockout.js';
 
 export type {
   CfnResource,

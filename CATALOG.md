@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**19 rules** implemented in the open in this package — 6 critical, 7 high, 2 medium, 4 low.
+**31 rules** implemented in the open in this package — 12 critical, 13 high, 2 medium, 4 low.
 
 > The full CDK Insights product runs **119 rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -34,6 +34,24 @@
 | --- | --- | --- | --- |
 | [`ecs-container-privileged`](https://cdkinsights.dev/rules/ecs-container-privileged) | HIGH | Security | Detects ECS task definitions with a container running in privileged mode, which can access the host and escalate a container compromise into host compromise. |
 
+## EFS
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`efs-encryption-disabled`](https://cdkinsights.dev/rules/efs-encryption-disabled) | HIGH | Security | Detects EFS file systems without encryption at rest. |
+
+## ElastiCache
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`elasticache-encryption-disabled`](https://cdkinsights.dev/rules/elasticache-encryption-disabled) | HIGH | Security | Detects ElastiCache replication groups and clusters without at-rest or in-transit encryption enabled. |
+
+## Events
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`eventbridge-bus-policy-wildcard-principal`](https://cdkinsights.dev/rules/eventbridge-bus-policy-wildcard-principal) | CRITICAL | Security | Detects event bus policies that allow a wildcard principal without any condition, letting any AWS account put events onto the bus. |
+
 ## IAM
 
 | Rule | Severity | Pillar | Description |
@@ -45,6 +63,13 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`kms-key-policy-public`](https://cdkinsights.dev/rules/kms-key-policy-public) | CRITICAL | Security | Detects KMS keys whose key policy grants access to a wildcard or public principal without a scoping condition. |
+| [`kms-key-policy-self-lockout`](https://cdkinsights.dev/rules/kms-key-policy-self-lockout) | CRITICAL | Security | Detects KMS key policies whose blanket Deny statements would make the key unmanageable. |
+
+## Kinesis
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`kinesis-encryption-disabled`](https://cdkinsights.dev/rules/kinesis-encryption-disabled) | HIGH | Security | Detects Kinesis data streams without server-side encryption enabled. |
 
 ## Lambda
 
@@ -61,17 +86,34 @@
 | [`rds-encryption-disabled`](https://cdkinsights.dev/rules/rds-encryption-disabled) | CRITICAL | Security | Detects RDS instances and clusters without storage encryption at rest. |
 | [`rds-publicly-accessible`](https://cdkinsights.dev/rules/rds-publicly-accessible) | CRITICAL | Security | Detects RDS instances with PubliclyAccessible set to true, exposing the database endpoint to the internet. |
 
+## Redshift
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`redshift-publicly-accessible`](https://cdkinsights.dev/rules/redshift-publicly-accessible) | CRITICAL | Security | Detects Redshift clusters with PubliclyAccessible set to true, exposing the warehouse endpoint to the internet. |
+| [`redshift-encryption-disabled`](https://cdkinsights.dev/rules/redshift-encryption-disabled) | HIGH | Security | Detects Redshift clusters without encryption at rest enabled. |
+
 ## S3
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`s3-bucket-policy-self-lockout`](https://cdkinsights.dev/rules/s3-bucket-policy-self-lockout) | CRITICAL | Security | Detects bucket policies whose blanket Deny statements would lock the account out of its own bucket. |
 | [`s3-bucket-public-access`](https://cdkinsights.dev/rules/s3-bucket-public-access) | CRITICAL | Security | Detects S3 buckets without a full Block Public Access configuration, leaving them exposable via ACLs or bucket policies. |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
+
+## SNS
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`sns-topic-policy-self-lockout`](https://cdkinsights.dev/rules/sns-topic-policy-self-lockout) | CRITICAL | Security | Detects SNS topic policies whose blanket Deny statements would lock the account out of its own topic. |
+| [`sns-encryption-disabled`](https://cdkinsights.dev/rules/sns-encryption-disabled) | HIGH | Security | Detects SNS topics without a KMS master key, leaving messages unencrypted at rest. |
 
 ## SQS
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`sqs-queue-policy-self-lockout`](https://cdkinsights.dev/rules/sqs-queue-policy-self-lockout) | CRITICAL | Security | Detects SQS queue policies whose blanket Deny statements would lock the account out of its own queue. |
+| [`sqs-encryption-disabled`](https://cdkinsights.dev/rules/sqs-encryption-disabled) | HIGH | Security | Detects SQS queues that explicitly disable server-side encryption (SqsManagedSseEnabled: false) without providing a KMS key. |
 | [`sqs-queue-no-dlq`](https://cdkinsights.dev/rules/sqs-queue-no-dlq) | LOW | Reliability | Detects SQS queues with no RedrivePolicy, so messages that repeatedly fail processing are lost instead of captured for inspection. |
 
 ## SecretsManager
