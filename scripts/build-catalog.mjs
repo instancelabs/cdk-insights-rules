@@ -70,7 +70,7 @@ lines.push(
 if (productCount) {
   lines.push('');
   lines.push(
-    `> The full CDK Insights product runs **${productCount} rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)`
+    `> This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (${productCount} in the product; the few remaining closed checks need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)`
   );
 }
 lines.push('');

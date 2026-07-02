@@ -13,10 +13,12 @@ rule for it, and this README shows you exactly how.
   product catalog, each with a before/after example.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the contribution workflow.
 
-> **Status:** early. This package open-sources a growing subset of the rules the
-> CDK Insights product runs. The scanner itself — CDK synth, source-location
-> attribution, the AI analysis tier, and the hosted service — stays in the
-> private product. This is the rule engine.
+> **All of CDK Insights' static detection rules are open source** — this package
+> is the product's rule engine, not a teaser. What stays in the private product
+> is the workflow around the rules: CDK synth orchestration, source-location
+> attribution (finding → your TypeScript line), the AI analysis tier, and the
+> hosted service. The handful of checks that need the product's synth pipeline
+> (source-level analysis, cross-stack heuristics) live there too.
 
 ---
 
