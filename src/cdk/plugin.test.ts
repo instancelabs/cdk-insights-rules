@@ -57,9 +57,21 @@ describe('CdkInsightsRulesPlugin', () => {
   });
 
   it('drops violations below minimumSeverity', () => {
-    // s3-bucket-versioning-disabled is MEDIUM.
+    // Public access fully blocked so only the MEDIUM versioning rule fires.
     const templatePath = writeTemplate({
-      Resources: { Bucket: { Type: 'AWS::S3::Bucket', Properties: {} } },
+      Resources: {
+        Bucket: {
+          Type: 'AWS::S3::Bucket',
+          Properties: {
+            PublicAccessBlockConfiguration: {
+              BlockPublicAcls: true,
+              BlockPublicPolicy: true,
+              IgnorePublicAcls: true,
+              RestrictPublicBuckets: true,
+            },
+          },
+        },
+      },
     });
 
     const high = new CdkInsightsRulesPlugin({

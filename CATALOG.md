@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**9 rules** implemented in the open in this package — 0 critical, 3 high, 2 medium, 4 low.
+**19 rules** implemented in the open in this package — 6 critical, 7 high, 2 medium, 4 low.
 
 > The full CDK Insights product runs **119 rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -23,7 +23,10 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`ebs-volume-unencrypted`](https://cdkinsights.dev/rules/ebs-volume-unencrypted) | HIGH | Security | Detects EBS volumes without encryption at rest. |
 | [`ec2-imdsv2-not-enforced`](https://cdkinsights.dev/rules/ec2-imdsv2-not-enforced) | HIGH | Security | Detects launch templates and launch configurations that do not require IMDSv2 (MetadataOptions.HttpTokens is not "required"), leaving instances exposed to SSRF-based credential theft. |
+| [`ec2-instance-public-ip`](https://cdkinsights.dev/rules/ec2-instance-public-ip) | HIGH | Security | Detects EC2 instances whose NetworkInterfaces set AssociatePublicIpAddress to true, exposing the instance directly to the internet. |
+| [`security-group-unrestricted-ingress`](https://cdkinsights.dev/rules/security-group-unrestricted-ingress) | HIGH | Security | Detects security group ingress rules open to the whole internet (0.0.0.0/0 or ::/0). |
 
 ## ECS
 
@@ -31,17 +34,38 @@
 | --- | --- | --- | --- |
 | [`ecs-container-privileged`](https://cdkinsights.dev/rules/ecs-container-privileged) | HIGH | Security | Detects ECS task definitions with a container running in privileged mode, which can access the host and escalate a container compromise into host compromise. |
 
+## IAM
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`iam-policies-overly-permissive`](https://cdkinsights.dev/rules/iam-policies-overly-permissive) | HIGH | Security | Detects IAM policies whose Allow statements use bare * wildcards for actions or resources. |
+
+## KMS
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`kms-key-policy-public`](https://cdkinsights.dev/rules/kms-key-policy-public) | CRITICAL | Security | Detects KMS keys whose key policy grants access to a wildcard or public principal without a scoping condition. |
+
 ## Lambda
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`lambda-permission-public`](https://cdkinsights.dev/rules/lambda-permission-public) | CRITICAL | Security | Detects Lambda permissions and layer-version permissions with a wildcard Principal and no source restriction, letting any AWS account invoke the function or use the layer. |
 | [`lambda-url-auth-none`](https://cdkinsights.dev/rules/lambda-url-auth-none) | HIGH | Security | Detects Lambda Function URLs configured with AuthType NONE, which allows unauthenticated public invocation. |
 | [`lambda-tracing-disabled`](https://cdkinsights.dev/rules/lambda-tracing-disabled) | LOW | Operational Excellence | Detects Lambda functions without active X-Ray tracing, reducing observability into latency and errors. |
+
+## RDS
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`rds-encryption-disabled`](https://cdkinsights.dev/rules/rds-encryption-disabled) | CRITICAL | Security | Detects RDS instances and clusters without storage encryption at rest. |
+| [`rds-publicly-accessible`](https://cdkinsights.dev/rules/rds-publicly-accessible) | CRITICAL | Security | Detects RDS instances with PubliclyAccessible set to true, exposing the database endpoint to the internet. |
 
 ## S3
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`s3-bucket-public-access`](https://cdkinsights.dev/rules/s3-bucket-public-access) | CRITICAL | Security | Detects S3 buckets without a full Block Public Access configuration, leaving them exposable via ACLs or bucket policies. |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
 
 ## SQS
@@ -49,4 +73,10 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`sqs-queue-no-dlq`](https://cdkinsights.dev/rules/sqs-queue-no-dlq) | LOW | Reliability | Detects SQS queues with no RedrivePolicy, so messages that repeatedly fail processing are lost instead of captured for inspection. |
+
+## SecretsManager
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`secrets-manager-secret-public`](https://cdkinsights.dev/rules/secrets-manager-secret-public) | CRITICAL | Security | Detects Secrets Manager resource policies that grant access to a wildcard or public principal without a scoping condition. |
 
