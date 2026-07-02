@@ -23,11 +23,11 @@ rule for it, and this README shows you exactly how.
 ## Install & use
 
 ```bash
-npm install cdk-insights-rules
+npm install @instance-labs/cdk-insights-rules
 ```
 
 ```ts
-import { runRules } from 'cdk-insights-rules';
+import { runRules } from '@instance-labs/cdk-insights-rules';
 import { readFileSync } from 'node:fs';
 
 // Feed it a synthesized template (e.g. from `cdk synth --json`, or a
@@ -42,7 +42,7 @@ for (const finding of findings) {
 
 ```ts
 // Or run a single rule / your own selection:
-import { runRules, rules } from 'cdk-insights-rules';
+import { runRules, rules } from '@instance-labs/cdk-insights-rules';
 
 const securityRules = rules.filter((rule) => rule.metadata.wafPillar === 'Security');
 const findings = runRules(template, securityRules);
