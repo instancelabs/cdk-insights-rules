@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**46 rules** implemented in the open in this package — 12 critical, 28 high, 2 medium, 4 low.
+**60 rules** implemented in the open in this package — 12 critical, 30 high, 13 medium, 5 low.
 
 > The full CDK Insights product runs **119 rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -10,6 +10,7 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`api-gateway-method-auth-missing`](https://cdkinsights.dev/rules/api-gateway-method-auth-missing) | HIGH | Security | Detects API Gateway methods and routes with no authorization (AuthorizationType NONE), excluding CORS preflight. |
 | [`apigateway-default-endpoint-enabled`](https://cdkinsights.dev/rules/apigateway-default-endpoint-enabled) | LOW | Security | Detects REST APIs that leave the default execute-api endpoint enabled while a custom domain is mapped to them, letting clients bypass the domain and its edge controls. |
 | [`apigateway-throttling-missing`](https://cdkinsights.dev/rules/apigateway-throttling-missing) | LOW | Reliability | Detects API Gateway stages with no rate or burst limits from either MethodSettings or a usage plan, leaving backends exposed to traffic spikes and uncontrolled cost. |
 
@@ -24,6 +25,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`cloudfront-https-only`](https://cdkinsights.dev/rules/cloudfront-https-only) | HIGH | Security | Detects CloudFront distributions with a cache behavior that allows plain HTTP (ViewerProtocolPolicy allow-all). |
+| [`cloudfront-tls-outdated`](https://cdkinsights.dev/rules/cloudfront-tls-outdated) | MEDIUM | Security | Detects CloudFront distributions with a custom certificate whose minimum TLS version is outdated or left at the TLSv1 default. |
 
 ## CloudTrail
 
@@ -36,12 +38,14 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`cognito-password-policy-weak`](https://cdkinsights.dev/rules/cognito-password-policy-weak) | HIGH | Security | Detects Cognito user pools with no password policy or a minimum length below 12 characters. |
+| [`cognito-mfa-disabled`](https://cdkinsights.dev/rules/cognito-mfa-disabled) | MEDIUM | Security | Detects Cognito user pools with multi-factor authentication disabled. |
 
 ## DynamoDB
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`dynamodb-deletion-protection-disabled`](https://cdkinsights.dev/rules/dynamodb-deletion-protection-disabled) | MEDIUM | Reliability | Detects DynamoDB tables (and global-table replicas) without deletion protection, which can be destroyed by an accidental stack update or delete. |
+| [`dynamodb-encryption-aws-owned-key`](https://cdkinsights.dev/rules/dynamodb-encryption-aws-owned-key) | MEDIUM | Security | Detects DynamoDB tables without customer-controlled KMS encryption (SSESpecification). |
 
 ## EC2
 
@@ -51,12 +55,15 @@
 | [`ec2-imdsv2-not-enforced`](https://cdkinsights.dev/rules/ec2-imdsv2-not-enforced) | HIGH | Security | Detects launch templates and launch configurations that do not require IMDSv2 (MetadataOptions.HttpTokens is not "required"), leaving instances exposed to SSRF-based credential theft. |
 | [`ec2-instance-public-ip`](https://cdkinsights.dev/rules/ec2-instance-public-ip) | HIGH | Security | Detects EC2 instances whose NetworkInterfaces set AssociatePublicIpAddress to true, exposing the instance directly to the internet. |
 | [`security-group-unrestricted-ingress`](https://cdkinsights.dev/rules/security-group-unrestricted-ingress) | HIGH | Security | Detects security group ingress rules open to the whole internet (0.0.0.0/0 or ::/0). |
+| [`vpc-flow-logs-missing`](https://cdkinsights.dev/rules/vpc-flow-logs-missing) | MEDIUM | Security | Detects VPCs without flow logs configured. |
+| [`ec2-subnet-auto-public-ip`](https://cdkinsights.dev/rules/ec2-subnet-auto-public-ip) | LOW | Security | Detects subnets that auto-assign public IPs to launched instances (MapPublicIpOnLaunch). |
 
 ## ECR
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`ecr-scan-on-push-disabled`](https://cdkinsights.dev/rules/ecr-scan-on-push-disabled) | HIGH | Security | Detects ECR repositories without image scanning on push enabled. |
+| [`ecr-mutable-tags`](https://cdkinsights.dev/rules/ecr-mutable-tags) | MEDIUM | Security | Detects ECR repositories that allow image tags to be overwritten. |
 
 ## ECS
 
@@ -77,18 +84,21 @@
 | --- | --- | --- | --- |
 | [`eks-public-endpoint-unrestricted`](https://cdkinsights.dev/rules/eks-public-endpoint-unrestricted) | HIGH | Security | Detects EKS clusters whose public API endpoint is reachable from the whole internet (no PublicAccessCidrs restriction). |
 | [`eks-secrets-encryption-disabled`](https://cdkinsights.dev/rules/eks-secrets-encryption-disabled) | HIGH | Security | Detects EKS clusters without KMS envelope encryption for Kubernetes secrets. |
+| [`eks-control-plane-logging-disabled`](https://cdkinsights.dev/rules/eks-control-plane-logging-disabled) | MEDIUM | Security | Detects EKS clusters with missing control-plane log types (api, audit, authenticator, controllerManager, scheduler). |
 
 ## ElastiCache
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`elasticache-encryption-disabled`](https://cdkinsights.dev/rules/elasticache-encryption-disabled) | HIGH | Security | Detects ElastiCache replication groups and clusters without at-rest or in-transit encryption enabled. |
+| [`elasticache-auth-token-missing`](https://cdkinsights.dev/rules/elasticache-auth-token-missing) | MEDIUM | Security | Detects ElastiCache replication groups with transit encryption but no AUTH token or RBAC user groups. |
 
 ## ElasticLoadBalancingV2
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`elb-https-listeners-missing`](https://cdkinsights.dev/rules/elb-https-listeners-missing) | HIGH | Security | Detects load balancer HTTP listeners that neither use HTTPS nor redirect to it. |
+| [`elb-logging-disabled`](https://cdkinsights.dev/rules/elb-logging-disabled) | MEDIUM | Security | Detects load balancers without access logging to S3 enabled. |
 
 ## Events
 
@@ -101,6 +111,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`iam-policies-overly-permissive`](https://cdkinsights.dev/rules/iam-policies-overly-permissive) | HIGH | Security | Detects IAM policies whose Allow statements use bare * wildcards for actions or resources. |
+| [`iam-user-direct-policies`](https://cdkinsights.dev/rules/iam-user-direct-policies) | MEDIUM | Security | Detects IAM users with inline or managed policies attached directly instead of via groups. |
 
 ## KMS
 
@@ -120,6 +131,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`lambda-permission-public`](https://cdkinsights.dev/rules/lambda-permission-public) | CRITICAL | Security | Detects Lambda permissions and layer-version permissions with a wildcard Principal and no source restriction, letting any AWS account invoke the function or use the layer. |
+| [`lambda-env-sensitive-data`](https://cdkinsights.dev/rules/lambda-env-sensitive-data) | HIGH | Security | Detects Lambda functions with sensitive-looking environment variables (passwords, API keys, tokens) set to literal values. |
 | [`lambda-permission-service-unrestricted`](https://cdkinsights.dev/rules/lambda-permission-service-unrestricted) | HIGH | Security | Detects Lambda permissions that grant an AWS service principal invoke rights without a SourceArn/SourceAccount restriction (confused-deputy risk). |
 | [`lambda-runtime-deprecated`](https://cdkinsights.dev/rules/lambda-runtime-deprecated) | HIGH | Security | Detects Lambda functions on deprecated runtimes that no longer receive security patches. |
 | [`lambda-url-auth-none`](https://cdkinsights.dev/rules/lambda-url-auth-none) | HIGH | Security | Detects Lambda Function URLs configured with AuthType NONE, which allows unauthenticated public invocation. |
@@ -159,6 +171,7 @@
 | [`s3-bucket-policy-self-lockout`](https://cdkinsights.dev/rules/s3-bucket-policy-self-lockout) | CRITICAL | Security | Detects bucket policies whose blanket Deny statements would lock the account out of its own bucket. |
 | [`s3-bucket-public-access`](https://cdkinsights.dev/rules/s3-bucket-public-access) | CRITICAL | Security | Detects S3 buckets without a full Block Public Access configuration, leaving them exposable via ACLs or bucket policies. |
 | [`s3-bucket-policy-non-ssl`](https://cdkinsights.dev/rules/s3-bucket-policy-non-ssl) | HIGH | Security | Detects S3 bucket policies without a Deny statement for non-TLS (aws:SecureTransport=false) requests. |
+| [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | MEDIUM | Security | Detects S3 buckets without server access logging configured. |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
 
 ## SNS
@@ -181,4 +194,10 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`secrets-manager-secret-public`](https://cdkinsights.dev/rules/secrets-manager-secret-public) | CRITICAL | Security | Detects Secrets Manager resource policies that grant access to a wildcard or public principal without a scoping condition. |
+
+## WAFv2
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`waf-webacl-misconfigured`](https://cdkinsights.dev/rules/waf-webacl-misconfigured) | MEDIUM | Security | Detects WAF WebACLs that allow all traffic with no rules defined, or run without CloudWatch metrics. |
 
