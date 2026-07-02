@@ -1,10 +1,18 @@
+import { acmCertificateEmailValidation } from './rules/acm/acmCertificateEmailValidation.js';
 import { apigatewayDefaultEndpointEnabled } from './rules/apigateway/apigatewayDefaultEndpointEnabled.js';
 import { apigatewayMethodAuthMissing } from './rules/apigateway/apigatewayMethodAuthMissing.js';
 import { apigatewayThrottlingMissing } from './rules/apigateway/apigatewayThrottlingMissing.js';
+import { appsyncApiKeyAuth } from './rules/appsync/appsyncApiKeyAuth.js';
+import { appsyncWafMissing } from './rules/appsync/appsyncWafMissing.js';
 import { autoscalingLaunchConfigPublicIp } from './rules/autoscaling/autoscalingLaunchConfigPublicIp.js';
+import { backupVaultHardening } from './rules/backup/backupVaultHardening.js';
 import { cloudfrontHttpsOnly } from './rules/cloudfront/cloudfrontHttpsOnly.js';
+import { cloudfrontLoggingDisabled } from './rules/cloudfront/cloudfrontLoggingDisabled.js';
 import { cloudfrontTlsOutdated } from './rules/cloudfront/cloudfrontTlsOutdated.js';
+import { cloudfrontWafMissing } from './rules/cloudfront/cloudfrontWafMissing.js';
 import { cloudtrailLoggingDisabled } from './rules/cloudtrail/cloudtrailLoggingDisabled.js';
+import { cloudwatchLogsEncryptionDisabled } from './rules/cloudwatch/cloudwatchLogsEncryptionDisabled.js';
+import { cognitoAdvancedSecurityDisabled } from './rules/cognito/cognitoAdvancedSecurityDisabled.js';
 import { cognitoMfaDisabled } from './rules/cognito/cognitoMfaDisabled.js';
 import { cognitoPasswordPolicyWeak } from './rules/cognito/cognitoPasswordPolicyWeak.js';
 import { dynamodbDeletionProtectionDisabled } from './rules/dynamodb/dynamodbDeletionProtectionDisabled.js';
@@ -18,6 +26,7 @@ import { ecrMutableTags } from './rules/ecr/ecrMutableTags.js';
 import { ecrScanOnPushDisabled } from './rules/ecr/ecrScanOnPushDisabled.js';
 import { ecsContainerPrivileged } from './rules/ecs/ecsContainerPrivileged.js';
 import { ecsSecretsPlaintext } from './rules/ecs/ecsSecretsPlaintext.js';
+import { ecsServiceConnectAccessLogsMissing } from './rules/ecs/ecsServiceConnectAccessLogsMissing.js';
 import { efsEncryptionDisabled } from './rules/efs/efsEncryptionDisabled.js';
 import { eksControlPlaneLoggingDisabled } from './rules/eks/eksControlPlaneLoggingDisabled.js';
 import { eksPublicEndpointUnrestricted } from './rules/eks/eksPublicEndpointUnrestricted.js';
@@ -27,6 +36,10 @@ import { elasticacheEncryptionDisabled } from './rules/elasticache/elasticacheEn
 import { elbHttpsListenersMissing } from './rules/elb/elbHttpsListenersMissing.js';
 import { elbLoggingDisabled } from './rules/elb/elbLoggingDisabled.js';
 import { eventbridgeBusPolicyWildcardPrincipal } from './rules/eventbridge/eventbridgeBusPolicyWildcardPrincipal.js';
+import { glueConnectionNetworkIsolation } from './rules/glue/glueConnectionNetworkIsolation.js';
+import { glueJobEncryptionMissing } from './rules/glue/glueJobEncryptionMissing.js';
+import { iamCrossAccountTrust } from './rules/iam/iamCrossAccountTrust.js';
+import { iamPermissionBoundaryMissing } from './rules/iam/iamPermissionBoundaryMissing.js';
 import { iamPoliciesOverlyPermissive } from './rules/iam/iamPoliciesOverlyPermissive.js';
 import { iamUserDirectPolicies } from './rules/iam/iamUserDirectPolicies.js';
 import { kinesisEncryptionDisabled } from './rules/kinesis/kinesisEncryptionDisabled.js';
@@ -40,11 +53,17 @@ import { lambdaTracingDisabled } from './rules/lambda/lambdaTracingDisabled.js';
 import { lambdaUrlAuthNone } from './rules/lambda/lambdaUrlAuthNone.js';
 import { mskClientAuthenticationMissing } from './rules/msk/mskClientAuthenticationMissing.js';
 import { mskEncryptionWeak } from './rules/msk/mskEncryptionWeak.js';
+import { opensearchAccessControlWeak } from './rules/opensearch/opensearchAccessControlWeak.js';
 import { opensearchEncryptionDisabled } from './rules/opensearch/opensearchEncryptionDisabled.js';
+import { opensearchLoggingDisabled } from './rules/opensearch/opensearchLoggingDisabled.js';
 import { rdsEncryptionDisabled } from './rules/rds/rdsEncryptionDisabled.js';
+import { rdsManagedSecretWithoutCmk } from './rules/rds/rdsManagedSecretWithoutCmk.js';
 import { rdsPubliclyAccessible } from './rules/rds/rdsPubliclyAccessible.js';
+import { redshiftAuditLoggingDisabled } from './rules/redshift/redshiftAuditLoggingDisabled.js';
 import { redshiftEncryptionDisabled } from './rules/redshift/redshiftEncryptionDisabled.js';
 import { redshiftPubliclyAccessible } from './rules/redshift/redshiftPubliclyAccessible.js';
+import { route53DnssecDisabled } from './rules/route53/route53DnssecDisabled.js';
+import { route53QueryLoggingDisabled } from './rules/route53/route53QueryLoggingDisabled.js';
 import { s3BucketAccessLoggingDisabled } from './rules/s3/s3BucketAccessLoggingDisabled.js';
 import { s3BucketPolicyNonSsl } from './rules/s3/s3BucketPolicyNonSsl.js';
 import { s3BucketPolicySelfLockout } from './rules/s3/s3BucketPolicySelfLockout.js';
@@ -56,7 +75,9 @@ import { snsTopicPolicySelfLockout } from './rules/sns/snsTopicPolicySelfLockout
 import { sqsEncryptionDisabled } from './rules/sqs/sqsEncryptionDisabled.js';
 import { sqsQueueNoDlq } from './rules/sqs/sqsQueueNoDlq.js';
 import { sqsQueuePolicySelfLockout } from './rules/sqs/sqsQueuePolicySelfLockout.js';
+import { vpcDefaultSecurityGroupRulesPresent } from './rules/vpc/vpcDefaultSecurityGroupRulesPresent.js';
 import { vpcFlowLogsMissing } from './rules/vpc/vpcFlowLogsMissing.js';
+import { wafLoggingDisabled } from './rules/waf/wafLoggingDisabled.js';
 import { wafWebAclMisconfigured } from './rules/waf/wafWebAclMisconfigured.js';
 import type { Rule } from './types.js';
 
@@ -88,9 +109,12 @@ export const rules: Rule[] = [
   // RDS
   rdsEncryptionDisabled,
   rdsPubliclyAccessible,
+  rdsManagedSecretWithoutCmk,
   // IAM
   iamPoliciesOverlyPermissive,
   iamUserDirectPolicies,
+  iamCrossAccountTrust,
+  iamPermissionBoundaryMissing,
   // KMS
   kmsKeyPolicyPublic,
   kmsKeyPolicySelfLockout,
@@ -104,6 +128,7 @@ export const rules: Rule[] = [
   // Redshift
   redshiftPubliclyAccessible,
   redshiftEncryptionDisabled,
+  redshiftAuditLoggingDisabled,
   // Kinesis / EFS / ElastiCache
   kinesisEncryptionDisabled,
   efsEncryptionDisabled,
@@ -111,15 +136,20 @@ export const rules: Rule[] = [
   elasticacheAuthTokenMissing,
   // VPC
   vpcFlowLogsMissing,
+  vpcDefaultSecurityGroupRulesPresent,
   // WAF
   wafWebAclMisconfigured,
+  wafLoggingDisabled,
   // CloudFront / CloudTrail
   cloudfrontHttpsOnly,
   cloudfrontTlsOutdated,
+  cloudfrontLoggingDisabled,
+  cloudfrontWafMissing,
   cloudtrailLoggingDisabled,
   // Cognito
   cognitoPasswordPolicyWeak,
   cognitoMfaDisabled,
+  cognitoAdvancedSecurityDisabled,
   // ECR
   ecrScanOnPushDisabled,
   ecrMutableTags,
@@ -135,14 +165,28 @@ export const rules: Rule[] = [
   mskEncryptionWeak,
   // OpenSearch
   opensearchEncryptionDisabled,
+  opensearchAccessControlWeak,
+  opensearchLoggingDisabled,
   // AutoScaling
   autoscalingLaunchConfigPublicIp,
+  // AppSync
+  appsyncApiKeyAuth,
+  appsyncWafMissing,
+  // ACM / Backup / CloudWatch / Glue / Route53
+  acmCertificateEmailValidation,
+  backupVaultHardening,
+  cloudwatchLogsEncryptionDisabled,
+  glueConnectionNetworkIsolation,
+  glueJobEncryptionMissing,
+  route53DnssecDisabled,
+  route53QueryLoggingDisabled,
   // DynamoDB
   dynamodbDeletionProtectionDisabled,
   dynamodbEncryptionAwsOwnedKey,
   // ECS
   ecsContainerPrivileged,
   ecsSecretsPlaintext,
+  ecsServiceConnectAccessLogsMissing,
   // SQS
   sqsQueueNoDlq,
   sqsEncryptionDisabled,

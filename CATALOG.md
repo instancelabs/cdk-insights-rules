@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**60 rules** implemented in the open in this package — 12 critical, 30 high, 13 medium, 5 low.
+**81 rules** implemented in the open in this package — 12 critical, 30 high, 26 medium, 13 low.
 
 > The full CDK Insights product runs **119 rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -14,18 +14,39 @@
 | [`apigateway-default-endpoint-enabled`](https://cdkinsights.dev/rules/apigateway-default-endpoint-enabled) | LOW | Security | Detects REST APIs that leave the default execute-api endpoint enabled while a custom domain is mapped to them, letting clients bypass the domain and its edge controls. |
 | [`apigateway-throttling-missing`](https://cdkinsights.dev/rules/apigateway-throttling-missing) | LOW | Reliability | Detects API Gateway stages with no rate or burst limits from either MethodSettings or a usage plan, leaving backends exposed to traffic spikes and uncontrolled cost. |
 
+## AppSync
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`appsync-api-key-auth`](https://cdkinsights.dev/rules/appsync-api-key-auth) | MEDIUM | Security | Detects AppSync GraphQL APIs whose primary authentication is a static API key. |
+| [`appsync-waf-missing`](https://cdkinsights.dev/rules/appsync-waf-missing) | MEDIUM | Security | Detects AppSync GraphQL APIs without a WAF WebACL association. |
+
 ## AutoScaling
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`autoscaling-launch-config-public-ip`](https://cdkinsights.dev/rules/autoscaling-launch-config-public-ip) | HIGH | Security | Detects AutoScaling launch configurations that associate a public IP with every launched instance. |
 
+## Backup
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`backup-vault-hardening`](https://cdkinsights.dev/rules/backup-vault-hardening) | LOW | Security | Detects backup vaults without a customer-managed KMS key or without a vault lock. |
+
+## CertificateManager
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`acm-certificate-email-validation`](https://cdkinsights.dev/rules/acm-certificate-email-validation) | LOW | Security | Detects ACM certificates using email validation instead of DNS, or with certificate transparency logging disabled. |
+
 ## CloudFront
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`cloudfront-https-only`](https://cdkinsights.dev/rules/cloudfront-https-only) | HIGH | Security | Detects CloudFront distributions with a cache behavior that allows plain HTTP (ViewerProtocolPolicy allow-all). |
+| [`cloudfront-logging-disabled`](https://cdkinsights.dev/rules/cloudfront-logging-disabled) | MEDIUM | Security | Detects CloudFront distributions without access logging configured. |
 | [`cloudfront-tls-outdated`](https://cdkinsights.dev/rules/cloudfront-tls-outdated) | MEDIUM | Security | Detects CloudFront distributions with a custom certificate whose minimum TLS version is outdated or left at the TLSv1 default. |
+| [`cloudfront-waf-missing`](https://cdkinsights.dev/rules/cloudfront-waf-missing) | MEDIUM | Security | Detects CloudFront distributions without a WAF WebACL attached. |
 
 ## CloudTrail
 
@@ -39,6 +60,7 @@
 | --- | --- | --- | --- |
 | [`cognito-password-policy-weak`](https://cdkinsights.dev/rules/cognito-password-policy-weak) | HIGH | Security | Detects Cognito user pools with no password policy or a minimum length below 12 characters. |
 | [`cognito-mfa-disabled`](https://cdkinsights.dev/rules/cognito-mfa-disabled) | MEDIUM | Security | Detects Cognito user pools with multi-factor authentication disabled. |
+| [`cognito-advanced-security-disabled`](https://cdkinsights.dev/rules/cognito-advanced-security-disabled) | LOW | Security | Detects Cognito user pools without advanced security features (compromised-credential detection). |
 
 ## DynamoDB
 
@@ -55,6 +77,7 @@
 | [`ec2-imdsv2-not-enforced`](https://cdkinsights.dev/rules/ec2-imdsv2-not-enforced) | HIGH | Security | Detects launch templates and launch configurations that do not require IMDSv2 (MetadataOptions.HttpTokens is not "required"), leaving instances exposed to SSRF-based credential theft. |
 | [`ec2-instance-public-ip`](https://cdkinsights.dev/rules/ec2-instance-public-ip) | HIGH | Security | Detects EC2 instances whose NetworkInterfaces set AssociatePublicIpAddress to true, exposing the instance directly to the internet. |
 | [`security-group-unrestricted-ingress`](https://cdkinsights.dev/rules/security-group-unrestricted-ingress) | HIGH | Security | Detects security group ingress rules open to the whole internet (0.0.0.0/0 or ::/0). |
+| [`vpc-default-security-group-rules-present`](https://cdkinsights.dev/rules/vpc-default-security-group-rules-present) | MEDIUM | Security | Detects default security groups with ingress or egress rules configured. |
 | [`vpc-flow-logs-missing`](https://cdkinsights.dev/rules/vpc-flow-logs-missing) | MEDIUM | Security | Detects VPCs without flow logs configured. |
 | [`ec2-subnet-auto-public-ip`](https://cdkinsights.dev/rules/ec2-subnet-auto-public-ip) | LOW | Security | Detects subnets that auto-assign public IPs to launched instances (MapPublicIpOnLaunch). |
 
@@ -71,6 +94,7 @@
 | --- | --- | --- | --- |
 | [`ecs-container-privileged`](https://cdkinsights.dev/rules/ecs-container-privileged) | HIGH | Security | Detects ECS task definitions with a container running in privileged mode, which can access the host and escalate a container compromise into host compromise. |
 | [`ecs-secrets-plaintext`](https://cdkinsights.dev/rules/ecs-secrets-plaintext) | HIGH | Security | Detects ECS task definitions with sensitive-looking environment variables (passwords, API keys, tokens) in plaintext. |
+| [`ecs-service-connect-access-logs-missing`](https://cdkinsights.dev/rules/ecs-service-connect-access-logs-missing) | MEDIUM | Security | Detects ECS services with Service Connect enabled but no log configuration. |
 
 ## EFS
 
@@ -106,12 +130,21 @@
 | --- | --- | --- | --- |
 | [`eventbridge-bus-policy-wildcard-principal`](https://cdkinsights.dev/rules/eventbridge-bus-policy-wildcard-principal) | CRITICAL | Security | Detects event bus policies that allow a wildcard principal without any condition, letting any AWS account put events onto the bus. |
 
+## Glue
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`glue-connection-network-isolation`](https://cdkinsights.dev/rules/glue-connection-network-isolation) | MEDIUM | Security | Detects Glue JDBC connections without VPC network isolation or SSL enforcement. |
+| [`glue-job-encryption-missing`](https://cdkinsights.dev/rules/glue-job-encryption-missing) | MEDIUM | Security | Detects Glue jobs without a security configuration for encryption. |
+
 ## IAM
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`iam-policies-overly-permissive`](https://cdkinsights.dev/rules/iam-policies-overly-permissive) | HIGH | Security | Detects IAM policies whose Allow statements use bare * wildcards for actions or resources. |
+| [`iam-cross-account-trust`](https://cdkinsights.dev/rules/iam-cross-account-trust) | MEDIUM | Security | Detects IAM roles whose trust policy grants assume rights to a literal AWS account with no scoping condition. |
 | [`iam-user-direct-policies`](https://cdkinsights.dev/rules/iam-user-direct-policies) | MEDIUM | Security | Detects IAM users with inline or managed policies attached directly instead of via groups. |
+| [`iam-permission-boundary-missing`](https://cdkinsights.dev/rules/iam-permission-boundary-missing) | LOW | Security | Detects IAM roles assumable by AWS principals (users/accounts) without a permission boundary. |
 
 ## KMS
 
@@ -137,6 +170,12 @@
 | [`lambda-url-auth-none`](https://cdkinsights.dev/rules/lambda-url-auth-none) | HIGH | Security | Detects Lambda Function URLs configured with AuthType NONE, which allows unauthenticated public invocation. |
 | [`lambda-tracing-disabled`](https://cdkinsights.dev/rules/lambda-tracing-disabled) | LOW | Operational Excellence | Detects Lambda functions without active X-Ray tracing, reducing observability into latency and errors. |
 
+## Logs
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`cloudwatch-logs-encryption-disabled`](https://cdkinsights.dev/rules/cloudwatch-logs-encryption-disabled) | LOW | Security | Detects CloudWatch log groups without a customer-managed KMS key. |
+
 ## MSK
 
 | Rule | Severity | Pillar | Description |
@@ -149,6 +188,8 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`opensearch-encryption-disabled`](https://cdkinsights.dev/rules/opensearch-encryption-disabled) | HIGH | Security | Detects OpenSearch/Elasticsearch domains without encryption at rest or node-to-node encryption. |
+| [`opensearch-access-control-weak`](https://cdkinsights.dev/rules/opensearch-access-control-weak) | MEDIUM | Security | Detects OpenSearch domains without fine-grained access control or VPC deployment. |
+| [`opensearch-logging-disabled`](https://cdkinsights.dev/rules/opensearch-logging-disabled) | LOW | Security | Detects OpenSearch domains without audit or application logging enabled. |
 
 ## RDS
 
@@ -156,6 +197,7 @@
 | --- | --- | --- | --- |
 | [`rds-encryption-disabled`](https://cdkinsights.dev/rules/rds-encryption-disabled) | CRITICAL | Security | Detects RDS instances and clusters without storage encryption at rest. |
 | [`rds-publicly-accessible`](https://cdkinsights.dev/rules/rds-publicly-accessible) | CRITICAL | Security | Detects RDS instances with PubliclyAccessible set to true, exposing the database endpoint to the internet. |
+| [`rds-managed-secret-without-cmk`](https://cdkinsights.dev/rules/rds-managed-secret-without-cmk) | MEDIUM | Security | Detects RDS-managed master-user secrets encrypted with the default AWS-managed key instead of a customer-managed KMS key. |
 
 ## Redshift
 
@@ -163,6 +205,14 @@
 | --- | --- | --- | --- |
 | [`redshift-publicly-accessible`](https://cdkinsights.dev/rules/redshift-publicly-accessible) | CRITICAL | Security | Detects Redshift clusters with PubliclyAccessible set to true, exposing the warehouse endpoint to the internet. |
 | [`redshift-encryption-disabled`](https://cdkinsights.dev/rules/redshift-encryption-disabled) | HIGH | Security | Detects Redshift clusters without encryption at rest enabled. |
+| [`redshift-audit-logging-disabled`](https://cdkinsights.dev/rules/redshift-audit-logging-disabled) | MEDIUM | Security | Detects Redshift clusters without audit logging to S3 or CloudWatch. |
+
+## Route53
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`route53-dnssec-disabled`](https://cdkinsights.dev/rules/route53-dnssec-disabled) | LOW | Security | Detects public Route53 hosted zones without DNSSEC signing enabled. |
+| [`route53-query-logging-disabled`](https://cdkinsights.dev/rules/route53-query-logging-disabled) | LOW | Security | Detects public Route53 hosted zones without DNS query logging. |
 
 ## S3
 
@@ -199,5 +249,6 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`waf-logging-disabled`](https://cdkinsights.dev/rules/waf-logging-disabled) | MEDIUM | Security | Detects WAF WebACLs without an associated logging configuration. |
 | [`waf-webacl-misconfigured`](https://cdkinsights.dev/rules/waf-webacl-misconfigured) | MEDIUM | Security | Detects WAF WebACLs that allow all traffic with no rules defined, or run without CloudWatch metrics. |
 

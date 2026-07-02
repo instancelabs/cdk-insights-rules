@@ -111,7 +111,13 @@ for (const file of files) {
     }
   }
 
-  for (const match of source.matchAll(importStatement)) {
+  // Rule examples are CDK snippets stored in template literals — data, not
+  // code — and may legitimately contain their own import lines. Strip
+  // template-literal contents for the import check only; the forbidden-
+  // construct patterns above still scan the full source including examples.
+  const sourceWithoutTemplateLiterals = source.replace(/`[^`]*`/g, '``');
+
+  for (const match of sourceWithoutTemplateLiterals.matchAll(importStatement)) {
     const specifier = match[1];
     if (specifier.startsWith('.')) {
       continue;
