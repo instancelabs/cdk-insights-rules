@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      # Hard gates — a rule cannot merge without passing all of these.
+      - name: Security scan (rule files must be pure)
+        run: npm run security-scan
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test (behaviour + contract)
+        run: npm test
+      - name: Build
+        run: npm run build
+
+      # Keep the generated catalog in sync with the registered rules.
+      - name: Catalog is up to date
+        run: |
+          npm run build:catalog
+          git diff --exit-code CATALOG.md \
+            || (echo "::error::CATALOG.md is stale — run 'npm run build && npm run build:catalog' and commit." && exit 1)

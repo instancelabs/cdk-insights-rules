@@ -1,0 +1,82 @@
+name: Propose a rule
+description: Suggest a new security, reliability, or cost rule for CDK Insights
+title: "[rule] <short name>"
+labels: ["rule-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for proposing a rule! The best proposals are **deterministic** (decidable
+        from the CloudFormation template) and **low false-positive** (never fire on a
+        valid/default-secure config). See [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md).
+  - type: input
+    id: name
+    attributes:
+      label: Rule name
+      description: A short, human-readable name.
+      placeholder: Lambda Function URL without authentication
+    validations:
+      required: true
+  - type: input
+    id: resource-types
+    attributes:
+      label: AWS resource type(s)
+      description: The CloudFormation resource type(s) this inspects.
+      placeholder: AWS::Lambda::Url
+    validations:
+      required: true
+  - type: textarea
+    id: condition
+    attributes:
+      label: Condition to detect
+      description: The exact property gap that should trip the rule.
+      placeholder: Properties.AuthType === 'NONE'
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: The concrete risk or waste, ideally with an AWS docs link.
+      placeholder: An AuthType NONE URL is a public, unauthenticated entry point to the function.
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Suggested severity
+      options: ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+    validations:
+      required: true
+  - type: dropdown
+    id: pillar
+    attributes:
+      label: Well-Architected pillar
+      options:
+        - Security
+        - Reliability
+        - Cost Optimization
+        - Performance Efficiency
+        - Operational Excellence
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: CDK before/after example
+      description: The flagged code that should trip the rule, and the fixed code that should not.
+      render: typescript
+      placeholder: |
+        // flagged
+        new lambda.CfnUrl(this, 'Url', { authType: 'NONE', targetFunctionArn: fn.functionArn });
+        // fixed
+        new lambda.CfnUrl(this, 'Url', { authType: 'AWS_IAM', targetFunctionArn: fn.functionArn });
+    validations:
+      required: false
+  - type: textarea
+    id: false-positives
+    attributes:
+      label: False-positive edge cases
+      description: When is this pattern legitimate, and how does the rule avoid flagging it?
+    validations:
+      required: false

@@ -1,0 +1,50 @@
+name: Rule review
+
+# AI-assisted review of rule contributions.
+#
+# SAFETY: this uses `pull_request_target`, so it has access to repo secrets
+# (the Anthropic key) even for fork PRs. To stay safe it NEVER runs the PR's
+# code: it checks out the trusted BASE commit, fetches the PR diff as text via
+# the API, and passes that text to the model. No `npm install` or execution of
+# contributed code happens here. The hard safety gate (security-scan) runs
+# separately in ci.yml.
+
+on:
+  pull_request_target:
+    paths:
+      - 'src/rules/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the trusted base (never the PR head)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Fetch the PR diff (data only)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} > rule.diff
+
+      - name: AI review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: claude-sonnet-4-6
+        run: node scripts/ai-review.mjs rule.diff | tee review.md
+
+      - name: Post review comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --edit-last --body-file review.md \
+            || gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body-file review.md

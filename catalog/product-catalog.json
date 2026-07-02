@@ -1,0 +1,2631 @@
+{
+  "schemaVersion": 1,
+  "count": 119,
+  "rules": [
+    {
+      "ruleId": "acm-certificate-email-validation",
+      "checkKey": "acmValidation",
+      "name": "ACM Certificate Validation Hardening",
+      "description": "Detects ACM certificates using email validation or with certificate transparency logging disabled.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/acm/latest/userguide/dns-validation.html",
+      "remediationSteps": [
+        "Use DNS validation for automated certificate renewal",
+        "Enable certificate transparency logging to detect misissuance"
+      ],
+      "resourceTypes": [
+        "AWS::CertificateManager::Certificate"
+      ],
+      "service": "ACM"
+    },
+    {
+      "ruleId": "api-gateway-method-auth-missing",
+      "checkKey": "apiGatewayMethodAuth",
+      "name": "API Gateway Method Has No Authorization",
+      "description": "Detects AWS::ApiGateway::Method and AWS::ApiGatewayV2::Route resources where AuthorizationType is missing or NONE (excluding OPTIONS preflight). Public-by-default endpoints expose backend Lambdas to anyone on the internet.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/apigateway/latest/developerguide/permissions.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set AuthorizationType to AWS_IAM, COGNITO_USER_POOLS, or CUSTOM (REST APIs)",
+        "Use JWT or AWS_IAM AuthorizationType for HTTP APIs (v2)",
+        "If the route is intentionally public (e.g. webhook receiver), prefer api-key + WAF rate limiting and suppress this rule explicitly"
+      ],
+      "resourceTypes": [
+        "AWS::ApiGateway::Method",
+        "AWS::ApiGatewayV2::Route"
+      ],
+      "service": "API Gateway"
+    },
+    {
+      "ruleId": "api-gateway-logging-disabled",
+      "checkKey": "apiGateway",
+      "name": "API Gateway Publicly Accessible",
+      "description": "Detects API Gateway REST APIs configured with a non-PRIVATE endpoint, i.e. reachable from the public internet.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Use a PRIVATE endpoint type with a VPC endpoint for internal APIs",
+        "For intentionally public APIs, attach an authorizer and a WAF web ACL",
+        "If public access is intended, suppress this rule for the resource"
+      ],
+      "resourceTypes": [
+        "AWS::ApiGateway::RestApi"
+      ],
+      "service": "API Gateway"
+    },
+    {
+      "ruleId": "apigateway-default-endpoint-enabled",
+      "checkKey": "apiGatewayDefaultEndpoint",
+      "name": "API Gateway Default Endpoint Enabled With Custom Domain",
+      "description": "Detects REST APIs that leave the default execute-api endpoint enabled while a custom domain is configured, letting clients bypass the domain and its edge controls.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/apigateway/latest/developerguide/rest-api-disable-default-endpoint.html",
+      "remediationSteps": [
+        "Set DisableExecuteApiEndpoint to true on the REST API",
+        "Route all traffic through the custom domain and its WAF / edge controls"
+      ],
+      "resourceTypes": [
+        "AWS::ApiGateway::RestApi"
+      ],
+      "service": "API Gateway"
+    },
+    {
+      "ruleId": "apigateway-throttling-missing",
+      "checkKey": "apiGatewayThrottling",
+      "name": "API Gateway Stage Missing Throttling",
+      "description": "Detects API Gateway stages that configure no method-level rate or burst limits, leaving backends exposed to traffic spikes and uncontrolled cost.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html",
+      "remediationSteps": [
+        "Add MethodSettings with ThrottlingRateLimit and ThrottlingBurstLimit (e.g. for HttpMethod \"*\")",
+        "Tune per-method limits for hot paths"
+      ],
+      "resourceTypes": [
+        "AWS::ApiGateway::Stage"
+      ],
+      "service": "API Gateway"
+    },
+    {
+      "ruleId": "appsync-api-key-auth",
+      "checkKey": "appSyncAuth",
+      "name": "AppSync API Key Authentication",
+      "description": "Detects AppSync APIs using API key authentication or lacking additional authentication providers.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Use AWS_IAM, Cognito User Pools, or OIDC for production workloads",
+        "Configure AdditionalAuthenticationProviders for client flexibility"
+      ],
+      "resourceTypes": [
+        "AWS::AppSync::GraphQLApi"
+      ],
+      "service": "AppSync"
+    },
+    {
+      "ruleId": "appsync-logging-disabled",
+      "checkKey": "appSyncLogging",
+      "name": "AppSync Logging Disabled",
+      "description": "Detects AppSync APIs without logging, field-level logging, or X-Ray tracing.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/appsync/latest/devguide/monitoring.html",
+      "remediationSteps": [
+        "Configure LogConfig to capture request/response logs in CloudWatch",
+        "Set FieldLogLevel to ERROR or ALL for resolver execution detail",
+        "Enable XrayEnabled for distributed tracing"
+      ],
+      "resourceTypes": [
+        "AWS::AppSync::GraphQLApi"
+      ],
+      "service": "AppSync"
+    },
+    {
+      "ruleId": "autoscaling-launch-config-public-ip",
+      "checkKey": "autoScalingLaunchConfigPublicIp",
+      "name": "AutoScaling LaunchConfiguration Assigns Public IP",
+      "description": "Detects AWS::AutoScaling::LaunchConfiguration with AssociatePublicIpAddress=true. Instances launched from this configuration get a public IP and are internet-reachable directly.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroupExamples.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set AssociatePublicIpAddress to false on the LaunchConfiguration",
+        "Place instances in private subnets behind an ALB / NLB",
+        "Use a NAT Gateway / VPC endpoints for outbound traffic",
+        "Migrate to AWS::EC2::LaunchTemplate (LaunchConfiguration is deprecated)"
+      ],
+      "resourceTypes": [
+        "AWS::AutoScaling::LaunchConfiguration"
+      ],
+      "service": "Auto Scaling"
+    },
+    {
+      "ruleId": "autoscaling-group-no-elb-healthcheck",
+      "checkKey": "autoScalingGroupHealthCheck",
+      "name": "AutoScaling Group Not Using ELB Health Checks",
+      "description": "Detects AWS::AutoScaling::AutoScalingGroup resources attached to a load balancer (LoadBalancerNames or TargetGroupARNs) but using EC2 health checks. EC2 health checks miss app-level outages the load balancer would otherwise detect.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/healthcheck.html",
+      "remediationSteps": [
+        "Set HealthCheckType to ELB on the AutoScalingGroup",
+        "Set HealthCheckGracePeriod to give instances time to bootstrap before the LB starts probing",
+        "Verify the ALB / NLB target group has appropriate health-check thresholds"
+      ],
+      "resourceTypes": [
+        "AWS::AutoScaling::AutoScalingGroup"
+      ],
+      "service": "Auto Scaling"
+    },
+    {
+      "ruleId": "backup-plan-misconfigured",
+      "checkKey": "backupPlans",
+      "name": "Backup Plan Misconfigured",
+      "description": "Detects Backup plan rules without cross-region copy or lifecycle configuration.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/aws-backup/latest/devguide/about-backup-plans.html",
+      "remediationSteps": [
+        "Add CopyActions to replicate backups cross-region for DR",
+        "Set DeleteAfterDays / MoveToColdStorageAfterDays to manage retention and cost"
+      ],
+      "resourceTypes": [
+        "AWS::Backup::BackupPlan"
+      ],
+      "service": "Backup"
+    },
+    {
+      "ruleId": "backup-vault-hardening",
+      "checkKey": "backupVault",
+      "name": "Backup Vault Hardening",
+      "description": "Detects Backup vaults using AWS-managed keys or without a vault lock for compliance.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/aws-backup/latest/devguide/vaultlock.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Specify a customer-managed KMS key via EncryptionKeyArn",
+        "Add a BackupVaultLock to enforce retention and prevent deletion"
+      ],
+      "resourceTypes": [
+        "AWS::Backup::BackupVault",
+        "AWS::Backup::BackupVaultLock"
+      ],
+      "service": "Backup"
+    },
+    {
+      "ruleId": "cloudfront-https-only",
+      "checkKey": "cloudFrontHttpsOnly",
+      "name": "CloudFront HTTPS Only",
+      "description": "Detects CloudFront distributions allowing HTTP traffic.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-https.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set ViewerProtocolPolicy to https-only or redirect-to-https",
+        "Configure custom SSL certificate"
+      ],
+      "resourceTypes": [
+        "AWS::CloudFront::Distribution"
+      ],
+      "service": "CloudFront"
+    },
+    {
+      "ruleId": "cloudfront-logging-disabled",
+      "checkKey": "cloudFrontLogging",
+      "name": "CloudFront Logging Disabled",
+      "description": "Detects CloudFront distributions without access logging.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable standard logging to S3",
+        "Consider real-time logs for detailed analysis"
+      ],
+      "resourceTypes": [
+        "AWS::CloudFront::Distribution"
+      ],
+      "service": "CloudFront"
+    },
+    {
+      "ruleId": "cloudfront-tls-outdated",
+      "checkKey": "cloudFrontTls",
+      "name": "CloudFront TLS Outdated",
+      "description": "Detects CloudFront distributions using outdated TLS versions.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/secure-connections-supported-viewer-protocols-ciphers.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set MinimumProtocolVersion to TLSv1.2_2021 or higher",
+        "Use a custom SSL certificate"
+      ],
+      "resourceTypes": [
+        "AWS::CloudFront::Distribution"
+      ],
+      "service": "CloudFront"
+    },
+    {
+      "ruleId": "cloudfront-waf-missing",
+      "checkKey": "cloudFrontWafAssociation",
+      "name": "CloudFront WAF Missing",
+      "description": "Detects CloudFront distributions without WAF association.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/distribution-web-awswaf.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Associate AWS WAF web ACL with CloudFront distribution",
+        "Configure WAF rules for common attack patterns"
+      ],
+      "resourceTypes": [
+        "AWS::CloudFront::Distribution"
+      ],
+      "service": "CloudFront"
+    },
+    {
+      "ruleId": "cloudtrail-logging-disabled",
+      "checkKey": "cloudTrailLogging",
+      "name": "No CloudTrail Trail Defined",
+      "description": "Flags stacks that define no CloudTrail Trail. CloudTrail is usually configured once at the account or organization level — suppress this rule if account-level logging is already in place.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-getting-started.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add an account- or organization-level CloudTrail Trail",
+        "Enable multi-region trails and log file validation",
+        "If account-level CloudTrail already exists, suppress this rule"
+      ],
+      "resourceTypes": [
+        "AWS::CloudTrail::Trail"
+      ],
+      "service": "CloudTrail"
+    },
+    {
+      "ruleId": "cloudwatch-alarm-actions-missing",
+      "checkKey": "cloudWatchAlarms",
+      "name": "CloudWatch Alarm Actions Missing",
+      "description": "Detects CloudWatch Alarms without alarm actions or missing-data handling.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html",
+      "remediationSteps": [
+        "Add AlarmActions (SNS, Lambda, SSM) for state-change notifications",
+        "Set TreatMissingData to define behaviour for missing data points"
+      ],
+      "resourceTypes": [
+        "AWS::CloudWatch::Alarm"
+      ],
+      "service": "CloudWatch"
+    },
+    {
+      "ruleId": "cloudwatch-logs-retention-missing",
+      "checkKey": "cloudWatchLogRetention",
+      "name": "CloudWatch Logs Retention Missing",
+      "description": "Detects CloudWatch Log Groups without an explicit retention period (logs retained indefinitely).",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html",
+      "remediationSteps": [
+        "Set RetentionInDays to control storage cost (30–90 days for ops, longer for compliance)"
+      ],
+      "resourceTypes": [
+        "AWS::Logs::LogGroup"
+      ],
+      "service": "CloudWatch"
+    },
+    {
+      "ruleId": "cloudwatch-logs-encryption-disabled",
+      "checkKey": "cloudWatchEncryption",
+      "name": "CloudWatch Logs Encryption Disabled",
+      "description": "Detects CloudWatch Log Groups not encrypted with a customer-managed KMS key.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set KmsKeyId on the LogGroup to encrypt with a customer-managed key"
+      ],
+      "resourceTypes": [
+        "AWS::Logs::LogGroup"
+      ],
+      "service": "CloudWatch"
+    },
+    {
+      "ruleId": "cognito-password-policy-weak",
+      "checkKey": "cognitoPasswordPolicy",
+      "name": "Cognito Password Policy Weak",
+      "description": "Detects Cognito user pools with weak password policies.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-policies.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set minimum password length to at least 12 characters",
+        "Require uppercase, lowercase, numbers, and symbols"
+      ],
+      "resourceTypes": [
+        "AWS::Cognito::UserPool"
+      ],
+      "service": "Cognito"
+    },
+    {
+      "ruleId": "cognito-mfa-disabled",
+      "checkKey": "cognitoMfa",
+      "name": "Cognito MFA Disabled",
+      "description": "Detects Cognito user pools without MFA enabled.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-mfa.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable MFA (OPTIONAL or ON)",
+        "Configure SMS or TOTP as MFA method"
+      ],
+      "resourceTypes": [
+        "AWS::Cognito::UserPool"
+      ],
+      "service": "Cognito"
+    },
+    {
+      "ruleId": "cognito-advanced-security-disabled",
+      "checkKey": "cognitoAdvancedSecurity",
+      "name": "Cognito Advanced Security Disabled",
+      "description": "Detects Cognito user pools without advanced security features.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pool-settings-advanced-security.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable advanced security mode (AUDIT or ENFORCED)",
+        "Configure risk-based adaptive authentication"
+      ],
+      "resourceTypes": [
+        "AWS::Cognito::UserPool"
+      ],
+      "service": "Cognito"
+    },
+    {
+      "ruleId": "cross-resource-misconfiguration",
+      "checkKey": "crossResourceRelationships",
+      "name": "Cross-Resource Misconfiguration",
+      "description": "Detects misconfigurations only visible across multiple resources: Lambda functions referencing VPC-only resources without VpcConfig, S3 replication without encryption configuration, and security groups exposing non-standard ports to the public when used by sensitive services.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Configure VpcConfig on Lambda functions that reach VPC-only resources (RDS, ElastiCache, Redshift, OpenSearch, ECS Service)",
+        "Specify EncryptionConfiguration on S3 replication rules so replicated objects retain encryption at the destination",
+        "Restrict 0.0.0.0/0 ingress on non-standard ports for security groups attached to sensitive services"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function",
+        "AWS::S3::Bucket",
+        "AWS::EC2::SecurityGroup",
+        "AWS::RDS::DBInstance",
+        "AWS::ElastiCache::CacheCluster",
+        "AWS::Redshift::Cluster",
+        "AWS::OpenSearchService::Domain",
+        "AWS::Elasticsearch::Domain"
+      ],
+      "service": "Cross-service"
+    },
+    {
+      "ruleId": "ec2-imdsv2-not-enforced",
+      "checkKey": "ec2Imdsv2",
+      "name": "EC2 IMDSv2 Not Enforced",
+      "description": "Detects launch templates and launch configurations that do not require IMDSv2 (MetadataOptions.HttpTokens is not \"required\"), leaving instances exposed to SSRF-based credential theft.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "CIS",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html",
+      "remediationSteps": [
+        "Set MetadataOptions.HttpTokens to \"required\" on the launch template / launch configuration",
+        "In CDK, pass requireImdsv2: true on the instance or launch template"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::LaunchTemplate",
+        "AWS::AutoScaling::LaunchConfiguration"
+      ],
+      "service": "Cross-service"
+    },
+    {
+      "ruleId": "appsync-waf-missing",
+      "checkKey": "appSyncWaf",
+      "name": "AppSync WAF Missing",
+      "description": "Detects AppSync APIs without an associated AWS WAF WebACL.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/appsync/latest/devguide/WAF-Integration.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Associate a WAFv2 WebACL with the AppSync API",
+        "Define rules to protect against common web exploits"
+      ],
+      "resourceTypes": [
+        "AWS::AppSync::GraphQLApi",
+        "AWS::WAFv2::WebACLAssociation"
+      ],
+      "service": "Cross-service"
+    },
+    {
+      "ruleId": "stack-architecture-recommendations",
+      "checkKey": "stackArchitecture",
+      "name": "Stack Architecture Recommendations",
+      "description": "Detects architectural omissions across the stack: missing CloudWatch Alarms on critical resources, Lambda functions without X-Ray tracing, public-facing resources without WAF, RDS databases without Secrets Manager rotation, and excessive NAT Gateway usage.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html",
+      "remediationSteps": [
+        "Add CloudWatch Alarms on key metrics (Lambda errors, ECS task failures, RDS connections)",
+        "Enable X-Ray tracing on Lambda functions for distributed-request visibility",
+        "Associate AWS WAF with public-facing API Gateway, ALB, or CloudFront distributions",
+        "Use Secrets Manager with automatic rotation for RDS database credentials",
+        "Audit NAT Gateway count and consider VPC endpoints or NAT instances for cost reduction"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function",
+        "AWS::ApiGateway::RestApi",
+        "AWS::ApiGatewayV2::Api",
+        "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        "AWS::CloudFront::Distribution",
+        "AWS::RDS::DBInstance",
+        "AWS::EC2::NatGateway",
+        "AWS::CloudWatch::Alarm"
+      ],
+      "service": "Cross-service"
+    },
+    {
+      "ruleId": "dynamodb-autoscaling-missing",
+      "checkKey": "dynamoDBAutoScaling",
+      "name": "DynamoDB Auto Scaling Missing",
+      "description": "Detects DynamoDB tables without auto-scaling enabled.",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/AutoScaling.html",
+      "remediationSteps": [
+        "Enable DynamoDB auto-scaling or use on-demand capacity",
+        "Set appropriate minimum and maximum capacity units"
+      ],
+      "resourceTypes": [
+        "AWS::DynamoDB::Table"
+      ],
+      "service": "DynamoDB"
+    },
+    {
+      "ruleId": "dynamodb-deletion-protection-disabled",
+      "checkKey": "dynamoDBDeletionProtection",
+      "name": "DynamoDB Deletion Protection Disabled",
+      "description": "Detects DynamoDB tables without deletion protection, which can be destroyed by an accidental stack update or delete.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/WorkingWithTables.Basics.html#WorkingWithTables.Basics.DeletionProtection",
+      "remediationSteps": [
+        "Set DeletionProtectionEnabled to true on production tables",
+        "Use CloudFormation DeletionPolicy: Retain as defence in depth"
+      ],
+      "resourceTypes": [
+        "AWS::DynamoDB::Table"
+      ],
+      "service": "DynamoDB"
+    },
+    {
+      "ruleId": "dynamodb-encryption-aws-owned-key",
+      "checkKey": "dynamoDBEncryption",
+      "name": "DynamoDB Table Uses AWS-Owned Encryption Key",
+      "description": "Detects AWS::DynamoDB::Table resources without SSESpecification.SSEEnabled=true. DynamoDB always encrypts at rest, but the default AWS-owned key cannot be inspected, audited, or rotated by the customer — inadequate for HIPAA / PCI-DSS / FedRAMP workloads.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/encryption.howitworks.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set SSESpecification.SSEEnabled to true on the table",
+        "Provide SSESpecification.KMSMasterKeyId pointing at a customer-managed KMS key",
+        "Verify the KMS key has rotation enabled (kms-key-rotation-disabled covers this)"
+      ],
+      "resourceTypes": [
+        "AWS::DynamoDB::Table",
+        "AWS::DynamoDB::GlobalTable"
+      ],
+      "service": "DynamoDB"
+    },
+    {
+      "ruleId": "dynamodb-pitr-disabled",
+      "checkKey": "dynamoDBPitr",
+      "name": "DynamoDB Point-in-Time Recovery Disabled",
+      "description": "Detects DynamoDB tables without Point-in-Time Recovery enabled. PITR provides continuous backups for the last 35 days and is required for SOC2 / HIPAA data resilience.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/PointInTimeRecovery.html",
+      "remediationSteps": [
+        "Set PointInTimeRecoverySpecification.PointInTimeRecoveryEnabled to true on the table",
+        "Verify the AWS region supports PITR for your table type (Provisioned / On-Demand)"
+      ],
+      "resourceTypes": [
+        "AWS::DynamoDB::Table",
+        "AWS::DynamoDB::GlobalTable"
+      ],
+      "service": "DynamoDB"
+    },
+    {
+      "ruleId": "dynamodb-streams-disabled",
+      "checkKey": "dynamoDBStreams",
+      "name": "DynamoDB Streams Disabled",
+      "description": "Detects DynamoDB tables without streams enabled.",
+      "severity": "LOW",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html",
+      "remediationSteps": [
+        "Enable DynamoDB Streams for change data capture",
+        "Consider point-in-time recovery for data protection"
+      ],
+      "resourceTypes": [
+        "AWS::DynamoDB::Table"
+      ],
+      "service": "DynamoDB"
+    },
+    {
+      "ruleId": "ebs-volume-unencrypted",
+      "checkKey": "ebsVolumes",
+      "name": "EBS Volume Unencrypted",
+      "description": "Detects EBS volumes without encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable EBS encryption by default in account settings",
+        "Use KMS customer managed keys for additional control"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::Volume"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "ec2-instance-public-ip",
+      "checkKey": "ec2PublicIp",
+      "name": "EC2 Instance Public IP",
+      "description": "Detects EC2 instances whose NetworkInterfaces specify AssociatePublicIpAddress=true, exposing the instance directly to the internet.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set AssociatePublicIpAddress to false on the NetworkInterface",
+        "Place the instance in a private subnet and use a NAT Gateway / VPC endpoint for outbound",
+        "Use an ALB / NLB in a public subnet to front the workload instead"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::Instance"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "security-group-unrestricted-ingress",
+      "checkKey": "securityGroups",
+      "name": "Security Group Unrestricted Ingress",
+      "description": "Detects security groups with unrestricted ingress (0.0.0.0/0).",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Restrict ingress to specific IP ranges",
+        "Use security group references for internal traffic",
+        "Implement least privilege network access"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::SecurityGroup"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "ec2-instance-type-outdated",
+      "checkKey": "ec2InstanceType",
+      "name": "EC2 Instance Type Outdated",
+      "description": "Detects EC2 instances using older generation instance types.",
+      "severity": "MEDIUM",
+      "wafPillar": "Performance Efficiency",
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html",
+      "remediationSteps": [
+        "Upgrade to current generation instance types",
+        "Use AWS Compute Optimizer for recommendations"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::Instance"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "ec2-subnet-auto-public-ip",
+      "checkKey": "ec2SubnetAutoPublicIp",
+      "name": "EC2 Subnet Auto-Assigns Public IPs",
+      "description": "Detects AWS::EC2::Subnet resources with MapPublicIpOnLaunch=true. Instances launched into the subnet inherit a public IP by default, which makes them internet-reachable without an explicit opt-in at the ENI level.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-ip-addressing.html#subnet-public-ip",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set MapPublicIpOnLaunch to false unless this is intentionally a public subnet",
+        "Have instances opt into a public IP via the ENI configuration when needed",
+        "Use VPC endpoints / NAT for outbound access from private subnets"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::Subnet"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "vpc-default-security-group-rules-present",
+      "checkKey": "vpcDefaultSecurityGroup",
+      "name": "VPC Default Security Group Has Rules",
+      "description": "Detects default VPC security groups with ingress or egress rules; defaults should be empty.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/vpc/latest/userguide/default-security-group.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Remove all rules from the default security group",
+        "Use purpose-built security groups instead"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::SecurityGroup"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "vpc-flow-logs-missing",
+      "checkKey": "vpcFlowLogs",
+      "name": "VPC Flow Logs Missing",
+      "description": "Detects VPCs without flow logs configured.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Create an AWS::EC2::FlowLog resource targeting the VPC",
+        "Send logs to CloudWatch Logs or S3"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::VPC",
+        "AWS::EC2::FlowLog"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "nat-gateway-usage",
+      "checkKey": "natGatewayUsage",
+      "name": "NAT Gateway Usage",
+      "description": "Identifies NAT Gateway usage for cost awareness.",
+      "severity": "LOW",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html",
+      "remediationSteps": [
+        "Consider VPC endpoints to reduce NAT Gateway traffic",
+        "Use NAT instances for lower traffic volumes"
+      ],
+      "resourceTypes": [
+        "AWS::EC2::NatGateway"
+      ],
+      "service": "EC2"
+    },
+    {
+      "ruleId": "ecr-scan-on-push-disabled",
+      "checkKey": "ecrScanning",
+      "name": "ECR Scan-on-Push Disabled",
+      "description": "Detects ECR repositories without image vulnerability scanning on push.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable ScanOnPush in ImageScanningConfiguration",
+        "Or use enhanced scanning at the registry level"
+      ],
+      "resourceTypes": [
+        "AWS::ECR::Repository"
+      ],
+      "service": "ECR"
+    },
+    {
+      "ruleId": "ecr-lifecycle-policy-missing",
+      "checkKey": "ecrLifecycle",
+      "name": "ECR Lifecycle Policy Missing",
+      "description": "Detects ECR repositories without a lifecycle policy to clean up old images.",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/LifecyclePolicies.html",
+      "remediationSteps": [
+        "Define a LifecyclePolicy to expire untagged or excess image versions"
+      ],
+      "resourceTypes": [
+        "AWS::ECR::Repository"
+      ],
+      "service": "ECR"
+    },
+    {
+      "ruleId": "ecr-mutable-tags",
+      "checkKey": "ecrImmutableTags",
+      "name": "ECR Mutable Image Tags",
+      "description": "Detects ECR repositories that allow image tags to be overwritten.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-tag-mutability.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set ImageTagMutability to IMMUTABLE"
+      ],
+      "resourceTypes": [
+        "AWS::ECR::Repository"
+      ],
+      "service": "ECR"
+    },
+    {
+      "ruleId": "ecs-container-privileged",
+      "checkKey": "ecsPrivilegedContainer",
+      "name": "ECS Container Running In Privileged Mode",
+      "description": "Detects ECS task definitions with a container running in privileged mode, which can access the host and escalate a container compromise into host compromise.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "SOC2",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html",
+      "remediationSteps": [
+        "Remove Privileged: true from the container definition unless strictly required",
+        "Grant only the specific Linux capabilities the workload needs via LinuxParameters"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::TaskDefinition"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "ecs-secrets-plaintext",
+      "checkKey": "ecsSecrets",
+      "name": "ECS Secrets in Plaintext",
+      "description": "Detects ECS task definitions with sensitive data in plaintext environment variables.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/specifying-sensitive-data.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Use secrets property with Secrets Manager ARN",
+        "Use SSM Parameter Store SecureString"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::TaskDefinition"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "ecs-deployment-circuit-breaker-disabled",
+      "checkKey": "ecsDeploymentCircuitBreaker",
+      "name": "ECS Deployment Circuit Breaker Disabled",
+      "description": "Detects ECS services (rolling-update controller) that do not enable the deployment circuit breaker, so a failed deployment is not stopped or rolled back automatically.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-circuit-breaker.html",
+      "remediationSteps": [
+        "Set DeploymentConfiguration.DeploymentCircuitBreaker.Enable to true",
+        "Set DeploymentConfiguration.DeploymentCircuitBreaker.Rollback to true so failed deployments revert to the last healthy task set"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::Service"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "ecs-logging-disabled",
+      "checkKey": "ecsLogging",
+      "name": "ECS Logging Disabled",
+      "description": "Detects ECS task definitions without logging configured.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using_awslogs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Configure awslogs log driver",
+        "Set up CloudWatch log groups with retention"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::TaskDefinition"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "ecs-service-connect-access-logs-missing",
+      "checkKey": "ecsServiceConnectLogs",
+      "name": "ECS Service Connect Access Logs Missing",
+      "description": "Detects ECS services with Service Connect enabled but no access log configuration, leaving inter-service traffic unaudited.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect-logging.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set ServiceConnectConfiguration.LogConfiguration with a LogDriver such as awslogs",
+        "Send Service Connect logs to a CloudWatch log group with a retention policy",
+        "Confirm log group encryption is configured for sensitive workloads"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::Service"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "ecs-resources-missing",
+      "checkKey": "ecsResources",
+      "name": "ECS Resource Limits Missing",
+      "description": "Detects ECS task definitions without CPU/memory limits.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#task_size",
+      "remediationSteps": [
+        "Set CPU and memory at task level for Fargate",
+        "Set container-level memory limits for EC2"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::TaskDefinition"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "ecs-task-definition-mutable-image-tag",
+      "checkKey": "ecsMutableImageTag",
+      "name": "ECS Task Definition Uses Mutable Image Tag",
+      "description": "Detects ECS task definition containers referencing an image by the mutable \"latest\" tag or no tag at all, so deployments are not reproducible and a changed upstream image can land without a code change.",
+      "severity": "LOW",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-type-ecs.html",
+      "remediationSteps": [
+        "Reference container images by an immutable tag (release version or git SHA)",
+        "Or pin the image by @sha256 digest so every deployment runs the exact tested image"
+      ],
+      "resourceTypes": [
+        "AWS::ECS::TaskDefinition"
+      ],
+      "service": "ECS"
+    },
+    {
+      "ruleId": "efs-encryption-disabled",
+      "checkKey": "efsEncryption",
+      "name": "EFS Encryption Disabled",
+      "description": "Detects AWS::EFS::FileSystem resources without Encrypted=true. The CFN default is unencrypted (unlike the EFS console default), and encryption can only be enabled at filesystem creation.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/efs/latest/ug/encryption-at-rest.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set Encrypted to true on the AWS::EFS::FileSystem resource",
+        "Provide KmsKeyId pointing at a customer-managed KMS key for additional control",
+        "For existing unencrypted filesystems, migrate data to a new encrypted filesystem"
+      ],
+      "resourceTypes": [
+        "AWS::EFS::FileSystem"
+      ],
+      "service": "EFS"
+    },
+    {
+      "ruleId": "eks-public-endpoint-unrestricted",
+      "checkKey": "eksPublicEndpoint",
+      "name": "EKS Public Endpoint Unrestricted",
+      "description": "Detects EKS clusters with the API endpoint reachable from 0.0.0.0/0 or only via the public network.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable EndpointPrivateAccess for in-VPC node communication",
+        "Restrict PublicAccessCidrs to known administrative IP ranges"
+      ],
+      "resourceTypes": [
+        "AWS::EKS::Cluster"
+      ],
+      "service": "EKS"
+    },
+    {
+      "ruleId": "eks-secrets-encryption-disabled",
+      "checkKey": "eksEncryption",
+      "name": "EKS Secrets Encryption Disabled",
+      "description": "Detects EKS clusters without envelope encryption for Kubernetes secrets in etcd.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/eks/latest/userguide/enable-kms.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Configure EncryptionConfig with a KMS key referencing resources: [\"secrets\"]"
+      ],
+      "resourceTypes": [
+        "AWS::EKS::Cluster"
+      ],
+      "service": "EKS"
+    },
+    {
+      "ruleId": "eks-control-plane-logging-disabled",
+      "checkKey": "eksLogging",
+      "name": "EKS Control Plane Logging Disabled",
+      "description": "Detects EKS clusters with no control plane log types enabled.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable api, audit, authenticator, controllerManager, and scheduler logs"
+      ],
+      "resourceTypes": [
+        "AWS::EKS::Cluster"
+      ],
+      "service": "EKS"
+    },
+    {
+      "ruleId": "elasticache-encryption-disabled",
+      "checkKey": "elastiCacheEncryption",
+      "name": "ElastiCache Encryption Disabled",
+      "description": "Detects ElastiCache clusters without at-rest or in-transit encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/at-rest-encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set AtRestEncryptionEnabled: true",
+        "Set TransitEncryptionEnabled: true"
+      ],
+      "resourceTypes": [
+        "AWS::ElastiCache::ReplicationGroup",
+        "AWS::ElastiCache::CacheCluster"
+      ],
+      "service": "ElastiCache"
+    },
+    {
+      "ruleId": "elasticache-auth-token-missing",
+      "checkKey": "elastiCacheAuth",
+      "name": "ElastiCache AUTH Token Missing",
+      "description": "Detects Redis replication groups with transit encryption but no AUTH token configured.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set AuthToken to require Redis client authentication"
+      ],
+      "resourceTypes": [
+        "AWS::ElastiCache::ReplicationGroup"
+      ],
+      "service": "ElastiCache"
+    },
+    {
+      "ruleId": "elasticache-failover-disabled",
+      "checkKey": "elastiCacheFailover",
+      "name": "ElastiCache Automatic Failover Disabled",
+      "description": "Detects ElastiCache replication groups without automatic failover or Multi-AZ.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/AutoFailover.html",
+      "remediationSteps": [
+        "Enable AutomaticFailoverEnabled",
+        "Enable MultiAZEnabled to span availability zones"
+      ],
+      "resourceTypes": [
+        "AWS::ElastiCache::ReplicationGroup"
+      ],
+      "service": "ElastiCache"
+    },
+    {
+      "ruleId": "elb-https-listeners-missing",
+      "checkKey": "elbHttpsListeners",
+      "name": "ELB HTTPS Listeners Missing",
+      "description": "Detects load balancers with HTTP listeners not redirecting to HTTPS.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add HTTPS listener with valid SSL certificate",
+        "Configure HTTP to HTTPS redirect"
+      ],
+      "resourceTypes": [
+        "AWS::ElasticLoadBalancingV2::Listener"
+      ],
+      "service": "ELB"
+    },
+    {
+      "ruleId": "elb-deletion-protection-disabled",
+      "checkKey": "elbDeletionProtection",
+      "name": "ELB Deletion Protection Disabled",
+      "description": "Detects load balancers without deletion protection.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancers.html#deletion-protection",
+      "remediationSteps": [
+        "Enable deletion protection for production load balancers",
+        "Use CloudFormation DeletionPolicy: Retain"
+      ],
+      "resourceTypes": [
+        "AWS::ElasticLoadBalancingV2::LoadBalancer"
+      ],
+      "service": "ELB"
+    },
+    {
+      "ruleId": "elb-logging-disabled",
+      "checkKey": "elbLogging",
+      "name": "ELB Logging Disabled",
+      "description": "Detects load balancers without access logging.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable access logging to S3",
+        "Configure log retention policy"
+      ],
+      "resourceTypes": [
+        "AWS::ElasticLoadBalancingV2::LoadBalancer"
+      ],
+      "service": "ELB"
+    },
+    {
+      "ruleId": "elb-security-policy-outdated",
+      "checkKey": "elbSecurityPolicy",
+      "name": "ELB Security Policy Outdated",
+      "description": "Detects load balancers using outdated TLS security policies.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/elasticloadbalancing/latest/application/create-https-listener.html#describe-ssl-policies",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Update to ELBSecurityPolicy-TLS13-1-2-2021-06 or newer",
+        "Remove support for deprecated protocols"
+      ],
+      "resourceTypes": [
+        "AWS::ElasticLoadBalancingV2::Listener"
+      ],
+      "service": "ELB"
+    },
+    {
+      "ruleId": "eventbridge-bus-policy-wildcard-principal",
+      "checkKey": "eventBusPolicy",
+      "name": "EventBridge Bus Policy Allows Wildcard Principal",
+      "description": "Detects AWS::Events::EventBusPolicy with an Allow statement targeting Principal=* (or AWS=*) without a Condition restricting access. Without the condition, any AWS account can publish events to the bus.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-bus-perms.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Replace wildcard Principal with specific 12-digit AWS account IDs",
+        "Or scope the policy with a Condition such as aws:PrincipalOrgID",
+        "Verify the StatementId is descriptive — easier to audit later"
+      ],
+      "resourceTypes": [
+        "AWS::Events::EventBusPolicy"
+      ],
+      "service": "EventBridge"
+    },
+    {
+      "ruleId": "eventbridge-dlq-missing",
+      "checkKey": "eventBridgeRules",
+      "name": "EventBridge Rule Disabled or Has No Targets",
+      "description": "Detects EventBridge rules that are disabled or have no targets configured, so matched events are silently dropped.",
+      "severity": "HIGH",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rules.html",
+      "remediationSteps": [
+        "Enable the rule (set State to ENABLED)",
+        "Attach at least one target to the rule"
+      ],
+      "resourceTypes": [
+        "AWS::Events::Rule"
+      ],
+      "service": "EventBridge"
+    },
+    {
+      "ruleId": "glue-connection-network-isolation",
+      "checkKey": "glueConnections",
+      "name": "Glue Connection Network Isolation",
+      "description": "Detects Glue JDBC connections without VPC subnet placement or SSL enforcement.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/glue/latest/dg/setup-vpc-for-glue-access.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set PhysicalConnectionRequirements with SubnetId and SecurityGroupIdList",
+        "Include SSL parameters in the JDBC connection URL"
+      ],
+      "resourceTypes": [
+        "AWS::Glue::Connection"
+      ],
+      "service": "Glue"
+    },
+    {
+      "ruleId": "glue-job-encryption-missing",
+      "checkKey": "glueEncryption",
+      "name": "Glue Job Encryption Missing",
+      "description": "Detects Glue jobs without an attached SecurityConfiguration for encrypting bookmarks, S3 data, and CloudWatch logs.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/glue/latest/dg/encryption-security-configuration.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Create a SecurityConfiguration enabling KMS encryption for all targets",
+        "Reference it via the job's SecurityConfiguration property"
+      ],
+      "resourceTypes": [
+        "AWS::Glue::Job"
+      ],
+      "service": "Glue"
+    },
+    {
+      "ruleId": "iam-policies-overly-permissive",
+      "checkKey": "iamPolicies",
+      "name": "IAM Overly Permissive Policies",
+      "description": "Detects IAM policies with overly permissive actions like * wildcards.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Review IAM policies for overly broad permissions",
+        "Replace wildcard (*) actions with specific actions",
+        "Use IAM Access Analyzer to identify unused permissions"
+      ],
+      "resourceTypes": [
+        "AWS::IAM::Policy",
+        "AWS::IAM::Role"
+      ],
+      "service": "IAM"
+    },
+    {
+      "ruleId": "iam-cross-account-trust",
+      "checkKey": "iamCrossAccountTrust",
+      "name": "IAM Cross-Account Trust",
+      "description": "Detects IAM roles with cross-account trust relationships.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_common-scenarios_aws-accounts.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Verify cross-account trust is intentional",
+        "Add conditions to restrict access (e.g., external ID)",
+        "Document the business justification"
+      ],
+      "resourceTypes": [
+        "AWS::IAM::Role"
+      ],
+      "service": "IAM"
+    },
+    {
+      "ruleId": "iam-user-direct-policies",
+      "checkKey": "iamUserPolicies",
+      "name": "IAM User Direct Policies",
+      "description": "Detects IAM Users with policies attached directly (inline Policies or ManagedPolicyArns). CIS AWS Foundations 1.15 requires users to inherit permissions through groups.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#use-groups-for-permissions",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Create an IAM Group with the required policies",
+        "Add the user to the group instead of attaching policies directly",
+        "Remove Policies and ManagedPolicyArns from AWS::IAM::User resources"
+      ],
+      "resourceTypes": [
+        "AWS::IAM::User"
+      ],
+      "service": "IAM"
+    },
+    {
+      "ruleId": "iam-permission-boundary-missing",
+      "checkKey": "iamPermissionBoundary",
+      "name": "IAM Permission Boundary Missing",
+      "description": "Detects IAM roles without permission boundaries.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_boundaries.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Create a permission boundary policy",
+        "Attach the permission boundary to IAM roles"
+      ],
+      "resourceTypes": [
+        "AWS::IAM::Role"
+      ],
+      "service": "IAM"
+    },
+    {
+      "ruleId": "kinesis-encryption-disabled",
+      "checkKey": "kinesisEncryption",
+      "name": "Kinesis Encryption Disabled",
+      "description": "Detects Kinesis Data Streams without server-side KMS encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/streams/latest/dev/server-side-encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set StreamEncryption with EncryptionType: KMS and a KeyId"
+      ],
+      "resourceTypes": [
+        "AWS::Kinesis::Stream"
+      ],
+      "service": "Kinesis"
+    },
+    {
+      "ruleId": "kinesis-retention-minimum",
+      "checkKey": "kinesisRetention",
+      "name": "Kinesis Minimum Retention",
+      "description": "Detects Kinesis Data Streams using the default 24-hour retention period.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/streams/latest/dev/kinesis-extended-retention.html",
+      "remediationSteps": [
+        "Increase RetentionPeriodHours to support replay/reprocessing during incidents"
+      ],
+      "resourceTypes": [
+        "AWS::Kinesis::Stream"
+      ],
+      "service": "Kinesis"
+    },
+    {
+      "ruleId": "kms-key-policy-self-lockout",
+      "checkKey": "kmsKeyPolicySelfLockout",
+      "name": "KMS Key Policy Self-Lockout",
+      "description": "Detects AWS::KMS::Key resources whose KeyPolicy contains a Deny statement on kms:*, kms:PutKeyPolicy, or * with a broad Principal and no carveout for the account root or admin role. Such a policy locks the account out of its own key — recovery requires breaking glass on the account root credentials AND scheduling a 7-30 day key deletion (which does not actually let you recover the key, just remove it). Effectively unrecoverable for any data the key has encrypted; AWS Support typically declines to intervene where customers have a self-service path via root.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Keep the auto-injected root Allow statement (CDK's defaultKeyPolicy) intact, or add an explicit Allow on Principal: { AWS: 'arn:aws:iam::<account>:root' } for Action: kms:*",
+        "Or add a NotPrincipal exemption for the account root or admin role(s)",
+        "Or use a Condition with StringNotEquals on aws:PrincipalArn to exempt admin role ARNs"
+      ],
+      "resourceTypes": [
+        "AWS::KMS::Key"
+      ],
+      "service": "KMS"
+    },
+    {
+      "ruleId": "kms-key-rotation-disabled",
+      "checkKey": "kmsKeys",
+      "name": "KMS Key Policy Allows Public Access",
+      "description": "Detects KMS keys whose key policy grants access to a wildcard or public principal.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Remove wildcard/public principals from the key policy",
+        "Scope key access to specific IAM principals or accounts"
+      ],
+      "resourceTypes": [
+        "AWS::KMS::Key"
+      ],
+      "service": "KMS"
+    },
+    {
+      "ruleId": "lambda-permission-public",
+      "checkKey": "lambdaPermission",
+      "name": "Lambda Permission Permits Public Access",
+      "description": "Detects AWS::Lambda::Permission and AWS::Lambda::LayerVersionPermission resources that grant invoke / use rights with a wildcard Principal, or grant a service principal without a SourceArn / SourceAccount / PrincipalOrgID restriction (confused-deputy risk).",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/access-control-resource-based.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Replace wildcard Principal with a specific 12-digit AWS account ID or {Ref: AWS::AccountId}",
+        "For service principals, set SourceArn to the specific resource that may invoke the function",
+        "For S3 service principal, set SourceAccount to your AWS account ID",
+        "For LayerVersionPermission, prefer OrganizationId over wildcard Principal"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Permission",
+        "AWS::Lambda::LayerVersionPermission"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-env-sensitive-data",
+      "checkKey": "lambdaEnvironmentVariables",
+      "name": "Lambda Sensitive Environment Variables",
+      "description": "Detects Lambda functions with sensitive data in environment variables.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Move sensitive data to AWS Secrets Manager",
+        "Use SSM Parameter Store with SecureString",
+        "Enable Lambda environment variable encryption"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-runtime-deprecated",
+      "checkKey": "lambdaRuntime",
+      "name": "Lambda Deprecated Runtime",
+      "description": "Detects Lambda functions using runtimes that have reached or are approaching end-of-life.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Upgrade to a currently supported runtime",
+        "Track AWS Lambda runtime deprecation announcements"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-url-auth-none",
+      "checkKey": "lambdaUrlAuth",
+      "name": "Lambda Function URL Without Authentication",
+      "description": "Detects Lambda Function URLs configured with AuthType NONE, which allows unauthenticated public invocation.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "SOC2",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/urls-auth.html",
+      "remediationSteps": [
+        "Set AuthType to AWS_IAM so callers are authorized with IAM SigV4",
+        "Or front the function with an authenticated API Gateway / CloudFront + WAF"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Url"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-memory-optimization",
+      "checkKey": "lambdaMemory",
+      "name": "Lambda Memory Optimization",
+      "description": "Detects Lambda functions with suboptimal memory configuration.",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-common.html#configuration-memory-console",
+      "remediationSteps": [
+        "Use AWS Lambda Power Tuning to find optimal memory",
+        "Consider cost vs performance tradeoffs"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-runtime-pinned-latest",
+      "checkKey": "lambdaVariableRuntime",
+      "name": "Lambda Variable Runtime",
+      "description": "Detects Lambda functions using a variable runtime (Runtime.NODEJS_LATEST or useLatestRuntimeVersion) that resolves to the newest runtime at synth time, causing silent in-place runtime upgrades on the next deploy after a CDK bump.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Runtime.html",
+      "complianceFrameworks": [],
+      "remediationSteps": [
+        "Pin an explicit runtime (e.g. Runtime.NODEJS_22_X)",
+        "Or set useLatestRuntimeVersion: false on NodejsFunction",
+        "Treat runtime upgrades as a deliberate, reviewed change"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-vpc-nat-cost",
+      "checkKey": "lambdaVpcNatWarning",
+      "name": "Lambda VPC NAT Gateway Cost Warning",
+      "description": "Warns about potential NAT Gateway costs for VPC-attached Lambda functions.",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html",
+      "remediationSteps": [
+        "Use VPC endpoints instead of NAT Gateway where possible",
+        "Consider if VPC attachment is necessary",
+        "Monitor NAT Gateway data processing costs"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-dlq-missing",
+      "checkKey": "lambdaDeadLetterQueue",
+      "name": "Lambda Dead Letter Queue Missing",
+      "description": "Detects Lambda functions without dead letter queue configuration.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-dlq",
+      "remediationSteps": [
+        "Configure a dead letter queue (SQS or SNS)",
+        "Set up monitoring for DLQ messages",
+        "Implement retry logic for failed invocations"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-reserved-concurrency-missing",
+      "checkKey": "lambdaReservedConcurrency",
+      "name": "Lambda Reserved Concurrency Missing",
+      "description": "Detects Lambda functions without reserved concurrency.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/configuration-concurrency.html",
+      "remediationSteps": [
+        "Set reserved concurrency for critical functions",
+        "Use provisioned concurrency for latency-sensitive workloads"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "lambda-tracing-disabled",
+      "checkKey": "lambdaTracing",
+      "name": "Lambda X-Ray Tracing Disabled",
+      "description": "Detects Lambda functions without active X-Ray tracing, reducing observability into latency and errors.",
+      "severity": "LOW",
+      "wafPillar": "Operational Excellence",
+      "complianceFrameworks": [
+        "SOC2"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html",
+      "remediationSteps": [
+        "Set TracingConfig.Mode to Active on the function",
+        "Grant the function the AWSXRayDaemonWriteAccess managed policy"
+      ],
+      "resourceTypes": [
+        "AWS::Lambda::Function"
+      ],
+      "service": "Lambda"
+    },
+    {
+      "ruleId": "msk-client-authentication-missing",
+      "checkKey": "mskAuth",
+      "name": "MSK Client Authentication Missing",
+      "description": "Detects MSK clusters without client authentication or that allow unauthenticated access.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/msk/latest/developerguide/kafka_apis_iam.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable SASL/SCRAM, IAM auth, or mTLS in ClientAuthentication",
+        "Disable Unauthenticated access"
+      ],
+      "resourceTypes": [
+        "AWS::MSK::Cluster"
+      ],
+      "service": "MSK"
+    },
+    {
+      "ruleId": "msk-encryption-weak",
+      "checkKey": "mskEncryption",
+      "name": "MSK Encryption Weak",
+      "description": "Detects MSK clusters without TLS for client-broker traffic, without inter-broker encryption, or using AWS-managed keys for at-rest encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/msk/latest/developerguide/msk-encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set ClientBroker to TLS in EncryptionInTransit",
+        "Set InCluster to true in EncryptionInTransit",
+        "Specify DataVolumeKMSKeyId for at-rest encryption"
+      ],
+      "resourceTypes": [
+        "AWS::MSK::Cluster"
+      ],
+      "service": "MSK"
+    },
+    {
+      "ruleId": "msk-broker-logging-disabled",
+      "checkKey": "mskLogging",
+      "name": "MSK Broker Logging Disabled",
+      "description": "Detects MSK clusters without broker logs configured.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/msk/latest/developerguide/msk-logging.html",
+      "remediationSteps": [
+        "Enable broker logs to CloudWatch Logs, Firehose, or S3"
+      ],
+      "resourceTypes": [
+        "AWS::MSK::Cluster"
+      ],
+      "service": "MSK"
+    },
+    {
+      "ruleId": "opensearch-encryption-disabled",
+      "checkKey": "openSearchEncryption",
+      "name": "OpenSearch Encryption Disabled",
+      "description": "Detects OpenSearch domains without at-rest encryption or node-to-node encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/encryption-at-rest.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable EncryptionAtRestOptions with a KMS key",
+        "Enable NodeToNodeEncryptionOptions"
+      ],
+      "resourceTypes": [
+        "AWS::OpenSearchService::Domain",
+        "AWS::Elasticsearch::Domain"
+      ],
+      "service": "OpenSearch"
+    },
+    {
+      "ruleId": "opensearch-access-control-weak",
+      "checkKey": "openSearchAccessControl",
+      "name": "OpenSearch Access Control Weak",
+      "description": "Detects OpenSearch domains without fine-grained access control or VPC placement.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/fgac.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable AdvancedSecurityOptions",
+        "Configure VPCOptions to deploy the domain inside a VPC"
+      ],
+      "resourceTypes": [
+        "AWS::OpenSearchService::Domain",
+        "AWS::Elasticsearch::Domain"
+      ],
+      "service": "OpenSearch"
+    },
+    {
+      "ruleId": "opensearch-logging-disabled",
+      "checkKey": "openSearchLogging",
+      "name": "OpenSearch Logging Disabled",
+      "description": "Detects OpenSearch domains without audit logs or application logs published to CloudWatch.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/opensearch-service/latest/developerguide/audit-logs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable AUDIT_LOGS in LogPublishingOptions",
+        "Enable ES_APPLICATION_LOGS in LogPublishingOptions"
+      ],
+      "resourceTypes": [
+        "AWS::OpenSearchService::Domain",
+        "AWS::Elasticsearch::Domain"
+      ],
+      "service": "OpenSearch"
+    },
+    {
+      "ruleId": "rds-encryption-disabled",
+      "checkKey": "rdsEncryption",
+      "name": "RDS Encryption Disabled",
+      "description": "Detects RDS instances without encryption at rest.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.Encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable encryption for new RDS instances",
+        "For existing instances, create encrypted snapshot and restore"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance",
+        "AWS::RDS::DBCluster"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-publicly-accessible",
+      "checkKey": "rdsPublicAccess",
+      "name": "RDS Publicly Accessible",
+      "description": "Detects RDS instances that are publicly accessible.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_VPC.WorkingWithRDSInstanceinaVPC.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set PubliclyAccessible to false",
+        "Use VPC security groups to control access",
+        "Access databases through bastion hosts or VPN"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-backup-retention-low",
+      "checkKey": "rdsBackupRetention",
+      "name": "RDS Backup Retention Low",
+      "description": "Detects RDS instances with insufficient backup retention.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set backup retention period to at least 7 days",
+        "Consider longer retention for compliance requirements",
+        "Enable cross-region backup replication"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance",
+        "AWS::RDS::DBCluster"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-deletion-protection-disabled",
+      "checkKey": "rdsDeletionProtection",
+      "name": "RDS Deletion Protection Disabled",
+      "description": "Detects RDS instances without deletion protection.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html",
+      "remediationSteps": [
+        "Enable deletion protection for production databases",
+        "Use CloudFormation DeletionPolicy: Retain"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance",
+        "AWS::RDS::DBCluster"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-enhanced-monitoring-disabled",
+      "checkKey": "rdsEnhancedMonitoring",
+      "name": "RDS Enhanced Monitoring Disabled",
+      "description": "Detects RDS instances without enhanced monitoring (MonitoringInterval missing or set to 0). OS-level metrics are not published to CloudWatch Logs.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html",
+      "remediationSteps": [
+        "Set MonitoringInterval to one of 1, 5, 10, 15, 30, or 60 (seconds)",
+        "Provide MonitoringRoleArn pointing at an IAM role with AmazonRDSEnhancedMonitoringRole attached"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-logging-disabled",
+      "checkKey": "rdsLogging",
+      "name": "RDS Logging Disabled",
+      "description": "Detects RDS DBInstance and DBCluster resources without EnableCloudwatchLogsExports configured. Engine logs (error, slow query, audit) are not exported to CloudWatch for retention or analysis.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set EnableCloudwatchLogsExports to the engine's relevant log types (e.g. ['error','slowquery'] for MySQL, ['postgresql'] for PostgreSQL)",
+        "Configure a CloudWatch Logs retention policy on the resulting log group",
+        "For Aurora, enable both DBCluster and per-instance log exports"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance",
+        "AWS::RDS::DBCluster"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-managed-secret-without-cmk",
+      "checkKey": "rdsManagedSecretCmk",
+      "name": "RDS Managed Master Secret Without Customer-Managed Key",
+      "description": "Detects RDS instances/clusters using the native Secrets Manager integration (ManageMasterUserPassword) whose managed master-user secret is encrypted with the AWS-managed aws/secretsmanager key instead of a customer-managed KMS key.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-secrets-manager.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set MasterUserSecret.KmsKeyId to a customer-managed KMS key",
+        "Apply a key policy that scopes who can decrypt the database credential secret",
+        "Enable key rotation and CloudTrail auditing on the customer-managed key"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance",
+        "AWS::RDS::DBCluster"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "rds-multi-az-disabled",
+      "checkKey": "rdsMultiAZ",
+      "name": "RDS Instance Using gp2 Storage",
+      "description": "Detects Multi-AZ RDS instances on gp2 storage; gp3 offers better baseline performance at lower cost.",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html",
+      "remediationSteps": [
+        "Migrate the instance storage type from gp2 to gp3",
+        "Right-size provisioned IOPS/throughput for gp3"
+      ],
+      "resourceTypes": [
+        "AWS::RDS::DBInstance"
+      ],
+      "service": "RDS"
+    },
+    {
+      "ruleId": "redshift-publicly-accessible",
+      "checkKey": "redshiftPublicAccess",
+      "name": "Redshift Publicly Accessible",
+      "description": "Detects Redshift clusters reachable from the public internet.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/redshift/latest/mgmt/managing-clusters-vpc.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set PubliclyAccessible: false",
+        "Use VPC endpoints, bastion hosts, or VPN for access"
+      ],
+      "resourceTypes": [
+        "AWS::Redshift::Cluster"
+      ],
+      "service": "Redshift"
+    },
+    {
+      "ruleId": "redshift-encryption-disabled",
+      "checkKey": "redshiftEncryption",
+      "name": "Redshift Encryption Disabled",
+      "description": "Detects Redshift clusters without at-rest encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-db-encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set Encrypted: true and specify a KmsKeyId"
+      ],
+      "resourceTypes": [
+        "AWS::Redshift::Cluster"
+      ],
+      "service": "Redshift"
+    },
+    {
+      "ruleId": "redshift-audit-logging-disabled",
+      "checkKey": "redshiftLogging",
+      "name": "Redshift Audit Logging Disabled",
+      "description": "Detects Redshift clusters without audit logging to S3 (connection, user, query activity).",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/redshift/latest/mgmt/db-auditing.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set LoggingProperties with a target S3 bucket and key prefix"
+      ],
+      "resourceTypes": [
+        "AWS::Redshift::Cluster"
+      ],
+      "service": "Redshift"
+    },
+    {
+      "ruleId": "route53-dnssec-disabled",
+      "checkKey": "route53Dnssec",
+      "name": "Route 53 DNSSEC Disabled",
+      "description": "Detects Route 53 hosted zones without DNSSEC signing enabled.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-configuring-dnssec.html",
+      "remediationSteps": [
+        "Create an AWS::Route53::DNSSEC resource for the hosted zone",
+        "Configure a key-signing key (KSK)"
+      ],
+      "resourceTypes": [
+        "AWS::Route53::HostedZone",
+        "AWS::Route53::DNSSEC"
+      ],
+      "service": "Route 53"
+    },
+    {
+      "ruleId": "route53-health-check-suboptimal",
+      "checkKey": "route53HealthChecks",
+      "name": "Route 53 Health Check Suboptimal",
+      "description": "Detects Route 53 health checks using HTTP instead of HTTPS or the standard request interval.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "awsDocUrl": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html",
+      "remediationSteps": [
+        "Use HTTPS to validate certificate and endpoint security",
+        "Use a 10-second request interval for critical endpoints"
+      ],
+      "resourceTypes": [
+        "AWS::Route53::HealthCheck"
+      ],
+      "service": "Route 53"
+    },
+    {
+      "ruleId": "route53-query-logging-disabled",
+      "checkKey": "route53QueryLogging",
+      "name": "Route 53 Query Logging Disabled",
+      "description": "Detects Route 53 hosted zones without query logging.",
+      "severity": "LOW",
+      "wafPillar": "Security",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/query-logs.html",
+      "remediationSteps": [
+        "Create an AWS::Route53::QueryLoggingConfig pointing to a CloudWatch Logs group"
+      ],
+      "resourceTypes": [
+        "AWS::Route53::HostedZone",
+        "AWS::Route53::QueryLoggingConfig"
+      ],
+      "service": "Route 53"
+    },
+    {
+      "ruleId": "s3-bucket-policy-self-lockout",
+      "checkKey": "s3BucketPolicySelfLockout",
+      "name": "S3 BucketPolicy Self-Lockout",
+      "description": "Detects AWS::S3::BucketPolicy resources containing a Deny statement on s3:DeleteBucket, s3:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own bucket — recovery requires breaking glass on the account root credentials, since AWS Support typically declines to intervene where customers have a self-service path via root.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add a NotPrincipal exemption for the account root (arn:aws:iam::<account>:root) or admin role(s)",
+        "Or use a Condition with StringNotEquals on aws:PrincipalArn to exempt admin role ARNs",
+        "If the Deny is intended for transport security, scope it with aws:SecureTransport rather than a blanket Deny on Principal: '*'"
+      ],
+      "resourceTypes": [
+        "AWS::S3::BucketPolicy"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-bucket-public-access",
+      "checkKey": "s3Buckets",
+      "name": "S3 Bucket Public Access",
+      "description": "Detects S3 buckets with public access enabled.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable S3 Block Public Access settings",
+        "Review bucket policies for public access",
+        "Use VPC endpoints for private access"
+      ],
+      "resourceTypes": [
+        "AWS::S3::Bucket"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-bucket-policy-non-ssl",
+      "checkKey": "s3BucketPolicySsl",
+      "name": "S3 BucketPolicy Permits Non-SSL Requests",
+      "description": "Detects AWS::S3::BucketPolicy resources that lack a Deny statement enforcing aws:SecureTransport. Without this, the bucket accepts plain HTTP requests in addition to HTTPS.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html#enforce-tls",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add a Deny statement with Action s3:* and Condition Bool aws:SecureTransport=false",
+        "Apply the Deny to both the bucket ARN and the bucket-objects ARN (arn/* )",
+        "Use BoolIfExists if the policy already accepts unsigned requests via specific clauses"
+      ],
+      "resourceTypes": [
+        "AWS::S3::BucketPolicy"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-bucket-access-logging-disabled",
+      "checkKey": "s3BucketLogging",
+      "name": "S3 Bucket Access Logging Disabled",
+      "description": "Detects S3 buckets without server access logging configured. Required by CIS AWS Foundations 2.1.2 and useful for incident forensics.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/ServerLogs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "CIS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Set LoggingConfiguration.DestinationBucketName on the bucket to capture access logs",
+        "Use a separate bucket for logs to avoid recursive logging",
+        "Configure a lifecycle rule on the log bucket to manage storage costs"
+      ],
+      "resourceTypes": [
+        "AWS::S3::Bucket"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-bucket-versioning-disabled",
+      "checkKey": "s3BucketVersioning",
+      "name": "S3 Bucket Versioning Disabled",
+      "description": "Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable.",
+      "severity": "MEDIUM",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html",
+      "remediationSteps": [
+        "Set VersioningConfiguration.Status to Enabled on the bucket",
+        "Add lifecycle rules to expire noncurrent versions and control cost"
+      ],
+      "resourceTypes": [
+        "AWS::S3::Bucket"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-lifecycle-policy-missing",
+      "checkKey": "s3LifecyclePolicy",
+      "name": "S3 Lifecycle Policy Missing",
+      "description": "Detects S3 buckets without lifecycle policies.",
+      "severity": "MEDIUM",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html",
+      "remediationSteps": [
+        "Create lifecycle rules to transition objects to cheaper storage classes",
+        "Set expiration rules for temporary data",
+        "Use lifecycle rules to delete incomplete multipart uploads"
+      ],
+      "resourceTypes": [
+        "AWS::S3::Bucket"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-intelligent-tiering",
+      "checkKey": "s3IntelligentTiering",
+      "name": "S3 Intelligent Tiering",
+      "description": "Recommends S3 Intelligent Tiering for cost optimization.",
+      "severity": "LOW",
+      "wafPillar": "Cost Optimization",
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering.html",
+      "remediationSteps": [
+        "Enable S3 Intelligent-Tiering for buckets with varying access patterns",
+        "Configure archive access tiers for infrequently accessed data"
+      ],
+      "resourceTypes": [
+        "AWS::S3::Bucket"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "s3-replication-missing",
+      "checkKey": "s3Replication",
+      "name": "S3 Replication Missing",
+      "description": "Detects critical S3 buckets without cross-region replication.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "NIST"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html",
+      "remediationSteps": [
+        "Enable cross-region replication for disaster recovery",
+        "Configure replication rules for critical data"
+      ],
+      "resourceTypes": [
+        "AWS::S3::Bucket"
+      ],
+      "service": "S3"
+    },
+    {
+      "ruleId": "secrets-manager-rotation-disabled",
+      "checkKey": "secretsManager",
+      "name": "Secrets Manager Secret Publicly Accessible",
+      "description": "Detects Secrets Manager secrets whose resource policy grants access to a wildcard or public principal.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_resource-based-policies.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Remove wildcard/public principals from the secret resource policy",
+        "Scope access to specific IAM principals or accounts"
+      ],
+      "resourceTypes": [
+        "AWS::SecretsManager::ResourcePolicy"
+      ],
+      "service": "Secrets Manager"
+    },
+    {
+      "ruleId": "sns-topic-policy-self-lockout",
+      "checkKey": "snsTopicPolicySelfLockout",
+      "name": "SNS TopicPolicy Self-Lockout",
+      "description": "Detects AWS::SNS::TopicPolicy resources containing a Deny statement on sns:DeleteTopic, sns:RemovePermission, sns:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own topic — recovery requires breaking glass on the account root credentials to remove the topic policy, or delete-and-recreate the topic if no subscribers depend on its ARN. In fan-out architectures that is often a multi-stack rebuild.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/sns/latest/dg/sns-access-policy-language-key-concepts.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add a NotPrincipal exemption for the account root (arn:aws:iam::<account>:root) or admin role(s)",
+        "Or use a Condition with StringNotEquals on aws:PrincipalArn to exempt admin role ARNs",
+        "If the Deny is intended to scope to AWS services, use aws:PrincipalIsAWSService rather than a blanket Deny on Principal: '*'"
+      ],
+      "resourceTypes": [
+        "AWS::SNS::TopicPolicy"
+      ],
+      "service": "SNS"
+    },
+    {
+      "ruleId": "sns-encryption-disabled",
+      "checkKey": "sns",
+      "name": "SNS Encryption Disabled",
+      "description": "Detects SNS topics without encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/sns/latest/dg/sns-server-side-encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable server-side encryption with KMS",
+        "Use customer managed keys for additional control"
+      ],
+      "resourceTypes": [
+        "AWS::SNS::Topic"
+      ],
+      "service": "SNS"
+    },
+    {
+      "ruleId": "sqs-queue-policy-self-lockout",
+      "checkKey": "sqsQueuePolicySelfLockout",
+      "name": "SQS QueuePolicy Self-Lockout",
+      "description": "Detects AWS::SQS::QueuePolicy resources containing a Deny statement on sqs:DeleteQueue, sqs:RemovePermission, sqs:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own queue — recovery requires breaking glass on the account root credentials to remove the queue policy, or delete-and-recreate the queue if nothing else depends on its ARN. In event-driven systems that is often a multi-stack rebuild.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-access-policy-language-basic-structure.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add a NotPrincipal exemption for the account root (arn:aws:iam::<account>:root) or admin role(s)",
+        "Or use a Condition with StringNotEquals on aws:PrincipalArn to exempt admin role ARNs",
+        "If the Deny is intended to scope to AWS services, use aws:PrincipalIsAWSService rather than a blanket Deny on Principal: '*'"
+      ],
+      "resourceTypes": [
+        "AWS::SQS::QueuePolicy"
+      ],
+      "service": "SQS"
+    },
+    {
+      "ruleId": "sqs-encryption-disabled",
+      "checkKey": "sqs",
+      "name": "SQS Encryption Disabled",
+      "description": "Detects SQS queues without encryption.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-server-side-encryption.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable server-side encryption with KMS",
+        "Use SQS-managed keys (SSE-SQS) or customer managed keys"
+      ],
+      "resourceTypes": [
+        "AWS::SQS::Queue"
+      ],
+      "service": "SQS"
+    },
+    {
+      "ruleId": "sqs-queue-no-dlq",
+      "checkKey": "sqsDeadLetterQueue",
+      "name": "SQS Queue Without Dead-Letter Queue",
+      "description": "Detects SQS queues with no RedrivePolicy, so messages that repeatedly fail processing are lost instead of captured for inspection.",
+      "severity": "LOW",
+      "wafPillar": "Reliability",
+      "complianceFrameworks": [
+        "SOC2"
+      ],
+      "awsDocUrl": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html",
+      "remediationSteps": [
+        "Add a RedrivePolicy pointing at a dead-letter queue with a sensible maxReceiveCount",
+        "Alarm on the dead-letter queue depth so poison messages are noticed"
+      ],
+      "resourceTypes": [
+        "AWS::SQS::Queue"
+      ],
+      "service": "SQS"
+    },
+    {
+      "ruleId": "stepfunctions-logging-disabled",
+      "checkKey": "stepFunctions",
+      "name": "Step Functions Logging Disabled",
+      "description": "Detects Step Functions state machines without logging.",
+      "severity": "MEDIUM",
+      "wafPillar": "Operational Excellence",
+      "awsDocUrl": "https://docs.aws.amazon.com/step-functions/latest/dg/cw-logs.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Enable CloudWatch Logs for state machine execution",
+        "Set appropriate log level (ALL, ERROR, FATAL, OFF)"
+      ],
+      "resourceTypes": [
+        "AWS::StepFunctions::StateMachine"
+      ],
+      "service": "Step Functions"
+    },
+    {
+      "ruleId": "waf-webacl-misconfigured",
+      "checkKey": "wafWebAcl",
+      "name": "WAF WebACL Misconfigured",
+      "description": "Detects WAFv2 WebACLs with no rules, default Allow action, or CloudWatch metrics disabled.",
+      "severity": "HIGH",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add WAF rules covering the OWASP Top 10 baseline",
+        "Set DefaultAction to Block for defence-in-depth",
+        "Enable CloudWatchMetricsEnabled in VisibilityConfig"
+      ],
+      "resourceTypes": [
+        "AWS::WAFv2::WebACL"
+      ],
+      "service": "WAF"
+    },
+    {
+      "ruleId": "waf-logging-disabled",
+      "checkKey": "wafLogging",
+      "name": "WAF Logging Disabled",
+      "description": "Detects WAFv2 WebACLs without logging configuration for analysed requests.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/waf/latest/developerguide/logging.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Create an AWS::WAFv2::LoggingConfiguration for the WebACL"
+      ],
+      "resourceTypes": [
+        "AWS::WAFv2::WebACL",
+        "AWS::WAFv2::LoggingConfiguration"
+      ],
+      "service": "WAF"
+    }
+  ]
+}

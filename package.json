@@ -1,0 +1,53 @@
+{
+  "name": "cdk-insights-rules",
+  "version": "0.1.0",
+  "description": "The open catalog of rules that CDK Insights runs against AWS CDK apps. Pure, testable checks over synthesized CloudFormation.",
+  "homepage": "https://cdkinsights.dev/rules",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/instancelabs/cdk-insights-rules.git"
+  },
+  "bugs": {
+    "url": "https://github.com/instancelabs/cdk-insights-rules/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Instance Labs",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE", "NOTICE"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome check src scripts",
+    "format": "biome format --write src scripts",
+    "build:catalog": "node scripts/build-catalog.mjs",
+    "security-scan": "node scripts/security-scan.mjs",
+    "ci": "npm run lint && npm run typecheck && npm run test && npm run security-scan"
+  },
+  "keywords": [
+    "aws",
+    "cdk",
+    "cloudformation",
+    "security",
+    "static-analysis",
+    "well-architected",
+    "cdk-insights"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

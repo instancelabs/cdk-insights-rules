@@ -1,0 +1,7 @@
+CDK Insights Rule Catalog
+Copyright 2026 Instance Labs
+
+This product includes software developed at Instance Labs (https://cdkinsights.dev).
+
+The rule metadata in rules.json and rules-examples.json is exported from the
+CDK Insights product and licensed under the Apache License, Version 2.0.
