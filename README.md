@@ -20,32 +20,71 @@ rule for it, and this README shows you exactly how.
 
 ---
 
-## Install & use
+## Install
 
 ```bash
 npm install @instance-labs/cdk-insights-rules
 ```
 
+**Zero runtime dependencies**, ESM, fully typed. Works with any `aws-cdk-lib`
+version — the CDK plugin's types are declared structurally, so nothing is pinned.
+
+## Use it in your CDK app (recommended)
+
+Add the plugin once. Every `cdk synth` then runs the rules against your
+synthesized templates — findings show up in CDK's own validation report, and
+synth fails if any are found:
+
+```ts
+import { App, Validations } from 'aws-cdk-lib';
+import { CdkInsightsRulesPlugin } from '@instance-labs/cdk-insights-rules/cdk';
+
+const app = new App();
+// ...define your stacks...
+Validations.of(app).addPlugins(
+  new CdkInsightsRulesPlugin({ minimumSeverity: 'HIGH' }), // threshold is optional
+);
+```
+
+```
+╔════════════════════════════════╗
+║   Source: cdk-insights-rules   ║
+║   Status: failure              ║
+╚════════════════════════════════╝
+lambda-url-auth-none (1 occurrences)
+Severity: HIGH
+  - Construct Path: MyStack/Url
+```
+
+Options: `rules` (run a subset — defaults to the full catalog), `minimumSeverity`
+(`LOW` | `MEDIUM` | `HIGH` | `CRITICAL`, default `LOW`), and `version`.
+
+## Or use it in your own code / CI
+
+Run the rules against any synthesized CloudFormation template — CDK, SAM, or raw:
+
 ```ts
 import { runRules } from '@instance-labs/cdk-insights-rules';
 import { readFileSync } from 'node:fs';
 
-// Feed it a synthesized template (e.g. from `cdk synth --json`, or a
-// cdk.out/*.template.json file).
 const template = JSON.parse(readFileSync('cdk.out/MyStack.template.json', 'utf8'));
-
-const findings = runRules(template);
-for (const finding of findings) {
+for (const finding of runRules(template)) {
   console.log(`[${finding.severity}] ${finding.ruleId} on ${finding.resourceId}: ${finding.issue}`);
 }
 ```
 
 ```ts
-// Or run a single rule / your own selection:
-import { runRules, rules } from '@instance-labs/cdk-insights-rules';
+// Cherry-pick: filter the catalog, import individual rules, or mix in your own.
+import {
+  runRules,
+  rules,
+  lambdaUrlAuthNone,
+  defineRule,
+} from '@instance-labs/cdk-insights-rules';
 
 const securityRules = rules.filter((rule) => rule.metadata.wafPillar === 'Security');
-const findings = runRules(template, securityRules);
+runRules(template, [lambdaUrlAuthNone]);
+runRules(template, [...securityRules, myOwnRule]);
 ```
 
 ---
@@ -242,7 +281,9 @@ src/
   types.ts            The rule contract.
   runRules.ts         The engine: template -> findings.
   registry.ts         The list of all rules.
+  defineRule.ts       Authoring helper.
   rules/<service>/    One file per rule (+ a co-located test).
+  cdk/                The CDK policy-validation plugin (the "./cdk" entry point).
 scripts/
   security-scan.mjs   Static safety gate for rule files.
   ai-review.mjs       AI-assisted PR review.

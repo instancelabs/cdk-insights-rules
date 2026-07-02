@@ -22,6 +22,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./cdk": {
+      "types": "./dist/cdk/index.d.ts",
+      "import": "./dist/cdk/index.js"
     }
   },
   "files": [
