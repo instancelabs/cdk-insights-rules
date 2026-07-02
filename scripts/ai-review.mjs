@@ -14,7 +14,7 @@
  *
  * Safety: this script only ever treats the diff as DATA sent to the model. It
  * never executes the contributed code. The workflow that runs it (which holds
- * the API key) checks out the trusted base branch, not the PR head.
+ * the AWS credentials) checks out the trusted base branch, not the PR head.
  *
  * The model runs on Amazon Bedrock, reached with AWS credentials the workflow
  * obtains via OIDC — there is no API key to manage. Locally, standard AWS
@@ -23,7 +23,7 @@
  * Input:  the diff on stdin, or a path as argv[2].
  * Env:    BEDROCK_MODEL_ID (required — a Bedrock model id or inference-profile
  *                           id/ARN; absent => skip, exit 0)
- *         AWS_REGION       (default: eu-west-2)
+ *         AWS_REGION       (default: us-east-1)
  *         GITHUB_STEP_SUMMARY (optional: markdown summary target)
  */
 import { appendFileSync, readFileSync } from 'node:fs';
@@ -32,7 +32,7 @@ import {
   ConverseCommand,
 } from '@aws-sdk/client-bedrock-runtime';
 
-const region = process.env.AWS_REGION || 'eu-west-2';
+const region = process.env.AWS_REGION || 'us-east-1';
 const modelId = process.env.BEDROCK_MODEL_ID;
 
 const readInput = () => {

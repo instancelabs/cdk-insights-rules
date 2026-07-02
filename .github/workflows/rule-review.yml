@@ -48,7 +48,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_REVIEW_ROLE_ARN }}
-          aws-region: eu-west-2
+          aws-region: us-east-1
 
       - name: Fetch the PR diff (data only)
         env:
@@ -57,7 +57,7 @@ jobs:
 
       - name: AI review
         env:
-          AWS_REGION: eu-west-2
+          AWS_REGION: us-east-1
           BEDROCK_MODEL_ID: ${{ vars.BEDROCK_MODEL_ID }}
         run: node scripts/ai-review.mjs rule.diff | tee review.md
 
