@@ -46,7 +46,15 @@
     "build:catalog": "node scripts/build-catalog.mjs",
     "security-scan": "node scripts/security-scan.mjs",
     "ci": "npm run lint && npm run typecheck && npm run test && npm run security-scan",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "prepare": "husky install",
+    "validate:commits": "bumper validate",
+    "changelog:preview": "bumper preview",
+    "changelog:generate": "bumper generate",
+    "release:patch": "bumper release patch",
+    "release:minor": "bumper release minor",
+    "release:major": "bumper release major",
+    "release:dry-run": "bumper release patch --dry-run"
   },
   "keywords": [
     "aws",
@@ -60,7 +68,11 @@
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1078.0",
     "@biomejs/biome": "1.9.4",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@types/node": "^22.10.0",
+    "bumper-cli": "^1.6.0",
+    "husky": "^8.0.3",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

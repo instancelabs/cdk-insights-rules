@@ -64,5 +64,15 @@ for them):
 
 - Link the AWS documentation for the control.
 - Be honest about false positives; a scoped-down rule beats a broad noisy one.
+- **Conventional commits** are enforced (a commitlint hook checks every message):
+  `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `security:`, etc.
+  A pre-commit hook runs lint + typecheck. Run `npm install` once to enable them.
 - By contributing you agree your contribution is licensed under
   [Apache-2.0](LICENSE).
+
+## Releasing (maintainers)
+
+Publishing is version-gated on push to `main` (like the `cdk-insights` CLI): a
+merge publishes only when `package.json`'s version changed. Cut a release with
+`npm run release:patch` | `release:minor` | `release:major` (bumps the version
+and regenerates `CHANGELOG.md` from the conventional commits), or bump manually.
