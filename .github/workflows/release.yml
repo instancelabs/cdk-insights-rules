@@ -1,7 +1,16 @@
 name: Release
 
-# Publishes to npm when a version tag (v*) is pushed. Requires an NPM_TOKEN
-# repository secret with publish rights to `cdk-insights-rules`.
+# Publishes to npm when a version tag (v*) is pushed.
+#
+# Uses npm TRUSTED PUBLISHING (OIDC) — there is no NPM_TOKEN. Instead, the
+# package on npmjs.com is configured to trust this repo + workflow, and npm
+# mints a short-lived credential from the GitHub OIDC token at publish time.
+# Nothing to rotate. Provenance is attached automatically.
+#
+# One-time setup on npmjs.com: package Settings → Trusted Publisher → GitHub
+# Actions, owner `instancelabs`, repo `cdk-insights-rules`, workflow
+# `release.yml`. (If npm requires the package to exist first, do a single
+# manual `npm publish` to create it, then switch on trusted publishing.)
 
 on:
   push:
@@ -10,7 +19,7 @@ on:
 
 permissions:
   contents: read
-  id-token: write # npm provenance
+  id-token: write # required for OIDC trusted publishing + provenance
 
 jobs:
   publish:
@@ -19,8 +28,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs a recent npm (>= 11.5.1); pin ahead of the
+      # version bundled with Node.
+      - run: npm install -g npm@latest
 
       - run: npm ci
 
@@ -28,6 +41,5 @@ jobs:
       - run: npm run ci
       - run: npm run build
 
-      - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # No token: OIDC authenticates, provenance is automatic.
+      - run: npm publish --access public
