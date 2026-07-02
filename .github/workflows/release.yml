@@ -1,45 +1,66 @@
 name: Release
 
-# Publishes to npm when a version tag (v*) is pushed.
+# Publishes to npm the same way cdk-insights does: on every push to main, but
+# only when package.json's version actually changed since the previous commit.
+# So the release step is "bump the version in your merge to main" — no tags to
+# remember. Auth is npm OIDC trusted publishing (no NPM_TOKEN, provenance auto).
 #
-# Uses npm TRUSTED PUBLISHING (OIDC) — there is no NPM_TOKEN. Instead, the
-# package on npmjs.com is configured to trust this repo + workflow, and npm
-# mints a short-lived credential from the GitHub OIDC token at publish time.
-# Nothing to rotate. Provenance is attached automatically.
-#
-# One-time setup on npmjs.com: package Settings → Trusted Publisher → GitHub
-# Actions, owner `instancelabs`, repo `cdk-insights-rules`, workflow
-# `release.yml`. (If npm requires the package to exist first, do a single
-# manual `npm publish` to create it, then switch on trusted publishing.)
+# One-time setup on npmjs.com: the package must exist first (one manual
+# `npm login` + `npm publish`), then configure Trusted Publisher → GitHub
+# Actions (owner instancelabs, repo cdk-insights-rules, workflow release.yml).
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
-  id-token: write # required for OIDC trusted publishing + provenance
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # OIDC trusted publishing + provenance
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # need the previous commit to diff the version
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing needs a recent npm (>= 11.5.1); pin ahead of the
-      # version bundled with Node.
+      # Trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.x, which
+      # fails OIDC with a misleading 404.
       - run: npm install -g npm@latest
 
       - run: npm ci
 
-      # Same gates as CI — never publish something that wouldn't pass a PR.
+      # Validate every push to main (same gates as CI).
       - run: npm run ci
       - run: npm run build
 
-      # No token: OIDC authenticates, provenance is automatic.
-      - run: npm publish --access public
+      - name: Did the version change?
+        id: version
+        run: |
+          CURR=$(node -p "require('./package.json').version")
+          echo "version=$CURR" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            PREV=$(git show HEAD^:package.json 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).version)}catch{console.log('')}})")
+            if [ "$PREV" = "$CURR" ]; then
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              echo "⚠️ version unchanged ($CURR) — nothing to publish."
+            else
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              echo "✅ version changed: $PREV → $CURR."
+            fi
+          fi
+
+      - name: Publish to npm
+        if: steps.version.outputs.changed == 'true'
+        run: npm publish --access public
