@@ -16,7 +16,7 @@ export const wafWebAclMisconfigured: Rule = {
     ruleId: 'waf-webacl-misconfigured',
     name: 'WAF WebACL Misconfigured',
     description:
-      'Detects WAF WebACLs that allow all traffic with no rules defined, or run without CloudWatch metrics.',
+      'Detects WAF WebACLs with no rules defined, or running without CloudWatch metrics.',
     severity: 'MEDIUM',
     wafPillar: 'Security',
     resourceTypes: ['AWS::WAFv2::WebACL'],
@@ -39,12 +39,13 @@ export const wafWebAclMisconfigured: Rule = {
       const props = resource.Properties ?? {};
       const rules = props.Rules;
       const hasRules = Array.isArray(rules) && rules.length > 0;
-      if (props.DefaultAction?.Allow && !hasRules) {
+      if (!hasRules) {
         report(resourceId, {
-          issue:
-            'WAF WebACL defaults to Allow and defines no rules — it inspects nothing.',
+          issue: props.DefaultAction?.Allow
+            ? 'WAF WebACL defaults to Allow and defines no rules — it inspects nothing.'
+            : 'WAF WebACL defines no rules.',
           recommendation:
-            'Add rules (e.g. AWS managed rule groups) or the WebACL provides no protection at all.',
+            'Add rules (e.g. AWS managed rule groups) so the WebACL actually inspects traffic.',
         });
       }
       const metricsEnabled = props.VisibilityConfig?.CloudWatchMetricsEnabled;

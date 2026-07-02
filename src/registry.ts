@@ -26,12 +26,15 @@ import { dynamodbDeletionProtectionDisabled } from './rules/dynamodb/dynamodbDel
 import { dynamodbEncryptionAwsOwnedKey } from './rules/dynamodb/dynamodbEncryptionAwsOwnedKey.js';
 import { dynamodbPitrDisabled } from './rules/dynamodb/dynamodbPitrDisabled.js';
 import { dynamodbStreamsDisabled } from './rules/dynamodb/dynamodbStreamsDisabled.js';
+import { ebsVolumeGp2Storage } from './rules/ec2/ebsVolumeGp2Storage.js';
 import { ebsVolumeUnencrypted } from './rules/ec2/ebsVolumeUnencrypted.js';
 import { ec2Imdsv2NotEnforced } from './rules/ec2/ec2Imdsv2NotEnforced.js';
 import { ec2InstancePublicIp } from './rules/ec2/ec2InstancePublicIp.js';
 import { ec2InstanceTypeOutdated } from './rules/ec2/ec2InstanceTypeOutdated.js';
 import { ec2SubnetAutoPublicIp } from './rules/ec2/ec2SubnetAutoPublicIp.js';
 import { natGatewayUsage } from './rules/ec2/natGatewayUsage.js';
+import { securityGroupNoRules } from './rules/ec2/securityGroupNoRules.js';
+import { securityGroupUnrestrictedEgress } from './rules/ec2/securityGroupUnrestrictedEgress.js';
 import { securityGroupUnrestrictedIngress } from './rules/ec2/securityGroupUnrestrictedIngress.js';
 import { ecrLifecyclePolicyMissing } from './rules/ecr/ecrLifecyclePolicyMissing.js';
 import { ecrMutableTags } from './rules/ecr/ecrMutableTags.js';
@@ -45,6 +48,7 @@ import { ecsServiceConnectAccessLogsMissing } from './rules/ecs/ecsServiceConnec
 import { ecsTaskDefinitionMutableImageTag } from './rules/ecs/ecsTaskDefinitionMutableImageTag.js';
 import { efsEncryptionDisabled } from './rules/efs/efsEncryptionDisabled.js';
 import { eksControlPlaneLoggingDisabled } from './rules/eks/eksControlPlaneLoggingDisabled.js';
+import { eksPrivateEndpointAccessDisabled } from './rules/eks/eksPrivateEndpointAccessDisabled.js';
 import { eksPublicEndpointUnrestricted } from './rules/eks/eksPublicEndpointUnrestricted.js';
 import { eksSecretsEncryptionDisabled } from './rules/eks/eksSecretsEncryptionDisabled.js';
 import { elasticacheAuthTokenMissing } from './rules/elasticache/elasticacheAuthTokenMissing.js';
@@ -55,6 +59,7 @@ import { elbHttpsListenersMissing } from './rules/elb/elbHttpsListenersMissing.j
 import { elbLoggingDisabled } from './rules/elb/elbLoggingDisabled.js';
 import { elbSecurityPolicyOutdated } from './rules/elb/elbSecurityPolicyOutdated.js';
 import { eventbridgeBusPolicyWildcardPrincipal } from './rules/eventbridge/eventbridgeBusPolicyWildcardPrincipal.js';
+import { eventbridgeRuleDisabled } from './rules/eventbridge/eventbridgeRuleDisabled.js';
 import { eventbridgeRuleNoTargets } from './rules/eventbridge/eventbridgeRuleNoTargets.js';
 import { eventbridgeTargetDlqMissing } from './rules/eventbridge/eventbridgeTargetDlqMissing.js';
 import { glueConnectionNetworkIsolation } from './rules/glue/glueConnectionNetworkIsolation.js';
@@ -71,6 +76,7 @@ import { lambdaDlqMissing } from './rules/lambda/lambdaDlqMissing.js';
 import { lambdaEnvSensitiveData } from './rules/lambda/lambdaEnvSensitiveData.js';
 import { lambdaMemoryOptimization } from './rules/lambda/lambdaMemoryOptimization.js';
 import { lambdaPermissionPublic } from './rules/lambda/lambdaPermissionPublic.js';
+import { lambdaPermissionScopedWildcard } from './rules/lambda/lambdaPermissionScopedWildcard.js';
 import { lambdaPermissionServiceUnrestricted } from './rules/lambda/lambdaPermissionServiceUnrestricted.js';
 import { lambdaReservedConcurrencyMissing } from './rules/lambda/lambdaReservedConcurrencyMissing.js';
 import { lambdaRuntimeDeprecated } from './rules/lambda/lambdaRuntimeDeprecated.js';
@@ -79,6 +85,7 @@ import { lambdaUrlAuthNone } from './rules/lambda/lambdaUrlAuthNone.js';
 import { lambdaVpcNatCost } from './rules/lambda/lambdaVpcNatCost.js';
 import { mskBrokerLoggingDisabled } from './rules/msk/mskBrokerLoggingDisabled.js';
 import { mskClientAuthenticationMissing } from './rules/msk/mskClientAuthenticationMissing.js';
+import { mskDataVolumeCmkMissing } from './rules/msk/mskDataVolumeCmkMissing.js';
 import { mskEncryptionWeak } from './rules/msk/mskEncryptionWeak.js';
 import { opensearchAccessControlWeak } from './rules/opensearch/opensearchAccessControlWeak.js';
 import { opensearchEncryptionDisabled } from './rules/opensearch/opensearchEncryptionDisabled.js';
@@ -98,6 +105,7 @@ import { route53DnssecDisabled } from './rules/route53/route53DnssecDisabled.js'
 import { route53HealthCheckSuboptimal } from './rules/route53/route53HealthCheckSuboptimal.js';
 import { route53QueryLoggingDisabled } from './rules/route53/route53QueryLoggingDisabled.js';
 import { s3BucketAccessLoggingDisabled } from './rules/s3/s3BucketAccessLoggingDisabled.js';
+import { s3BucketEncryptionAwsManaged } from './rules/s3/s3BucketEncryptionAwsManaged.js';
 import { s3BucketPolicyNonSsl } from './rules/s3/s3BucketPolicyNonSsl.js';
 import { s3BucketPolicySelfLockout } from './rules/s3/s3BucketPolicySelfLockout.js';
 import { s3BucketPublicAccess } from './rules/s3/s3BucketPublicAccess.js';
@@ -128,6 +136,7 @@ export const rules: Rule[] = [
   lambdaUrlAuthNone,
   lambdaPermissionPublic,
   lambdaPermissionServiceUnrestricted,
+  lambdaPermissionScopedWildcard,
   lambdaRuntimeDeprecated,
   lambdaEnvSensitiveData,
   lambdaDlqMissing,
@@ -142,9 +151,13 @@ export const rules: Rule[] = [
   ec2InstanceTypeOutdated,
   natGatewayUsage,
   ebsVolumeUnencrypted,
+  ebsVolumeGp2Storage,
   securityGroupUnrestrictedIngress,
+  securityGroupUnrestrictedEgress,
+  securityGroupNoRules,
   // S3
   s3BucketPublicAccess,
+  s3BucketEncryptionAwsManaged,
   s3BucketVersioningDisabled,
   s3BucketPolicySelfLockout,
   s3BucketPolicyNonSsl,
@@ -177,6 +190,7 @@ export const rules: Rule[] = [
   // EventBridge
   eventbridgeBusPolicyWildcardPrincipal,
   eventbridgeRuleNoTargets,
+  eventbridgeRuleDisabled,
   eventbridgeTargetDlqMissing,
   // Redshift
   redshiftPubliclyAccessible,
@@ -211,6 +225,7 @@ export const rules: Rule[] = [
   ecrLifecyclePolicyMissing,
   // EKS
   eksPublicEndpointUnrestricted,
+  eksPrivateEndpointAccessDisabled,
   eksSecretsEncryptionDisabled,
   eksControlPlaneLoggingDisabled,
   // ELB
@@ -221,6 +236,7 @@ export const rules: Rule[] = [
   // MSK
   mskClientAuthenticationMissing,
   mskEncryptionWeak,
+  mskDataVolumeCmkMissing,
   mskBrokerLoggingDisabled,
   // OpenSearch
   opensearchEncryptionDisabled,

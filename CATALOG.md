@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**118 rules** implemented in the open in this package — 12 critical, 31 high, 50 medium, 25 low.
+**126 rules** implemented in the open in this package — 12 critical, 31 high, 53 medium, 30 low.
 
 > This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (119 in the product; the few remaining closed checks need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -93,8 +93,11 @@
 | [`ec2-instance-type-outdated`](https://cdkinsights.dev/rules/ec2-instance-type-outdated) | MEDIUM | Performance Efficiency | Detects EC2 instances on the previous-generation t2 family. |
 | [`vpc-default-security-group-rules-present`](https://cdkinsights.dev/rules/vpc-default-security-group-rules-present) | MEDIUM | Security | Detects default security groups with ingress or egress rules configured. |
 | [`vpc-flow-logs-missing`](https://cdkinsights.dev/rules/vpc-flow-logs-missing) | MEDIUM | Security | Detects VPCs without flow logs configured. |
+| [`ebs-volume-gp2-storage`](https://cdkinsights.dev/rules/ebs-volume-gp2-storage) | LOW | Cost Optimization | Detects EBS volumes using gp2 where gp3 offers the same baseline for less. |
 | [`ec2-subnet-auto-public-ip`](https://cdkinsights.dev/rules/ec2-subnet-auto-public-ip) | LOW | Security | Detects subnets that auto-assign public IPs to launched instances (MapPublicIpOnLaunch). |
 | [`nat-gateway-usage`](https://cdkinsights.dev/rules/nat-gateway-usage) | LOW | Cost Optimization | Flags NAT gateways so their hourly and per-GB costs are a conscious decision. |
+| [`security-group-no-rules`](https://cdkinsights.dev/rules/security-group-no-rules) | LOW | Operational Excellence | Detects security groups with no ingress or egress rules defined. |
+| [`security-group-unrestricted-egress`](https://cdkinsights.dev/rules/security-group-unrestricted-egress) | LOW | Security | Detects security groups with egress open to the whole internet (0.0.0.0/0). |
 
 ## ECR
 
@@ -129,6 +132,7 @@
 | [`eks-public-endpoint-unrestricted`](https://cdkinsights.dev/rules/eks-public-endpoint-unrestricted) | HIGH | Security | Detects EKS clusters whose public API endpoint is reachable from the whole internet (no PublicAccessCidrs restriction). |
 | [`eks-secrets-encryption-disabled`](https://cdkinsights.dev/rules/eks-secrets-encryption-disabled) | HIGH | Security | Detects EKS clusters without KMS envelope encryption for Kubernetes secrets. |
 | [`eks-control-plane-logging-disabled`](https://cdkinsights.dev/rules/eks-control-plane-logging-disabled) | MEDIUM | Security | Detects EKS clusters with missing control-plane log types (api, audit, authenticator, controllerManager, scheduler). |
+| [`eks-private-endpoint-access-disabled`](https://cdkinsights.dev/rules/eks-private-endpoint-access-disabled) | MEDIUM | Security | Detects EKS clusters with public API access but no private endpoint access. |
 
 ## ElastiCache
 
@@ -153,6 +157,7 @@
 | --- | --- | --- | --- |
 | [`eventbridge-bus-policy-wildcard-principal`](https://cdkinsights.dev/rules/eventbridge-bus-policy-wildcard-principal) | CRITICAL | Security | Detects event bus policies that allow a wildcard principal without any condition, letting any AWS account put events onto the bus. |
 | [`eventbridge-rule-no-targets`](https://cdkinsights.dev/rules/eventbridge-rule-no-targets) | HIGH | Reliability | Detects EventBridge rules with no targets, which match events and silently drop them. |
+| [`eventbridge-rule-disabled`](https://cdkinsights.dev/rules/eventbridge-rule-disabled) | MEDIUM | Operational Excellence | Detects EventBridge rules with State DISABLED, which match no events. |
 | [`eventbridge-target-dlq-missing`](https://cdkinsights.dev/rules/eventbridge-target-dlq-missing) | LOW | Reliability | Detects EventBridge rule targets without a dead-letter queue for failed deliveries. |
 
 ## Glue
@@ -197,6 +202,7 @@
 | [`lambda-memory-optimization`](https://cdkinsights.dev/rules/lambda-memory-optimization) | MEDIUM | Cost Optimization | Detects Lambda functions with memory allocations above 1024 MB. |
 | [`lambda-vpc-nat-cost`](https://cdkinsights.dev/rules/lambda-vpc-nat-cost) | MEDIUM | Cost Optimization | Detects VPC-attached Lambda functions in templates with a NAT gateway, where NAT data-processing charges accumulate. |
 | [`lambda-dlq-missing`](https://cdkinsights.dev/rules/lambda-dlq-missing) | LOW | Reliability | Detects async-invoked Lambda functions without a dead-letter queue or failure destination. |
+| [`lambda-permission-scoped-wildcard`](https://cdkinsights.dev/rules/lambda-permission-scoped-wildcard) | LOW | Security | Detects Lambda permissions using a wildcard Principal scoped only by a source/org condition. |
 | [`lambda-reserved-concurrency-missing`](https://cdkinsights.dev/rules/lambda-reserved-concurrency-missing) | LOW | Reliability | Detects Lambda functions without reserved concurrency configured. |
 | [`lambda-tracing-disabled`](https://cdkinsights.dev/rules/lambda-tracing-disabled) | LOW | Operational Excellence | Detects Lambda functions without active X-Ray tracing, reducing observability into latency and errors. |
 
@@ -214,6 +220,7 @@
 | [`msk-client-authentication-missing`](https://cdkinsights.dev/rules/msk-client-authentication-missing) | HIGH | Security | Detects MSK clusters with no client authentication configured, or with unauthenticated access enabled. |
 | [`msk-encryption-weak`](https://cdkinsights.dev/rules/msk-encryption-weak) | HIGH | Security | Detects MSK clusters that allow plaintext client-broker traffic or disable inter-broker encryption. |
 | [`msk-broker-logging-disabled`](https://cdkinsights.dev/rules/msk-broker-logging-disabled) | MEDIUM | Operational Excellence | Detects MSK clusters without broker logs to CloudWatch, Firehose, or S3. |
+| [`msk-data-volume-cmk-missing`](https://cdkinsights.dev/rules/msk-data-volume-cmk-missing) | LOW | Security | Detects MSK clusters whose broker volumes are not encrypted with a customer-managed KMS key. |
 
 ## OpenSearchService
 
@@ -260,6 +267,7 @@
 | [`s3-bucket-public-access`](https://cdkinsights.dev/rules/s3-bucket-public-access) | CRITICAL | Security | Detects S3 buckets without a full Block Public Access configuration, leaving them exposable via ACLs or bucket policies. |
 | [`s3-bucket-policy-non-ssl`](https://cdkinsights.dev/rules/s3-bucket-policy-non-ssl) | HIGH | Security | Detects S3 bucket policies without a Deny statement for non-TLS (aws:SecureTransport=false) requests. |
 | [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | MEDIUM | Security | Detects S3 buckets without server access logging configured. |
+| [`s3-bucket-encryption-aws-managed`](https://cdkinsights.dev/rules/s3-bucket-encryption-aws-managed) | MEDIUM | Security | Detects S3 buckets without an explicit BucketEncryption configuration (SSE-S3 default applies, not customer-controlled). |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
 | [`s3-lifecycle-policy-missing`](https://cdkinsights.dev/rules/s3-lifecycle-policy-missing) | MEDIUM | Cost Optimization | Detects S3 buckets without lifecycle rules. |
 | [`s3-intelligent-tiering`](https://cdkinsights.dev/rules/s3-intelligent-tiering) | LOW | Cost Optimization | Detects S3 buckets not using Intelligent-Tiering for automatic cost optimization. |
@@ -297,5 +305,5 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`waf-logging-disabled`](https://cdkinsights.dev/rules/waf-logging-disabled) | MEDIUM | Security | Detects WAF WebACLs without an associated logging configuration. |
-| [`waf-webacl-misconfigured`](https://cdkinsights.dev/rules/waf-webacl-misconfigured) | MEDIUM | Security | Detects WAF WebACLs that allow all traffic with no rules defined, or run without CloudWatch metrics. |
+| [`waf-webacl-misconfigured`](https://cdkinsights.dev/rules/waf-webacl-misconfigured) | MEDIUM | Security | Detects WAF WebACLs with no rules defined, or running without CloudWatch metrics. |
 

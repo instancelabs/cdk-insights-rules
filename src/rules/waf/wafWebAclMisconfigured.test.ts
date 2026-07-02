@@ -35,14 +35,14 @@ describe('waf-webacl-misconfigured', () => {
     ).toHaveLength(0);
   });
 
-  it('does not flag a default-block WebACL with metrics', () => {
-    expect(
-      run(
-        webAcl({
-          DefaultAction: { Block: {} },
-          VisibilityConfig: { CloudWatchMetricsEnabled: true },
-        })
-      )
-    ).toHaveLength(0);
+  it('flags a rule-less WebACL regardless of default action', () => {
+    const findings = run(
+      webAcl({
+        DefaultAction: { Block: {} },
+        VisibilityConfig: { CloudWatchMetricsEnabled: true },
+      })
+    );
+    expect(findings).toHaveLength(1);
+    expect(findings[0].issue).toContain('no rules');
   });
 });

@@ -3,6 +3,31 @@
 All notable changes to this package are documented here. This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-07-02
+
+Eight new rules closing the last parity gaps with the CDK Insights CLI's
+native checks (126 rules total), plus one rule update:
+
+### Added
+
+- `s3-bucket-encryption-aws-managed` (MEDIUM) — no explicit BucketEncryption
+  (SSE-S3 default applies; not customer-controlled)
+- `eks-private-endpoint-access-disabled` (MEDIUM) — public API access without
+  private endpoint access
+- `eventbridge-rule-disabled` (MEDIUM, OpsEx) — rules with State DISABLED
+- `ebs-volume-gp2-storage` (LOW, Cost) — gp2 where gp3 is cheaper
+- `msk-data-volume-cmk-missing` (LOW) — broker volumes on the AWS-managed key
+- `lambda-permission-scoped-wildcard` (LOW) — wildcard Principal scoped only
+  by a source/org condition (org-shared layers exempt)
+- `security-group-unrestricted-egress` (LOW) — advisory; allow-all outbound
+  is the CDK default and is documented as such
+- `security-group-no-rules` (LOW, OpsEx) — orphaned/empty security groups
+
+### Changed
+
+- `waf-webacl-misconfigured` now flags any rule-less WebACL (not only
+  default-Allow ones) — a WebACL with no rules inspects nothing.
+
 ## [0.2.0] - 2026-07-02
 
 The catalog release: **all of CDK Insights' static detection rules are now open
