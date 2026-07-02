@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**81 rules** implemented in the open in this package — 12 critical, 30 high, 26 medium, 13 low.
+**96 rules** implemented in the open in this package — 12 critical, 31 high, 32 medium, 21 low.
 
 > The full CDK Insights product runs **119 rules**. These are the ones open-sourced so far — see the complete list at [cdkinsights.dev/rules](https://cdkinsights.dev/rules). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -26,11 +26,13 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`autoscaling-launch-config-public-ip`](https://cdkinsights.dev/rules/autoscaling-launch-config-public-ip) | HIGH | Security | Detects AutoScaling launch configurations that associate a public IP with every launched instance. |
+| [`autoscaling-group-no-elb-healthcheck`](https://cdkinsights.dev/rules/autoscaling-group-no-elb-healthcheck) | MEDIUM | Reliability | Detects AutoScaling groups attached to a load balancer that do not use ELB health checks. |
 
 ## Backup
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`backup-plan-misconfigured`](https://cdkinsights.dev/rules/backup-plan-misconfigured) | LOW | Reliability | Detects backup plan rules without cross-region copy or lifecycle configuration. |
 | [`backup-vault-hardening`](https://cdkinsights.dev/rules/backup-vault-hardening) | LOW | Security | Detects backup vaults without a customer-managed KMS key or without a vault lock. |
 
 ## CertificateManager
@@ -68,6 +70,7 @@
 | --- | --- | --- | --- |
 | [`dynamodb-deletion-protection-disabled`](https://cdkinsights.dev/rules/dynamodb-deletion-protection-disabled) | MEDIUM | Reliability | Detects DynamoDB tables (and global-table replicas) without deletion protection, which can be destroyed by an accidental stack update or delete. |
 | [`dynamodb-encryption-aws-owned-key`](https://cdkinsights.dev/rules/dynamodb-encryption-aws-owned-key) | MEDIUM | Security | Detects DynamoDB tables without customer-controlled KMS encryption (SSESpecification). |
+| [`dynamodb-pitr-disabled`](https://cdkinsights.dev/rules/dynamodb-pitr-disabled) | MEDIUM | Reliability | Detects DynamoDB tables (and global-table replicas) without point-in-time recovery. |
 
 ## EC2
 
@@ -95,6 +98,7 @@
 | [`ecs-container-privileged`](https://cdkinsights.dev/rules/ecs-container-privileged) | HIGH | Security | Detects ECS task definitions with a container running in privileged mode, which can access the host and escalate a container compromise into host compromise. |
 | [`ecs-secrets-plaintext`](https://cdkinsights.dev/rules/ecs-secrets-plaintext) | HIGH | Security | Detects ECS task definitions with sensitive-looking environment variables (passwords, API keys, tokens) in plaintext. |
 | [`ecs-service-connect-access-logs-missing`](https://cdkinsights.dev/rules/ecs-service-connect-access-logs-missing) | MEDIUM | Security | Detects ECS services with Service Connect enabled but no log configuration. |
+| [`ecs-resources-missing`](https://cdkinsights.dev/rules/ecs-resources-missing) | LOW | Reliability | Detects ECS containers with no CPU or memory limits and no task-level sizing. |
 
 ## EFS
 
@@ -116,12 +120,14 @@
 | --- | --- | --- | --- |
 | [`elasticache-encryption-disabled`](https://cdkinsights.dev/rules/elasticache-encryption-disabled) | HIGH | Security | Detects ElastiCache replication groups and clusters without at-rest or in-transit encryption enabled. |
 | [`elasticache-auth-token-missing`](https://cdkinsights.dev/rules/elasticache-auth-token-missing) | MEDIUM | Security | Detects ElastiCache replication groups with transit encryption but no AUTH token or RBAC user groups. |
+| [`elasticache-failover-disabled`](https://cdkinsights.dev/rules/elasticache-failover-disabled) | MEDIUM | Reliability | Detects ElastiCache replication groups with replicas but no automatic failover, or failover without Multi-AZ. |
 
 ## ElasticLoadBalancingV2
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`elb-https-listeners-missing`](https://cdkinsights.dev/rules/elb-https-listeners-missing) | HIGH | Security | Detects load balancer HTTP listeners that neither use HTTPS nor redirect to it. |
+| [`elb-deletion-protection-disabled`](https://cdkinsights.dev/rules/elb-deletion-protection-disabled) | MEDIUM | Reliability | Detects load balancers without deletion protection enabled. |
 | [`elb-logging-disabled`](https://cdkinsights.dev/rules/elb-logging-disabled) | MEDIUM | Security | Detects load balancers without access logging to S3 enabled. |
 
 ## Events
@@ -129,6 +135,8 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`eventbridge-bus-policy-wildcard-principal`](https://cdkinsights.dev/rules/eventbridge-bus-policy-wildcard-principal) | CRITICAL | Security | Detects event bus policies that allow a wildcard principal without any condition, letting any AWS account put events onto the bus. |
+| [`eventbridge-rule-no-targets`](https://cdkinsights.dev/rules/eventbridge-rule-no-targets) | HIGH | Reliability | Detects EventBridge rules with no targets, which match events and silently drop them. |
+| [`eventbridge-target-dlq-missing`](https://cdkinsights.dev/rules/eventbridge-target-dlq-missing) | LOW | Reliability | Detects EventBridge rule targets without a dead-letter queue for failed deliveries. |
 
 ## Glue
 
@@ -158,6 +166,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`kinesis-encryption-disabled`](https://cdkinsights.dev/rules/kinesis-encryption-disabled) | HIGH | Security | Detects Kinesis data streams without server-side encryption enabled. |
+| [`kinesis-retention-minimum`](https://cdkinsights.dev/rules/kinesis-retention-minimum) | LOW | Reliability | Detects Kinesis streams using the minimum 24-hour retention period. |
 
 ## Lambda
 
@@ -168,6 +177,8 @@
 | [`lambda-permission-service-unrestricted`](https://cdkinsights.dev/rules/lambda-permission-service-unrestricted) | HIGH | Security | Detects Lambda permissions that grant an AWS service principal invoke rights without a SourceArn/SourceAccount restriction (confused-deputy risk). |
 | [`lambda-runtime-deprecated`](https://cdkinsights.dev/rules/lambda-runtime-deprecated) | HIGH | Security | Detects Lambda functions on deprecated runtimes that no longer receive security patches. |
 | [`lambda-url-auth-none`](https://cdkinsights.dev/rules/lambda-url-auth-none) | HIGH | Security | Detects Lambda Function URLs configured with AuthType NONE, which allows unauthenticated public invocation. |
+| [`lambda-dlq-missing`](https://cdkinsights.dev/rules/lambda-dlq-missing) | LOW | Reliability | Detects async-invoked Lambda functions without a dead-letter queue or failure destination. |
+| [`lambda-reserved-concurrency-missing`](https://cdkinsights.dev/rules/lambda-reserved-concurrency-missing) | LOW | Reliability | Detects Lambda functions without reserved concurrency configured. |
 | [`lambda-tracing-disabled`](https://cdkinsights.dev/rules/lambda-tracing-disabled) | LOW | Operational Excellence | Detects Lambda functions without active X-Ray tracing, reducing observability into latency and errors. |
 
 ## Logs
@@ -197,6 +208,8 @@
 | --- | --- | --- | --- |
 | [`rds-encryption-disabled`](https://cdkinsights.dev/rules/rds-encryption-disabled) | CRITICAL | Security | Detects RDS instances and clusters without storage encryption at rest. |
 | [`rds-publicly-accessible`](https://cdkinsights.dev/rules/rds-publicly-accessible) | CRITICAL | Security | Detects RDS instances with PubliclyAccessible set to true, exposing the database endpoint to the internet. |
+| [`rds-backup-retention-low`](https://cdkinsights.dev/rules/rds-backup-retention-low) | MEDIUM | Reliability | Detects RDS instances and clusters with automated backups disabled or retention under 7 days. |
+| [`rds-deletion-protection-disabled`](https://cdkinsights.dev/rules/rds-deletion-protection-disabled) | MEDIUM | Reliability | Detects RDS instances and clusters without deletion protection. |
 | [`rds-managed-secret-without-cmk`](https://cdkinsights.dev/rules/rds-managed-secret-without-cmk) | MEDIUM | Security | Detects RDS-managed master-user secrets encrypted with the default AWS-managed key instead of a customer-managed KMS key. |
 
 ## Redshift
@@ -212,6 +225,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`route53-dnssec-disabled`](https://cdkinsights.dev/rules/route53-dnssec-disabled) | LOW | Security | Detects public Route53 hosted zones without DNSSEC signing enabled. |
+| [`route53-health-check-suboptimal`](https://cdkinsights.dev/rules/route53-health-check-suboptimal) | LOW | Reliability | Detects Route53 health checks using plain HTTP or the slow standard request interval. |
 | [`route53-query-logging-disabled`](https://cdkinsights.dev/rules/route53-query-logging-disabled) | LOW | Security | Detects public Route53 hosted zones without DNS query logging. |
 
 ## S3
@@ -223,6 +237,7 @@
 | [`s3-bucket-policy-non-ssl`](https://cdkinsights.dev/rules/s3-bucket-policy-non-ssl) | HIGH | Security | Detects S3 bucket policies without a Deny statement for non-TLS (aws:SecureTransport=false) requests. |
 | [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | MEDIUM | Security | Detects S3 buckets without server access logging configured. |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
+| [`s3-replication-missing`](https://cdkinsights.dev/rules/s3-replication-missing) | LOW | Reliability | Detects production/critical-named S3 buckets without cross-region replication. |
 
 ## SNS
 
