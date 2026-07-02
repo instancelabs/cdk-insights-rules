@@ -24,6 +24,7 @@ export const lambdaUrlAuthNone: Rule = {
     complianceFrameworks: ['SOC2', 'PCI-DSS', 'NIST'],
   },
 
+  // Reference implementation — see README "Anatomy of a rule".
   check: (template, report) => {
     for (const [resourceId, resource] of Object.entries(
       template.Resources ?? {}
