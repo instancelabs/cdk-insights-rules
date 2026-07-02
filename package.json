@@ -21,7 +21,12 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md", "LICENSE", "NOTICE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -46,6 +51,7 @@
     "cdk-insights"
   ],
   "devDependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1078.0",
     "@biomejs/biome": "1.9.4",
     "@types/node": "^22.10.0",
     "typescript": "^5.7.2",

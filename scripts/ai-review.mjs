@@ -16,15 +16,24 @@
  * never executes the contributed code. The workflow that runs it (which holds
  * the API key) checks out the trusted base branch, not the PR head.
  *
+ * The model runs on Amazon Bedrock, reached with AWS credentials the workflow
+ * obtains via OIDC — there is no API key to manage. Locally, standard AWS
+ * credential resolution applies (profile / env vars).
+ *
  * Input:  the diff on stdin, or a path as argv[2].
- * Env:    ANTHROPIC_API_KEY (required to call the model; absent => skip, exit 0)
- *         ANTHROPIC_MODEL   (default: claude-sonnet-4-6)
+ * Env:    BEDROCK_MODEL_ID (required — a Bedrock model id or inference-profile
+ *                           id/ARN; absent => skip, exit 0)
+ *         AWS_REGION       (default: eu-west-2)
  *         GITHUB_STEP_SUMMARY (optional: markdown summary target)
  */
 import { appendFileSync, readFileSync } from 'node:fs';
+import {
+  BedrockRuntimeClient,
+  ConverseCommand,
+} from '@aws-sdk/client-bedrock-runtime';
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
-const API_KEY = process.env.ANTHROPIC_API_KEY;
+const region = process.env.AWS_REGION || 'eu-west-2';
+const modelId = process.env.BEDROCK_MODEL_ID;
 
 const readInput = () => {
   const path = process.argv[2];
@@ -128,37 +137,23 @@ const main = async () => {
     writeSummary('_No rule changes to review._');
     return;
   }
-  if (!API_KEY) {
+  if (!modelId) {
     writeSummary(
-      '_AI review skipped: `ANTHROPIC_API_KEY` not available (expected on fork PRs). Human review still applies._'
+      '_AI review skipped: `BEDROCK_MODEL_ID` not set. Human review still applies._'
     );
     return;
   }
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: PROMPT(diff) }],
-    }),
-  });
+  const client = new BedrockRuntimeClient({ region });
+  const response = await client.send(
+    new ConverseCommand({
+      modelId,
+      messages: [{ role: 'user', content: [{ text: PROMPT(diff) }] }],
+      inferenceConfig: { maxTokens: 1024, temperature: 0 },
+    })
+  );
 
-  if (!response.ok) {
-    const body = await response.text();
-    writeSummary(
-      `_AI review unavailable (API ${response.status})._\n\n${body.slice(0, 500)}`
-    );
-    return;
-  }
-
-  const data = await response.json();
-  const text = data?.content?.[0]?.text ?? '';
+  const text = response.output?.message?.content?.[0]?.text ?? '';
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     writeSummary(

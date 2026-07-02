@@ -1,13 +1,21 @@
 name: Rule review
 
-# AI-assisted review of rule contributions.
+# AI-assisted review of rule contributions, running Claude on Amazon Bedrock.
 #
-# SAFETY: this uses `pull_request_target`, so it has access to repo secrets
-# (the Anthropic key) even for fork PRs. To stay safe it NEVER runs the PR's
-# code: it checks out the trusted BASE commit, fetches the PR diff as text via
-# the API, and passes that text to the model. No `npm install` or execution of
-# contributed code happens here. The hard safety gate (security-scan) runs
-# separately in ci.yml.
+# No API key: the job obtains short-lived AWS credentials via OIDC (the same
+# pattern as npm trusted publishing) by assuming a minimally-scoped role that
+# can only call bedrock:InvokeModel on the review model.
+#
+# SAFETY: this uses `pull_request_target`, so it can read repo secrets even on
+# fork PRs. It never runs the PR's code — it checks out the trusted BASE commit,
+# installs from the base lockfile, fetches the PR diff as text via the API, and
+# sends only that text to Bedrock. The AWS role is scoped to a single model, so
+# blast radius is minimal.
+#
+# One-time setup (see README):
+#   - secret AWS_REVIEW_ROLE_ARN — an IAM role trusting this repo's OIDC with
+#     bedrock:InvokeModel on the review model.
+#   - variable BEDROCK_MODEL_ID — the Bedrock model / inference-profile id.
 
 on:
   pull_request_target:
@@ -17,6 +25,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  id-token: write # AWS OIDC
 
 jobs:
   ai-review:
@@ -30,6 +39,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+
+      # Installs from the trusted base lockfile (includes the Bedrock SDK).
+      - run: npm ci
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_REVIEW_ROLE_ARN }}
+          aws-region: eu-west-2
 
       - name: Fetch the PR diff (data only)
         env:
@@ -38,8 +57,8 @@ jobs:
 
       - name: AI review
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: claude-sonnet-4-6
+          AWS_REGION: eu-west-2
+          BEDROCK_MODEL_ID: ${{ vars.BEDROCK_MODEL_ID }}
         run: node scripts/ai-review.mjs rule.diff | tee review.md
 
       - name: Post review comment
