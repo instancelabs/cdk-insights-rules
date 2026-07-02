@@ -1,25 +1,40 @@
 import { apigatewayDefaultEndpointEnabled } from './rules/apigateway/apigatewayDefaultEndpointEnabled.js';
 import { apigatewayThrottlingMissing } from './rules/apigateway/apigatewayThrottlingMissing.js';
+import { autoscalingLaunchConfigPublicIp } from './rules/autoscaling/autoscalingLaunchConfigPublicIp.js';
+import { cloudfrontHttpsOnly } from './rules/cloudfront/cloudfrontHttpsOnly.js';
+import { cloudtrailLoggingDisabled } from './rules/cloudtrail/cloudtrailLoggingDisabled.js';
+import { cognitoPasswordPolicyWeak } from './rules/cognito/cognitoPasswordPolicyWeak.js';
 import { dynamodbDeletionProtectionDisabled } from './rules/dynamodb/dynamodbDeletionProtectionDisabled.js';
 import { ebsVolumeUnencrypted } from './rules/ec2/ebsVolumeUnencrypted.js';
 import { ec2Imdsv2NotEnforced } from './rules/ec2/ec2Imdsv2NotEnforced.js';
 import { ec2InstancePublicIp } from './rules/ec2/ec2InstancePublicIp.js';
 import { securityGroupUnrestrictedIngress } from './rules/ec2/securityGroupUnrestrictedIngress.js';
+import { ecrScanOnPushDisabled } from './rules/ecr/ecrScanOnPushDisabled.js';
 import { ecsContainerPrivileged } from './rules/ecs/ecsContainerPrivileged.js';
+import { ecsSecretsPlaintext } from './rules/ecs/ecsSecretsPlaintext.js';
 import { efsEncryptionDisabled } from './rules/efs/efsEncryptionDisabled.js';
+import { eksPublicEndpointUnrestricted } from './rules/eks/eksPublicEndpointUnrestricted.js';
+import { eksSecretsEncryptionDisabled } from './rules/eks/eksSecretsEncryptionDisabled.js';
 import { elasticacheEncryptionDisabled } from './rules/elasticache/elasticacheEncryptionDisabled.js';
+import { elbHttpsListenersMissing } from './rules/elb/elbHttpsListenersMissing.js';
 import { eventbridgeBusPolicyWildcardPrincipal } from './rules/eventbridge/eventbridgeBusPolicyWildcardPrincipal.js';
 import { iamPoliciesOverlyPermissive } from './rules/iam/iamPoliciesOverlyPermissive.js';
 import { kinesisEncryptionDisabled } from './rules/kinesis/kinesisEncryptionDisabled.js';
 import { kmsKeyPolicyPublic } from './rules/kms/kmsKeyPolicyPublic.js';
 import { kmsKeyPolicySelfLockout } from './rules/kms/kmsKeyPolicySelfLockout.js';
 import { lambdaPermissionPublic } from './rules/lambda/lambdaPermissionPublic.js';
+import { lambdaPermissionServiceUnrestricted } from './rules/lambda/lambdaPermissionServiceUnrestricted.js';
+import { lambdaRuntimeDeprecated } from './rules/lambda/lambdaRuntimeDeprecated.js';
 import { lambdaTracingDisabled } from './rules/lambda/lambdaTracingDisabled.js';
 import { lambdaUrlAuthNone } from './rules/lambda/lambdaUrlAuthNone.js';
+import { mskClientAuthenticationMissing } from './rules/msk/mskClientAuthenticationMissing.js';
+import { mskEncryptionWeak } from './rules/msk/mskEncryptionWeak.js';
+import { opensearchEncryptionDisabled } from './rules/opensearch/opensearchEncryptionDisabled.js';
 import { rdsEncryptionDisabled } from './rules/rds/rdsEncryptionDisabled.js';
 import { rdsPubliclyAccessible } from './rules/rds/rdsPubliclyAccessible.js';
 import { redshiftEncryptionDisabled } from './rules/redshift/redshiftEncryptionDisabled.js';
 import { redshiftPubliclyAccessible } from './rules/redshift/redshiftPubliclyAccessible.js';
+import { s3BucketPolicyNonSsl } from './rules/s3/s3BucketPolicyNonSsl.js';
 import { s3BucketPolicySelfLockout } from './rules/s3/s3BucketPolicySelfLockout.js';
 import { s3BucketPublicAccess } from './rules/s3/s3BucketPublicAccess.js';
 import { s3BucketVersioningDisabled } from './rules/s3/s3BucketVersioningDisabled.js';
@@ -40,6 +55,8 @@ export const rules: Rule[] = [
   // Lambda
   lambdaUrlAuthNone,
   lambdaPermissionPublic,
+  lambdaPermissionServiceUnrestricted,
+  lambdaRuntimeDeprecated,
   lambdaTracingDisabled,
   // EC2 / EBS
   ec2Imdsv2NotEnforced,
@@ -50,6 +67,7 @@ export const rules: Rule[] = [
   s3BucketPublicAccess,
   s3BucketVersioningDisabled,
   s3BucketPolicySelfLockout,
+  s3BucketPolicyNonSsl,
   // RDS
   rdsEncryptionDisabled,
   rdsPubliclyAccessible,
@@ -72,10 +90,30 @@ export const rules: Rule[] = [
   kinesisEncryptionDisabled,
   efsEncryptionDisabled,
   elasticacheEncryptionDisabled,
+  // CloudFront / CloudTrail
+  cloudfrontHttpsOnly,
+  cloudtrailLoggingDisabled,
+  // Cognito
+  cognitoPasswordPolicyWeak,
+  // ECR
+  ecrScanOnPushDisabled,
+  // EKS
+  eksPublicEndpointUnrestricted,
+  eksSecretsEncryptionDisabled,
+  // ELB
+  elbHttpsListenersMissing,
+  // MSK
+  mskClientAuthenticationMissing,
+  mskEncryptionWeak,
+  // OpenSearch
+  opensearchEncryptionDisabled,
+  // AutoScaling
+  autoscalingLaunchConfigPublicIp,
   // DynamoDB
   dynamodbDeletionProtectionDisabled,
   // ECS
   ecsContainerPrivileged,
+  ecsSecretsPlaintext,
   // SQS
   sqsQueueNoDlq,
   sqsEncryptionDisabled,

@@ -43,6 +43,21 @@ export { snsEncryptionDisabled } from './rules/sns/snsEncryptionDisabled.js';
 export { snsTopicPolicySelfLockout } from './rules/sns/snsTopicPolicySelfLockout.js';
 export { sqsEncryptionDisabled } from './rules/sqs/sqsEncryptionDisabled.js';
 export { sqsQueuePolicySelfLockout } from './rules/sqs/sqsQueuePolicySelfLockout.js';
+export { autoscalingLaunchConfigPublicIp } from './rules/autoscaling/autoscalingLaunchConfigPublicIp.js';
+export { cloudfrontHttpsOnly } from './rules/cloudfront/cloudfrontHttpsOnly.js';
+export { cloudtrailLoggingDisabled } from './rules/cloudtrail/cloudtrailLoggingDisabled.js';
+export { cognitoPasswordPolicyWeak } from './rules/cognito/cognitoPasswordPolicyWeak.js';
+export { ecrScanOnPushDisabled } from './rules/ecr/ecrScanOnPushDisabled.js';
+export { ecsSecretsPlaintext } from './rules/ecs/ecsSecretsPlaintext.js';
+export { eksPublicEndpointUnrestricted } from './rules/eks/eksPublicEndpointUnrestricted.js';
+export { eksSecretsEncryptionDisabled } from './rules/eks/eksSecretsEncryptionDisabled.js';
+export { elbHttpsListenersMissing } from './rules/elb/elbHttpsListenersMissing.js';
+export { lambdaPermissionServiceUnrestricted } from './rules/lambda/lambdaPermissionServiceUnrestricted.js';
+export { lambdaRuntimeDeprecated } from './rules/lambda/lambdaRuntimeDeprecated.js';
+export { mskClientAuthenticationMissing } from './rules/msk/mskClientAuthenticationMissing.js';
+export { mskEncryptionWeak } from './rules/msk/mskEncryptionWeak.js';
+export { opensearchEncryptionDisabled } from './rules/opensearch/opensearchEncryptionDisabled.js';
+export { s3BucketPolicyNonSsl } from './rules/s3/s3BucketPolicyNonSsl.js';
 
 export type {
   CfnResource,
