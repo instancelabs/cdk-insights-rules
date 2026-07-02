@@ -28,7 +28,7 @@
       "validated": true
     },
     {
-      "ruleId": "api-gateway-logging-disabled",
+      "ruleId": "api-gateway-public-endpoint",
       "language": "typescript",
       "flagged": {
         "code": "import * as apigateway from 'aws-cdk-lib/aws-apigateway';\n\nconst api = new apigateway.RestApi(this, 'Api');\napi.root.addMethod('GET', new apigateway.MockIntegration());",
@@ -729,7 +729,7 @@
       "validated": true
     },
     {
-      "ruleId": "eventbridge-dlq-missing",
+      "ruleId": "eventbridge-rule-no-targets",
       "language": "typescript",
       "flagged": {
         "code": "import { Duration } from 'aws-cdk-lib';\nimport * as events from 'aws-cdk-lib/aws-events';\n\n// inside your Stack\nnew events.Rule(this, 'Rule', {\n  schedule: events.Schedule.rate(Duration.hours(1)),\n});",
@@ -859,7 +859,7 @@
       "validated": true
     },
     {
-      "ruleId": "kms-key-rotation-disabled",
+      "ruleId": "kms-key-policy-public",
       "language": "typescript",
       "flagged": {
         "code": "import { Key } from 'aws-cdk-lib/aws-kms';\nimport { PolicyStatement, Effect, AnyPrincipal } from 'aws-cdk-lib/aws-iam';\n\nconst key = new Key(this, 'DataKey');\nkey.addToResourcePolicy(new PolicyStatement({\n  effect: Effect.ALLOW,\n  principals: [new AnyPrincipal()],\n  actions: ['kms:Decrypt', 'kms:GenerateDataKey'],\n  resources: ['*'],\n}));",
@@ -1145,7 +1145,7 @@
       "validated": true
     },
     {
-      "ruleId": "rds-multi-az-disabled",
+      "ruleId": "rds-multi-az-gp2-storage",
       "language": "typescript",
       "flagged": {
         "code": "import { Stack, App } from 'aws-cdk-lib';\nimport { Construct } from 'constructs';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nnew rds.CfnDBInstance(this, 'Db', {\n  engine: 'postgres',\n  dbInstanceClass: 'db.m5.large',\n  allocatedStorage: '100',\n  multiAz: true,\n  storageType: 'gp2',\n});",
@@ -1327,7 +1327,7 @@
       "validated": true
     },
     {
-      "ruleId": "secrets-manager-rotation-disabled",
+      "ruleId": "secrets-manager-secret-public",
       "language": "typescript",
       "flagged": {
         "code": "import { Secret } from 'aws-cdk-lib/aws-secretsmanager';\nimport { PolicyStatement, Effect, AnyPrincipal } from 'aws-cdk-lib/aws-iam';\n\nconst secret = new Secret(this, 'DbSecret');\nsecret.addToResourcePolicy(new PolicyStatement({\n  effect: Effect.ALLOW,\n  principals: [new AnyPrincipal()],\n  actions: ['secretsmanager:GetSecretValue'],\n  resources: ['*'],\n}));",

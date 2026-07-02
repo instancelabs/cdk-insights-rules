@@ -49,7 +49,10 @@
       "service": "API Gateway"
     },
     {
-      "ruleId": "api-gateway-logging-disabled",
+      "ruleId": "api-gateway-public-endpoint",
+      "legacyRuleIds": [
+        "api-gateway-logging-disabled"
+      ],
       "checkKey": "apiGateway",
       "name": "API Gateway Publicly Accessible",
       "description": "Detects API Gateway REST APIs configured with a non-PRIVATE endpoint, i.e. reachable from the public internet.",
@@ -646,7 +649,7 @@
       "remediationSteps": [
         "Set SSESpecification.SSEEnabled to true on the table",
         "Provide SSESpecification.KMSMasterKeyId pointing at a customer-managed KMS key",
-        "Verify the KMS key has rotation enabled (kms-key-rotation-disabled covers this)"
+        "Verify the KMS key has rotation enabled"
       ],
       "resourceTypes": [
         "AWS::DynamoDB::Table",
@@ -1352,7 +1355,10 @@
       "service": "EventBridge"
     },
     {
-      "ruleId": "eventbridge-dlq-missing",
+      "ruleId": "eventbridge-rule-no-targets",
+      "legacyRuleIds": [
+        "eventbridge-dlq-missing"
+      ],
       "checkKey": "eventBridgeRules",
       "name": "EventBridge Rule Disabled or Has No Targets",
       "description": "Detects EventBridge rules that are disabled or have no targets configured, so matched events are silently dropped.",
@@ -1550,29 +1556,10 @@
       "service": "Kinesis"
     },
     {
-      "ruleId": "kms-key-policy-self-lockout",
-      "checkKey": "kmsKeyPolicySelfLockout",
-      "name": "KMS Key Policy Self-Lockout",
-      "description": "Detects AWS::KMS::Key resources whose KeyPolicy contains a Deny statement on kms:*, kms:PutKeyPolicy, or * with a broad Principal and no carveout for the account root or admin role. Such a policy locks the account out of its own key — recovery requires breaking glass on the account root credentials AND scheduling a 7-30 day key deletion (which does not actually let you recover the key, just remove it). Effectively unrecoverable for any data the key has encrypted; AWS Support typically declines to intervene where customers have a self-service path via root.",
-      "severity": "CRITICAL",
-      "wafPillar": "Security",
-      "awsDocUrl": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
-      "complianceFrameworks": [
-        "SOC2",
-        "NIST"
+      "ruleId": "kms-key-policy-public",
+      "legacyRuleIds": [
+        "kms-key-rotation-disabled"
       ],
-      "remediationSteps": [
-        "Keep the auto-injected root Allow statement (CDK's defaultKeyPolicy) intact, or add an explicit Allow on Principal: { AWS: 'arn:aws:iam::<account>:root' } for Action: kms:*",
-        "Or add a NotPrincipal exemption for the account root or admin role(s)",
-        "Or use a Condition with StringNotEquals on aws:PrincipalArn to exempt admin role ARNs"
-      ],
-      "resourceTypes": [
-        "AWS::KMS::Key"
-      ],
-      "service": "KMS"
-    },
-    {
-      "ruleId": "kms-key-rotation-disabled",
       "checkKey": "kmsKeys",
       "name": "KMS Key Policy Allows Public Access",
       "description": "Detects KMS keys whose key policy grants access to a wildcard or public principal.",
@@ -1589,6 +1576,28 @@
       "remediationSteps": [
         "Remove wildcard/public principals from the key policy",
         "Scope key access to specific IAM principals or accounts"
+      ],
+      "resourceTypes": [
+        "AWS::KMS::Key"
+      ],
+      "service": "KMS"
+    },
+    {
+      "ruleId": "kms-key-policy-self-lockout",
+      "checkKey": "kmsKeyPolicySelfLockout",
+      "name": "KMS Key Policy Self-Lockout",
+      "description": "Detects AWS::KMS::Key resources whose KeyPolicy contains a Deny statement on kms:*, kms:PutKeyPolicy, or * with a broad Principal and no carveout for the account root or admin role. Such a policy locks the account out of its own key — recovery requires breaking glass on the account root credentials AND scheduling a 7-30 day key deletion (which does not actually let you recover the key, just remove it). Effectively unrecoverable for any data the key has encrypted; AWS Support typically declines to intervene where customers have a self-service path via root.",
+      "severity": "CRITICAL",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Keep the auto-injected root Allow statement (CDK's defaultKeyPolicy) intact, or add an explicit Allow on Principal: { AWS: 'arn:aws:iam::<account>:root' } for Action: kms:*",
+        "Or add a NotPrincipal exemption for the account root or admin role(s)",
+        "Or use a Condition with StringNotEquals on aws:PrincipalArn to exempt admin role ARNs"
       ],
       "resourceTypes": [
         "AWS::KMS::Key"
@@ -2104,7 +2113,10 @@
       "service": "RDS"
     },
     {
-      "ruleId": "rds-multi-az-disabled",
+      "ruleId": "rds-multi-az-gp2-storage",
+      "legacyRuleIds": [
+        "rds-multi-az-disabled"
+      ],
       "checkKey": "rdsMultiAZ",
       "name": "RDS Instance Using gp2 Storage",
       "description": "Detects Multi-AZ RDS instances on gp2 storage; gp3 offers better baseline performance at lower cost.",
@@ -2425,7 +2437,10 @@
       "service": "S3"
     },
     {
-      "ruleId": "secrets-manager-rotation-disabled",
+      "ruleId": "secrets-manager-secret-public",
+      "legacyRuleIds": [
+        "secrets-manager-rotation-disabled"
+      ],
       "checkKey": "secretsManager",
       "name": "Secrets Manager Secret Publicly Accessible",
       "description": "Detects Secrets Manager secrets whose resource policy grants access to a wildcard or public principal.",
@@ -2581,30 +2596,6 @@
       "service": "Step Functions"
     },
     {
-      "ruleId": "waf-webacl-misconfigured",
-      "checkKey": "wafWebAcl",
-      "name": "WAF WebACL Misconfigured",
-      "description": "Detects WAFv2 WebACLs with no rules, default Allow action, or CloudWatch metrics disabled.",
-      "severity": "HIGH",
-      "wafPillar": "Security",
-      "awsDocUrl": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html",
-      "complianceFrameworks": [
-        "SOC2",
-        "HIPAA",
-        "PCI-DSS",
-        "NIST"
-      ],
-      "remediationSteps": [
-        "Add WAF rules covering the OWASP Top 10 baseline",
-        "Set DefaultAction to Block for defence-in-depth",
-        "Enable CloudWatchMetricsEnabled in VisibilityConfig"
-      ],
-      "resourceTypes": [
-        "AWS::WAFv2::WebACL"
-      ],
-      "service": "WAF"
-    },
-    {
       "ruleId": "waf-logging-disabled",
       "checkKey": "wafLogging",
       "name": "WAF Logging Disabled",
@@ -2624,6 +2615,30 @@
       "resourceTypes": [
         "AWS::WAFv2::WebACL",
         "AWS::WAFv2::LoggingConfiguration"
+      ],
+      "service": "WAF"
+    },
+    {
+      "ruleId": "waf-webacl-misconfigured",
+      "checkKey": "wafWebAcl",
+      "name": "WAF WebACL Misconfigured",
+      "description": "Detects WAFv2 WebACLs with no rules, default Allow action, or CloudWatch metrics disabled.",
+      "severity": "MEDIUM",
+      "wafPillar": "Security",
+      "awsDocUrl": "https://docs.aws.amazon.com/waf/latest/developerguide/web-acl.html",
+      "complianceFrameworks": [
+        "SOC2",
+        "HIPAA",
+        "PCI-DSS",
+        "NIST"
+      ],
+      "remediationSteps": [
+        "Add WAF rules covering the OWASP Top 10 baseline",
+        "Set DefaultAction to Block for defence-in-depth",
+        "Enable CloudWatchMetricsEnabled in VisibilityConfig"
+      ],
+      "resourceTypes": [
+        "AWS::WAFv2::WebACL"
       ],
       "service": "WAF"
     }
