@@ -17,14 +17,8 @@ if [ "$CURRENT_BRANCH" != "main" ]; then
   exit 0
 fi
 
-# Skip for release / version-bump commits themselves.
-COMMIT_MSG=$(cat .git/COMMIT_EDITMSG 2>/dev/null || echo "")
-case "$COMMIT_MSG" in
-  "chore: release"* | "chore: bump"* | "chore(release)"*)
-    echo "ℹ️  Release commit — skipping bump."
-    exit 0
-    ;;
-esac
+# (Release commits are detected below via the staged package.json — the commit
+# message isn't written yet when pre-commit runs, so it can't be inspected here.)
 
 # Nothing to release if only meta files changed.
 STAGED=$(git diff --cached --name-only | grep -vE '^(package\.json|package-lock\.json|CHANGELOG\.md)$' || true)

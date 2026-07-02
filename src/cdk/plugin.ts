@@ -55,7 +55,12 @@ export interface PolicyValidationContext {
 export interface CdkInsightsRulesPluginOptions {
   /** Which rules to run. Defaults to the full catalog. */
   readonly rules?: Rule[];
-  /** Drop violations below this severity. Defaults to LOW (report everything). */
+  /**
+   * Drop violations below this severity. Defaults to MEDIUM: LOW rules are
+   * advisory best-practice nudges, and a validation plugin fails `cdk synth` —
+   * failing every build over advisory findings would train users to ignore the
+   * tool. Opt into `'LOW'` explicitly to gate on everything.
+   */
   readonly minimumSeverity?: Severity;
   /** Reported back to CDK for analytics; an arbitrary semver string. */
   readonly version?: string;
@@ -77,7 +82,7 @@ export class CdkInsightsRulesPlugin {
 
   constructor(options: CdkInsightsRulesPluginOptions = {}) {
     this.rules = options.rules ?? allRules;
-    this.minimumSeverity = options.minimumSeverity ?? 'LOW';
+    this.minimumSeverity = options.minimumSeverity ?? 'MEDIUM';
     this.version = options.version;
     this.ruleIds = this.rules.map((rule) => rule.metadata.ruleId);
   }
@@ -85,6 +90,9 @@ export class CdkInsightsRulesPlugin {
   validate(context: PolicyValidationContext): PolicyValidationPluginReport {
     const threshold = SEVERITY_ORDER[this.minimumSeverity];
     const violations: PolicyViolation[] = [];
+    const rulesById = new Map(
+      this.rules.map((rule) => [rule.metadata.ruleId, rule])
+    );
 
     for (const templatePath of context.templatePaths) {
       let template: CfnTemplate;
@@ -92,8 +100,24 @@ export class CdkInsightsRulesPlugin {
         template = JSON.parse(
           readFileSync(templatePath, 'utf8')
         ) as CfnTemplate;
-      } catch {
-        // Unreadable/invalid template — skip rather than fail the whole synth.
+      } catch (error) {
+        // CDK just wrote this template, so failing to read it means something
+        // is genuinely wrong. Silently skipping would validate nothing and
+        // still report success — fail loudly instead.
+        violations.push({
+          ruleName: 'cdk-insights-rules/unreadable-template',
+          description: `Could not read or parse the synthesized template, so no rules were run against it: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+          violatingResources: [
+            {
+              resourceLogicalId: '(template)',
+              templatePath,
+              locations: [templatePath],
+            },
+          ],
+          severity: 'HIGH',
+        });
         continue;
       }
 
@@ -102,9 +126,7 @@ export class CdkInsightsRulesPlugin {
       );
 
       for (const finding of findings) {
-        const rule = this.rules.find(
-          (candidate) => candidate.metadata.ruleId === finding.ruleId
-        );
+        const rule = rulesById.get(finding.ruleId);
         violations.push({
           ruleName: finding.ruleId,
           description: finding.issue,

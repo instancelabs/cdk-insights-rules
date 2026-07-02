@@ -10,6 +10,11 @@
  * It is defence-in-depth, not a substitute for human review — but it makes the
  * common malicious patterns impossible to merge by accident.
  *
+ * SCOPE: only `src/rules/**` is scanned — that is the surface contributors
+ * touch. Changes to the engine (`src/*.ts`), the CDK plugin, `scripts/`, or
+ * the workflows are NOT covered by this gate and get correspondingly stricter
+ * human review.
+ *
  * Usage:
  *   node scripts/security-scan.mjs                 # scan all rule files
  *   node scripts/security-scan.mjs a.ts b.ts       # scan specific files
@@ -47,12 +52,21 @@ const forbiddenConstructs = [
   { pattern: /\bfrom\s+['"]node:/, label: 'node: import' },
   { pattern: /\b__proto__\b/, label: '__proto__' },
   { pattern: /\[\s*['"]constructor['"]\s*\]/, label: "['constructor'] access" },
+  { pattern: /\.\s*constructor\b/, label: '.constructor access' },
+  { pattern: /\bReflect\s*\./, label: 'Reflect.*' },
+  { pattern: /\bimport\s*\.\s*meta\b/, label: 'import.meta' },
+  { pattern: /\bset(Timeout|Interval|Immediate)\s*\(/, label: 'timers' },
+  {
+    pattern: /\bfrom(CharCode|CodePoint)\b/,
+    label: 'fromCharCode/fromCodePoint (possible obfuscation)',
+  },
+  { pattern: /\bString\s*\.\s*raw\b/, label: 'String.raw' },
   {
     pattern: /\\x[0-9a-fA-F]{2}/,
     label: 'hex-escaped string (possible obfuscation)',
   },
   {
-    pattern: /\\u[0-9a-fA-F]{4}/,
+    pattern: /\\u(\{[0-9a-fA-F]+\}|[0-9a-fA-F]{4})/,
     label: 'unicode-escaped string (possible obfuscation)',
   },
 ];

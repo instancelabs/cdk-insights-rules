@@ -12,23 +12,39 @@ name: Rule review
 # sends only that text to Bedrock. The AWS role is scoped to a single model, so
 # blast radius is minimal.
 #
+# GATE: the review runs only when a maintainer applies the `ai-review` label,
+# so drive-by PRs can't invoke Bedrock (spend) and the model only ever reads
+# diffs a human decided were worth reviewing. Remove and re-apply the label to
+# re-run after the PR changes.
+#
+# PROMPT INJECTION: the diff is attacker-controlled text, so the model's
+# verdict can be steered and is advisory ONLY. scripts/ai-review.mjs validates
+# the model's JSON against strict enums and escapes all free text before it is
+# rendered into the comment (no links, mentions, or markdown structure), and
+# asks the model to flag suspected injection attempts.
+#
 # One-time setup (see README):
 #   - secret AWS_REVIEW_ROLE_ARN — an IAM role trusting this repo's OIDC with
 #     bedrock:InvokeModel on the review model.
 #   - variable BEDROCK_MODEL_ID — the Bedrock model / inference-profile id.
+#   - a `ai-review` label in the repo.
 
 on:
   pull_request_target:
-    paths:
-      - 'src/rules/**'
+    types: [labeled]
 
 permissions:
   contents: read
   pull-requests: write
   id-token: write # AWS OIDC
 
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   ai-review:
+    if: github.event.label.name == 'ai-review'
     runs-on: ubuntu-latest
     steps:
       - name: Check out the trusted base (never the PR head)

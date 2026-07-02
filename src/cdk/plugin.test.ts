@@ -77,6 +77,42 @@ describe('CdkInsightsRulesPlugin', () => {
     );
   });
 
+  it('defaults to MEDIUM: advisory LOW findings do not fail synth', () => {
+    // sqs-queue-no-dlq is LOW; s3-bucket-versioning-disabled is MEDIUM.
+    const templatePath = writeTemplate({
+      Resources: {
+        Queue: { Type: 'AWS::SQS::Queue', Properties: {} },
+        Bucket: { Type: 'AWS::S3::Bucket', Properties: {} },
+      },
+    });
+
+    const report = new CdkInsightsRulesPlugin().validate({
+      templatePaths: [templatePath],
+    });
+
+    const ruleNames = report.violations.map((violation) => violation.ruleName);
+    expect(ruleNames).toContain('s3-bucket-versioning-disabled');
+    expect(ruleNames).not.toContain('sqs-queue-no-dlq');
+  });
+
+  it('fails loudly on an unreadable template instead of silently passing', () => {
+    const templatePath = join(workDir, 'template.json');
+    writeFileSync(templatePath, 'not json {');
+
+    const report = new CdkInsightsRulesPlugin().validate({
+      templatePaths: [templatePath],
+    });
+
+    expect(report.success).toBe(false);
+    expect(report.violations).toHaveLength(1);
+    expect(report.violations[0].ruleName).toBe(
+      'cdk-insights-rules/unreadable-template'
+    );
+    expect(report.violations[0].violatingResources[0].templatePath).toBe(
+      templatePath
+    );
+  });
+
   it('runs only the rules it is given', () => {
     const templatePath = writeTemplate({
       Resources: {

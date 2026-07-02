@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -29,10 +30,13 @@ export const s3BucketVersioningDisabled: Rule = {
     for (const [resourceId, resource] of Object.entries(
       template.Resources ?? {}
     )) {
-      if (
-        resource.Type === 'AWS::S3::Bucket' &&
-        resource.Properties?.VersioningConfiguration?.Status !== 'Enabled'
-      ) {
+      if (resource.Type !== 'AWS::S3::Bucket') {
+        continue;
+      }
+      const status = resource.Properties?.VersioningConfiguration?.Status;
+      // An intrinsic (Ref / Fn::If / ...) may well resolve to "Enabled" —
+      // undecidable from the template, so never flag it.
+      if (status !== 'Enabled' && !isIntrinsic(status)) {
         report(resourceId, {
           issue: 'S3 bucket does not have versioning enabled.',
           recommendation:

@@ -54,6 +54,25 @@ describe('ec2-imdsv2-not-enforced', () => {
     ).toHaveLength(0);
   });
 
+  it('does not flag HttpTokens set via an intrinsic (undecidable)', () => {
+    expect(
+      run({
+        Resources: {
+          Lt: {
+            Type: 'AWS::EC2::LaunchTemplate',
+            Properties: {
+              LaunchTemplateData: {
+                MetadataOptions: {
+                  HttpTokens: { 'Fn::If': ['Strict', 'required', 'optional'] },
+                },
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('flags a LaunchConfiguration with HttpTokens optional', () => {
     expect(
       run({

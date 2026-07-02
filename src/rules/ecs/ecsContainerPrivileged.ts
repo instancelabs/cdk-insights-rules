@@ -1,3 +1,4 @@
+import { asBoolean } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -33,13 +34,19 @@ export const ecsContainerPrivileged: Rule = {
         continue;
       }
       const containers = resource.Properties?.ContainerDefinitions;
-      if (
-        Array.isArray(containers) &&
-        containers.some((container) => container?.Privileged === true)
-      ) {
+      if (!Array.isArray(containers)) {
+        continue;
+      }
+      // asBoolean also catches the string "true", which CloudFormation accepts.
+      const privileged = containers.filter(
+        (container) => asBoolean(container?.Privileged) === true
+      );
+      if (privileged.length > 0) {
+        const names = privileged
+          .map((container) => container?.Name ?? '(unnamed)')
+          .join(', ');
         report(resourceId, {
-          issue:
-            'ECS task definition has a container running in privileged mode.',
+          issue: `ECS task definition has a container running in privileged mode: ${names}.`,
           recommendation:
             'Remove Privileged: true unless strictly required — a privileged container can access the host and turn a container compromise into host compromise.',
         });

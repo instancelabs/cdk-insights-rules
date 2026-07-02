@@ -1,3 +1,4 @@
+import { isCdkInternalLogicalId, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -28,10 +29,17 @@ export const lambdaTracingDisabled: Rule = {
     for (const [resourceId, resource] of Object.entries(
       template.Resources ?? {}
     )) {
-      if (
-        resource.Type === 'AWS::Lambda::Function' &&
-        resource.Properties?.TracingConfig?.Mode !== 'Active'
-      ) {
+      if (resource.Type !== 'AWS::Lambda::Function') {
+        continue;
+      }
+      // CDK-internal helper functions (log-retention handlers, custom-resource
+      // providers, ...) aren't configurable by the user — flagging them would
+      // produce findings nobody can act on.
+      if (isCdkInternalLogicalId(resourceId)) {
+        continue;
+      }
+      const mode = resource.Properties?.TracingConfig?.Mode;
+      if (mode !== 'Active' && !isIntrinsic(mode)) {
         report(resourceId, {
           issue: 'Lambda function does not have active X-Ray tracing enabled.',
           recommendation:

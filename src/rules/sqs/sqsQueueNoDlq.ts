@@ -1,4 +1,26 @@
-import type { Rule } from '../../types';
+import type { CfnResource, Rule } from '../../types';
+
+/**
+ * Read a queue's RedrivePolicy. In raw CloudFormation the policy may be a
+ * JSON-encoded *string* rather than an object — parse it so both forms work.
+ */
+const redrivePolicyOf = (
+  resource: CfnResource
+): Record<string, unknown> | undefined => {
+  const policy = resource.Properties?.RedrivePolicy;
+  if (policy && typeof policy === 'object') {
+    return policy as Record<string, unknown>;
+  }
+  if (typeof policy === 'string') {
+    try {
+      const parsed = JSON.parse(policy);
+      return parsed && typeof parsed === 'object' ? parsed : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+};
 
 /**
  * Resolve the logical id a dead-letter-target ARN points at.
@@ -23,12 +45,27 @@ const resolveLogicalId = (arn: unknown): string | undefined => {
 };
 
 /**
+ * Extract the queue name from a literal ARN string
+ * (`arn:aws:sqs:region:account:queue-name`), so a DLQ referenced by hardcoded
+ * ARN can still be matched against queues in the template by `QueueName`.
+ */
+const queueNameFromArn = (arn: unknown): string | undefined => {
+  if (typeof arn !== 'string' || !arn.startsWith('arn:')) {
+    return undefined;
+  }
+  const name = arn.split(':').at(-1);
+  return name && name.length > 0 ? name : undefined;
+};
+
+/**
  * sqs-queue-no-dlq — flag queues without a dead-letter queue.
  *
  * A queue with no RedrivePolicy silently loses messages that repeatedly fail
  * processing. Two passes: first collect the queues that are themselves used as
  * dead-letter targets (so we never flag a DLQ for lacking its own DLQ), then
- * report every queue that has no RedrivePolicy and isn't a DLQ.
+ * report every queue that has no RedrivePolicy and isn't a DLQ. Targets are
+ * recognized via Fn::GetAtt / Ref intrinsics and via literal ARN strings
+ * matched against QueueName.
  */
 export const sqsQueueNoDlq: Rule = {
   metadata: {
@@ -51,16 +88,21 @@ export const sqsQueueNoDlq: Rule = {
   check: (template, report) => {
     const entries = Object.entries(template.Resources ?? {});
 
-    // Pass 1 — logical ids used AS dead-letter queues.
+    // Pass 1 — queues used AS dead-letter targets, by logical id or queue name.
     const deadLetterIds = new Set<string>();
+    const deadLetterNames = new Set<string>();
     for (const [, resource] of entries) {
       if (resource.Type !== 'AWS::SQS::Queue') {
         continue;
       }
-      const targetArn = resource.Properties?.RedrivePolicy?.deadLetterTargetArn;
+      const targetArn = redrivePolicyOf(resource)?.deadLetterTargetArn;
       const targetId = resolveLogicalId(targetArn);
       if (targetId) {
         deadLetterIds.add(targetId);
+      }
+      const targetName = queueNameFromArn(targetArn);
+      if (targetName) {
+        deadLetterNames.add(targetName);
       }
     }
 
@@ -69,7 +111,11 @@ export const sqsQueueNoDlq: Rule = {
       if (resource.Type !== 'AWS::SQS::Queue') {
         continue;
       }
-      if (resource.Properties?.RedrivePolicy || deadLetterIds.has(resourceId)) {
+      const queueName = resource.Properties?.QueueName;
+      const isDeadLetterTarget =
+        deadLetterIds.has(resourceId) ||
+        (typeof queueName === 'string' && deadLetterNames.has(queueName));
+      if (resource.Properties?.RedrivePolicy || isDeadLetterTarget) {
         continue;
       }
       report(resourceId, {

@@ -57,7 +57,22 @@ Severity: HIGH
 ```
 
 Options: `rules` (run a subset — defaults to the full catalog), `minimumSeverity`
-(`LOW` | `MEDIUM` | `HIGH` | `CRITICAL`, default `LOW`), and `version`.
+(`LOW` | `MEDIUM` | `HIGH` | `CRITICAL`, default `MEDIUM` — `LOW` rules are
+advisory nudges, and a validation plugin fails synth, so gate on them only by
+explicit opt-in), and `version`.
+
+### Suppressing a finding
+
+Findings you've reviewed and accepted can be acknowledged per resource, so they
+stop firing without turning the rule off for everything else:
+
+```ts
+const cfnFn = fn.node.defaultChild as lambda.CfnFunction;
+cfnFn.addMetadata('cdk-insights', { suppress: ['lambda-tracing-disabled'] });
+```
+
+(Or in raw CloudFormation: `Metadata: { "cdk-insights": { "suppress": ["rule-id"] } }`
+on the resource.)
 
 ## Or use it in your own code / CI
 
@@ -181,12 +196,16 @@ That's it. Read one property, report one finding. Most rules are ~30 lines.
 
 3. **Write the check.** Walk `template.Resources`, guard every property access
    with `?.`, and `report(resourceId, { issue, recommendation })` on a violation.
-   Keep it pure. (Need a template shape to reason about? Run `cdk synth --json`
-   on a tiny stack and look at the JSON.)
+   Keep it pure. Use the helpers in [`src/cfn.ts`](src/cfn.ts) — `isIntrinsic`
+   (never flag a value you can't decide: `Ref`/`Fn::If` might resolve to the
+   safe setting) and `asBoolean` (CloudFormation accepts `"true"` as a boolean).
+   (Need a template shape to reason about? Run `cdk synth --json` on a tiny
+   stack and look at the JSON.)
 
 4. **Add a test and register it.** Write `<yourRule>.test.ts` next to the rule
-   (copy the reference test), then add your rule to the array in
-   [`src/registry.ts`](src/registry.ts).
+   (copy the reference test), add your rule to the array in
+   [`src/registry.ts`](src/registry.ts), and export it from
+   [`src/index.ts`](src/index.ts) (the contract test fails if you forget).
 
 Then:
 
@@ -194,10 +213,14 @@ Then:
 npm run ci        # lint + typecheck + test + security scan — the same gates CI runs
 ```
 
-The contract test ([`src/rules.contract.test.ts`](src/rules.contract.test.ts))
-automatically checks your rule for a unique kebab-case id, complete metadata, and
-that it produces nothing on an empty template — so a lot of review is done for
-you before a human ever looks.
+The contract tests do a lot of review before a human ever looks:
+[`src/rules.contract.test.ts`](src/rules.contract.test.ts) checks your rule for
+a unique kebab-case id, complete metadata, that it produces nothing on an empty
+template, and that it never mutates its input and is deterministic — and
+[`src/examples.contract.test.ts`](src/examples.contract.test.ts) **synthesizes
+your before/after example with real `aws-cdk-lib`** and proves `flagged` trips
+the rule while `fixed` does not, so examples can never drift from the detection
+logic.
 
 ---
 
@@ -258,11 +281,16 @@ safe:
 1. **Security scan (hard gate).** [`scripts/security-scan.mjs`](scripts/security-scan.mjs)
    statically rejects anything a pure rule has no business doing — `eval`,
    `require`/dynamic `import`, `child_process`, `fs`, `process`, `fetch`,
-   node builtins, obfuscated strings, or importing anything outside this
-   package. A rule literally cannot merge with those in it.
-2. **Typecheck + tests (hard gate).** The contract test validates your rule's
-   shape; your own tests validate its behaviour.
-3. **AI review (advisory).** [`scripts/ai-review.mjs`](scripts/ai-review.mjs)
+   node builtins, constructor/`Reflect` escapes, obfuscated strings, or
+   importing anything outside this package. A rule literally cannot merge with
+   those in it. (The scan covers `src/rules/**` — the contributed surface;
+   changes to the engine or scripts get stricter human review instead.)
+2. **Typecheck + tests (hard gate).** The contract tests validate your rule's
+   shape, purity, and — by synthesizing them with real `aws-cdk-lib` — that its
+   before/after example matches its detection logic; your own tests validate
+   its behaviour.
+3. **AI review (advisory, maintainer-triggered).** When a maintainer applies
+   the `ai-review` label, [`scripts/ai-review.mjs`](scripts/ai-review.mjs)
    sends the diff to Claude and posts a structured review — correctness,
    false-positive risk, integration fit, and any security concerns — as a PR
    comment, giving a maintainer a fast first read.
@@ -270,7 +298,11 @@ safe:
    false-positive for *every* user, so new detection logic always gets a human.
 
 The AI reviewer only ever reads the diff as data — it never executes contributed
-code, and the security scan runs before anything else.
+code, and the security scan runs before anything else. Because the diff it reads
+is untrusted text, its verdict is treated as untrusted too: the model's output
+is validated against strict enums and fully escaped before being rendered, the
+model is asked to flag suspected prompt-injection attempts, and a clean AI
+review never substitutes for the human one.
 
 ---
 
@@ -279,11 +311,13 @@ code, and the security scan runs before anything else.
 ```
 src/
   types.ts            The rule contract.
-  runRules.ts         The engine: template -> findings.
+  cfn.ts              Shared template-reading helpers (intrinsics, booleans).
+  runRules.ts         The engine: template -> findings (+ suppressions, onRuleError).
   registry.ts         The list of all rules.
   defineRule.ts       Authoring helper.
   rules/<service>/    One file per rule (+ a co-located test).
   cdk/                The CDK policy-validation plugin (the "./cdk" entry point).
+  examples.contract.test.ts  Synthesizes every rule's example and proves it.
 scripts/
   security-scan.mjs   Static safety gate for rule files.
   ai-review.mjs       AI-assisted PR review.

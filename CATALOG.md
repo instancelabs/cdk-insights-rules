@@ -10,14 +10,14 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
-| [`apigateway-default-endpoint-enabled`](https://cdkinsights.dev/rules/apigateway-default-endpoint-enabled) | LOW | Security | Detects REST APIs that leave the default execute-api endpoint enabled while a custom domain is configured, letting clients bypass the domain and its edge controls. |
-| [`apigateway-throttling-missing`](https://cdkinsights.dev/rules/apigateway-throttling-missing) | LOW | Reliability | Detects API Gateway stages that configure no method-level rate or burst limits, leaving backends exposed to traffic spikes and uncontrolled cost. |
+| [`apigateway-default-endpoint-enabled`](https://cdkinsights.dev/rules/apigateway-default-endpoint-enabled) | LOW | Security | Detects REST APIs that leave the default execute-api endpoint enabled while a custom domain is mapped to them, letting clients bypass the domain and its edge controls. |
+| [`apigateway-throttling-missing`](https://cdkinsights.dev/rules/apigateway-throttling-missing) | LOW | Reliability | Detects API Gateway stages with no rate or burst limits from either MethodSettings or a usage plan, leaving backends exposed to traffic spikes and uncontrolled cost. |
 
 ## DynamoDB
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
-| [`dynamodb-deletion-protection-disabled`](https://cdkinsights.dev/rules/dynamodb-deletion-protection-disabled) | MEDIUM | Reliability | Detects DynamoDB tables without deletion protection, which can be destroyed by an accidental stack update or delete. |
+| [`dynamodb-deletion-protection-disabled`](https://cdkinsights.dev/rules/dynamodb-deletion-protection-disabled) | MEDIUM | Reliability | Detects DynamoDB tables (and global-table replicas) without deletion protection, which can be destroyed by an accidental stack update or delete. |
 
 ## EC2
 

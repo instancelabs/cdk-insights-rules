@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -44,7 +45,8 @@ export const ec2Imdsv2NotEnforced: Rule = {
         continue;
       }
 
-      if (httpTokens !== 'required') {
+      // An intrinsic may resolve to "required" — undecidable, so never flag.
+      if (httpTokens !== 'required' && !isIntrinsic(httpTokens)) {
         report(resourceId, {
           issue:
             'Launch template/configuration does not enforce IMDSv2 (MetadataOptions.HttpTokens is not set to "required").',

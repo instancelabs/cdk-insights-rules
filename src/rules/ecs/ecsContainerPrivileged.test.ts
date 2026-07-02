@@ -24,6 +24,29 @@ describe('ecs-container-privileged', () => {
     ).toContain('ecs-container-privileged');
   });
 
+  it('flags the CloudFormation string form "true" and names the container', () => {
+    const findings = runRules(
+      {
+        Resources: {
+          TaskDef: {
+            Type: 'AWS::ECS::TaskDefinition',
+            Properties: {
+              ContainerDefinitions: [
+                { Name: 'app', Privileged: 'true' },
+                { Name: 'sidecar', Privileged: false },
+              ],
+            },
+          },
+        },
+      },
+      [ecsContainerPrivileged]
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0].issue).toContain('app');
+    expect(findings[0].issue).not.toContain('sidecar');
+  });
+
   it('does not flag a task definition whose containers are all not privileged', () => {
     expect(
       run({

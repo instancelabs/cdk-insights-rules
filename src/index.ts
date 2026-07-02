@@ -1,6 +1,7 @@
+export { asBoolean, isCdkInternalLogicalId, isIntrinsic } from './cfn.js';
 export { defineRule } from './defineRule.js';
 export { rules } from './registry.js';
-export { runRules } from './runRules.js';
+export { runRules, type RunRulesOptions } from './runRules.js';
 
 // Individual rules, so consumers can cherry-pick and tree-shake instead of
 // pulling the whole catalog.

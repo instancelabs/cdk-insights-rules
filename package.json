@@ -16,6 +16,7 @@
   "license": "Apache-2.0",
   "author": "Instance Labs",
   "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -71,7 +72,9 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@types/node": "^22.10.0",
+    "aws-cdk-lib": "^2.261.0",
     "bumper-cli": "^1.6.0",
+    "constructs": "^10.6.0",
     "husky": "^8.0.3",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

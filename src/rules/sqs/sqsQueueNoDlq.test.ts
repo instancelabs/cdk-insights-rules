@@ -55,4 +55,44 @@ describe('sqs-queue-no-dlq', () => {
       findings.filter((finding) => finding.resourceId === 'Queue')
     ).toHaveLength(0);
   });
+
+  it('does not flag a DLQ referenced by a literal ARN, matched via QueueName', () => {
+    const findings = run({
+      Resources: {
+        Dlq: {
+          Type: 'AWS::SQS::Queue',
+          Properties: { QueueName: 'my-dlq' },
+        },
+        Producer: {
+          Type: 'AWS::SQS::Queue',
+          Properties: {
+            RedrivePolicy: {
+              deadLetterTargetArn: 'arn:aws:sqs:eu-west-2:111122223333:my-dlq',
+            },
+          },
+        },
+      },
+    });
+
+    expect(findings).toHaveLength(0);
+  });
+
+  it('understands a RedrivePolicy given as a JSON string (raw CloudFormation)', () => {
+    const findings = run({
+      Resources: {
+        Dlq: { Type: 'AWS::SQS::Queue', Properties: {} },
+        Producer: {
+          Type: 'AWS::SQS::Queue',
+          Properties: {
+            RedrivePolicy: JSON.stringify({
+              deadLetterTargetArn: { 'Fn::GetAtt': ['Dlq', 'Arn'] },
+              maxReceiveCount: 5,
+            }),
+          },
+        },
+      },
+    });
+
+    expect(findings).toHaveLength(0);
+  });
 });

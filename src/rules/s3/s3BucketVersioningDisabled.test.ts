@@ -32,6 +32,23 @@ describe('s3-bucket-versioning-disabled', () => {
     ).toContain('s3-bucket-versioning-disabled');
   });
 
+  it('does not flag a Status set via an intrinsic (undecidable)', () => {
+    expect(
+      run({
+        Resources: {
+          Bucket: {
+            Type: 'AWS::S3::Bucket',
+            Properties: {
+              VersioningConfiguration: {
+                Status: { 'Fn::If': ['IsProd', 'Enabled', 'Suspended'] },
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag a bucket with versioning Enabled', () => {
     expect(
       run({

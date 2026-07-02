@@ -6,37 +6,64 @@ import { apigatewayDefaultEndpointEnabled } from './apigatewayDefaultEndpointEna
 describe('apigateway-default-endpoint-enabled', () => {
   const run = (template: CfnTemplate) =>
     runRules(template, [apigatewayDefaultEndpointEnabled]).map(
-      (finding) => finding.ruleId
+      (finding) => finding.resourceId
     );
 
-  it('flags a RestApi with the default endpoint enabled when a custom domain is present', () => {
+  const domain = {
+    Type: 'AWS::ApiGateway::DomainName',
+    Properties: { DomainName: 'api.example.com' },
+  };
+
+  it('flags a RestApi with the default endpoint enabled when a mapping ties it to a custom domain', () => {
     expect(
       run({
         Resources: {
-          Domain: {
-            Type: 'AWS::ApiGateway::DomainName',
-            Properties: { DomainName: 'api.example.com' },
-          },
-          Api: {
-            Type: 'AWS::ApiGateway::RestApi',
-            Properties: { Name: 'x' },
+          Domain: domain,
+          Api: { Type: 'AWS::ApiGateway::RestApi', Properties: { Name: 'x' } },
+          Mapping: {
+            Type: 'AWS::ApiGateway::BasePathMapping',
+            Properties: {
+              DomainName: 'api.example.com',
+              RestApiId: { Ref: 'Api' },
+            },
           },
         },
       })
-    ).toContain('apigateway-default-endpoint-enabled');
+    ).toContain('Api');
+  });
+
+  it('flags a RestApi mapped via an ApiGatewayV2 ApiMapping', () => {
+    expect(
+      run({
+        Resources: {
+          Api: { Type: 'AWS::ApiGateway::RestApi', Properties: { Name: 'x' } },
+          Mapping: {
+            Type: 'AWS::ApiGatewayV2::ApiMapping',
+            Properties: {
+              DomainName: 'api.example.com',
+              ApiId: { Ref: 'Api' },
+            },
+          },
+        },
+      })
+    ).toContain('Api');
   });
 
   it('does not flag a RestApi with DisableExecuteApiEndpoint true', () => {
     expect(
       run({
         Resources: {
-          Domain: {
-            Type: 'AWS::ApiGateway::DomainName',
-            Properties: { DomainName: 'api.example.com' },
-          },
+          Domain: domain,
           Api: {
             Type: 'AWS::ApiGateway::RestApi',
             Properties: { Name: 'x', DisableExecuteApiEndpoint: true },
+          },
+          Mapping: {
+            Type: 'AWS::ApiGateway::BasePathMapping',
+            Properties: {
+              DomainName: 'api.example.com',
+              RestApiId: { Ref: 'Api' },
+            },
           },
         },
       })
@@ -47,10 +74,40 @@ describe('apigateway-default-endpoint-enabled', () => {
     expect(
       run({
         Resources: {
-          Api: {
+          Api: { Type: 'AWS::ApiGateway::RestApi', Properties: { Name: 'x' } },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
+  it('does not flag a RestApi when the domain is mapped to a different API', () => {
+    expect(
+      run({
+        Resources: {
+          Domain: domain,
+          Api: { Type: 'AWS::ApiGateway::RestApi', Properties: { Name: 'x' } },
+          OtherApi: {
             Type: 'AWS::ApiGateway::RestApi',
-            Properties: { Name: 'x' },
+            Properties: { Name: 'y' },
           },
+          Mapping: {
+            Type: 'AWS::ApiGateway::BasePathMapping',
+            Properties: {
+              DomainName: 'api.example.com',
+              RestApiId: { Ref: 'OtherApi' },
+            },
+          },
+        },
+      })
+    ).toEqual(['OtherApi']);
+  });
+
+  it('does not flag a RestApi when a domain exists but nothing is mapped', () => {
+    expect(
+      run({
+        Resources: {
+          Domain: domain,
+          Api: { Type: 'AWS::ApiGateway::RestApi', Properties: { Name: 'x' } },
         },
       })
     ).toHaveLength(0);

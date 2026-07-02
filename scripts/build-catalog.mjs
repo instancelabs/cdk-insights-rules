@@ -79,7 +79,8 @@ lines.push('');
 
 const bySeverityThenId = (first, second) =>
   severityOrder[first.metadata.severity] -
-  severityOrder[second.metadata.severity];
+    severityOrder[second.metadata.severity] ||
+  first.metadata.ruleId.localeCompare(second.metadata.ruleId);
 
 for (const service of services) {
   lines.push(`## ${service}`);

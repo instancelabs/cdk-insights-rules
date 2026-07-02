@@ -34,8 +34,9 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.x, which
-      # fails OIDC with a misleading 404.
-      - run: npm install -g npm@latest
+      # fails OIDC with a misleading 404. Pinned to a major so the publish job
+      # doesn't silently pick up an unvetted npm release.
+      - run: npm install -g npm@11
 
       - run: npm ci
 
@@ -49,7 +50,15 @@ jobs:
           CURR=$(node -p "require('./package.json').version")
           echo "version=$CURR" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
+            # Manual runs publish only if this version isn't on npm already —
+            # otherwise npm publish would fail the job with a 403.
+            PKG=$(node -p "require('./package.json').name")
+            if npm view "$PKG@$CURR" version >/dev/null 2>&1; then
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              echo "⚠️ $PKG@$CURR already published — nothing to do."
+            else
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+            fi
           else
             PREV=$(git show HEAD^:package.json 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).version)}catch{console.log('')}})")
             if [ "$PREV" = "$CURR" ]; then
