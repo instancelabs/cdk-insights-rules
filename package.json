@@ -1,6 +1,6 @@
 {
   "name": "@instance-labs/cdk-insights-rules",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The open catalog of rules that CDK Insights runs against AWS CDK apps. Pure, testable checks over synthesized CloudFormation.",
   "publishConfig": {
     "access": "public"

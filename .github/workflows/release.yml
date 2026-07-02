@@ -61,9 +61,15 @@ jobs:
             fi
           else
             PREV=$(git show HEAD^:package.json 2>/dev/null | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{console.log(JSON.parse(s).version)}catch{console.log('')}})")
+            PKG=$(node -p "require('./package.json').name")
             if [ "$PREV" = "$CURR" ]; then
               echo "changed=false" >> "$GITHUB_OUTPUT"
               echo "⚠️ version unchanged ($CURR) — nothing to publish."
+            elif npm view "$PKG@$CURR" version >/dev/null 2>&1; then
+              # Covers manual releases (e.g. the first publish, done by hand
+              # before trusted publishing exists) landing on main afterwards.
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              echo "⚠️ $PKG@$CURR already on npm — nothing to publish."
             else
               echo "changed=true" >> "$GITHUB_OUTPUT"
               echo "✅ version changed: $PREV → $CURR."
