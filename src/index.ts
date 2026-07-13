@@ -151,3 +151,8 @@ export type {
   Severity,
   WafPillar,
 } from './types.js';
+export { iamRoleAnonymousAssume } from './rules/iam/iamRoleAnonymousAssume.js';
+export { imagebuilderAmiPublicLaunchPermission } from './rules/imagebuilder/imagebuilderAmiPublicLaunchPermission.js';
+export { rdsMasterPasswordPlaintext } from './rules/rds/rdsMasterPasswordPlaintext.js';
+export { s3BucketPolicyPublicRead } from './rules/s3/s3BucketPolicyPublicRead.js';
+export { secretsManagerRotationMissing } from './rules/secretsmanager/secretsManagerRotationMissing.js';

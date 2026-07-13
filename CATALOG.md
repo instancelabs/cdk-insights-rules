@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**126 rules** implemented in the open in this package — 10 critical, 31 high, 54 medium, 31 low.
+**131 rules** implemented in the open in this package — 13 critical, 32 high, 55 medium, 31 low.
 
 > This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (the product runs these same rules, plus template-level checks that need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -171,10 +171,17 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`iam-role-anonymous-assume`](https://cdkinsights.dev/rules/iam-role-anonymous-assume) | CRITICAL | Security | Detects IAM roles whose trust policy allows a wildcard principal to assume them with no scoping condition — anyone with an AWS account can become the role. |
 | [`iam-policies-overly-permissive`](https://cdkinsights.dev/rules/iam-policies-overly-permissive) | HIGH | Security | Detects IAM policies whose Allow statements use bare * wildcards for actions or resources. |
 | [`iam-cross-account-trust`](https://cdkinsights.dev/rules/iam-cross-account-trust) | MEDIUM | Security | Detects IAM roles whose trust policy grants assume rights to a literal AWS account with no scoping condition. |
 | [`iam-user-direct-policies`](https://cdkinsights.dev/rules/iam-user-direct-policies) | MEDIUM | Security | Detects IAM users with inline or managed policies attached directly instead of via groups. |
 | [`iam-permission-boundary-missing`](https://cdkinsights.dev/rules/iam-permission-boundary-missing) | LOW | Security | Detects IAM roles assumable by AWS principals (users/accounts) without a permission boundary. |
+
+## ImageBuilder
+
+| Rule | Severity | Pillar | Description |
+| --- | --- | --- | --- |
+| [`imagebuilder-ami-public-launch-permission`](https://cdkinsights.dev/rules/imagebuilder-ami-public-launch-permission) | CRITICAL | Security | Detects Image Builder distribution configurations whose AMI launch permission includes the "all" user group, making the produced AMI public to every AWS account. |
 
 ## KMS
 
@@ -235,6 +242,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`rds-publicly-accessible`](https://cdkinsights.dev/rules/rds-publicly-accessible) | CRITICAL | Security | Detects RDS instances with PubliclyAccessible set to true, exposing the database endpoint to the internet. |
+| [`rds-master-password-plaintext`](https://cdkinsights.dev/rules/rds-master-password-plaintext) | HIGH | Security | Detects RDS instances and clusters whose MasterUserPassword is a literal string in the template rather than a Secrets Manager/SSM dynamic reference or managed credential. |
 | [`rds-backup-retention-low`](https://cdkinsights.dev/rules/rds-backup-retention-low) | MEDIUM | Reliability | Detects RDS instances and clusters with automated backups disabled or retention under 7 days. |
 | [`rds-deletion-protection-disabled`](https://cdkinsights.dev/rules/rds-deletion-protection-disabled) | MEDIUM | Reliability | Detects RDS instances and clusters without deletion protection. |
 | [`rds-encryption-disabled`](https://cdkinsights.dev/rules/rds-encryption-disabled) | MEDIUM | Security | Detects RDS instances and clusters without storage encryption at rest. Aurora member instances and read replicas (which inherit encryption) are exempt. |
@@ -263,6 +271,7 @@
 
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
+| [`s3-bucket-policy-public-read`](https://cdkinsights.dev/rules/s3-bucket-policy-public-read) | CRITICAL | Security | Detects S3 bucket policies that allow object reads to a wildcard principal with no scoping condition — the bucket contents are publicly downloadable. |
 | [`s3-bucket-policy-self-lockout`](https://cdkinsights.dev/rules/s3-bucket-policy-self-lockout) | CRITICAL | Security | Detects bucket policies whose blanket Deny statements would lock the account out of its own bucket. |
 | [`s3-bucket-policy-non-ssl`](https://cdkinsights.dev/rules/s3-bucket-policy-non-ssl) | HIGH | Security | Detects S3 bucket policies without a Deny statement for non-TLS (aws:SecureTransport=false) requests. |
 | [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | MEDIUM | Security | Detects S3 buckets without server access logging configured. |
@@ -293,6 +302,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`secrets-manager-secret-public`](https://cdkinsights.dev/rules/secrets-manager-secret-public) | CRITICAL | Security | Detects Secrets Manager resource policies that grant access to a wildcard or public principal without a scoping condition. |
+| [`secrets-manager-rotation-missing`](https://cdkinsights.dev/rules/secrets-manager-rotation-missing) | MEDIUM | Security | Detects Secrets Manager secrets with no rotation schedule in the template — static credentials that never expire. |
 
 ## StepFunctions
 
