@@ -1,6 +1,7 @@
 # Contributing
 
-Thanks for helping CDK Insights catch more real problems. There are two ways in:
+Thanks for helping CDK Insights catch more real problems. Participation is
+governed by our [Code of Conduct](CODE_OF_CONDUCT.md). There are two ways in:
 
 - **Propose a rule** — an idea, no code. Open a
   [rule proposal issue](https://github.com/instancelabs/cdk-insights-rules/issues/new?template=propose-a-rule.yml).

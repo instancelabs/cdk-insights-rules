@@ -57,8 +57,11 @@ const PILLARS: WafPillar[] = [
 ];
 
 describe('rule catalog contract', () => {
-  it('has no duplicate ruleIds', () => {
-    const ruleIds = rules.map((rule) => rule.metadata.ruleId);
+  it('has no duplicate ruleIds (including legacy aliases)', () => {
+    const ruleIds = rules.flatMap((rule) => [
+      rule.metadata.ruleId,
+      ...(rule.metadata.legacyRuleIds ?? []),
+    ]);
     expect(new Set(ruleIds).size).toBe(ruleIds.length);
   });
 

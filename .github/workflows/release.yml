@@ -20,6 +20,10 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    # Protected environment: arm it in Settings -> Environments -> release with
+    # a required reviewer so publishing needs an explicit approval click,
+    # decoupling "merge to main" from "publish to npm".
+    environment: release
     permissions:
       contents: read
       id-token: write # OIDC trusted publishing + provenance

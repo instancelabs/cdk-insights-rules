@@ -11,19 +11,21 @@ const PUBLIC_ACCESS_FLAGS = [
 /**
  * s3-bucket-public-access
  *
- * Public S3 buckets are the classic cloud breach. Block Public Access is the
- * account/bucket-level guardrail: with all four settings on, a bucket cannot
- * be made public by an ACL or policy mistake. We flag buckets with no
- * PublicAccessBlockConfiguration at all, and buckets where any of the four
- * settings is decidably not enabled.
+ * Block Public Access is the bucket-level guardrail against ACL/policy
+ * mistakes. Since April 2023 NEW buckets get all four settings enabled by
+ * default, so a bucket with no PublicAccessBlockConfiguration is protected by
+ * the service default — but the protection is implicit: it does not survive
+ * template reuse against legacy buckets and is invisible in review. We flag
+ * missing configuration as an explicitness/hardening nudge (MEDIUM), and
+ * flags decidably set to false (an active weakening) the same way.
  */
 export const s3BucketPublicAccess: Rule = {
   metadata: {
     ruleId: 's3-bucket-public-access',
-    name: 'S3 Bucket Public Access Not Blocked',
+    name: 'S3 Bucket Public Access Not Explicitly Blocked',
     description:
-      'Detects S3 buckets without a full Block Public Access configuration, leaving them exposable via ACLs or bucket policies.',
-    severity: 'CRITICAL',
+      'Detects S3 buckets that do not explicitly enable all four Block Public Access settings. New buckets are protected by service defaults since April 2023; explicit configuration makes the protection visible and portable.',
+    severity: 'MEDIUM',
     wafPillar: 'Security',
     resourceTypes: ['AWS::S3::Bucket'],
     awsDocUrl:
@@ -48,7 +50,7 @@ export const s3BucketPublicAccess: Rule = {
       if (!publicAccessBlock) {
         report(resourceId, {
           issue:
-            'S3 bucket has no PublicAccessBlockConfiguration, so an ACL or bucket-policy mistake can make it public.',
+            'S3 bucket does not explicitly configure PublicAccessBlockConfiguration; it relies on service defaults for public-access protection.',
           recommendation:
             'Configure PublicAccessBlockConfiguration with BlockPublicAcls, BlockPublicPolicy, IgnorePublicAcls, and RestrictPublicBuckets all set to true (in CDK: blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL).',
         });

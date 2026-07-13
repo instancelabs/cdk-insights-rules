@@ -2,7 +2,7 @@ blank_issues_enabled: true
 contact_links:
   - name: Browse existing rules
     url: https://cdkinsights.dev/rules
-    about: See the 119 rules CDK Insights already runs before proposing a new one.
+    about: See the rules CDK Insights already runs before proposing a new one.
   - name: CDK Insights docs
     url: https://cdkinsights.dev/docs
     about: How to run the scanner and suppress findings.

@@ -15,7 +15,7 @@ export const lambdaMemoryOptimization: Rule = {
     name: 'Lambda Memory Allocation High',
     description:
       'Detects Lambda functions with memory allocations above 1024 MB.',
-    severity: 'MEDIUM',
+    severity: 'LOW',
     wafPillar: 'Cost Optimization',
     resourceTypes: ['AWS::Lambda::Function'],
     awsDocUrl:

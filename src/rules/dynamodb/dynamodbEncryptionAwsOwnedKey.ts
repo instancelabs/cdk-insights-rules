@@ -13,7 +13,7 @@ export const dynamodbEncryptionAwsOwnedKey: Rule = {
     ruleId: 'dynamodb-encryption-aws-owned-key',
     name: 'DynamoDB Encryption Uses AWS-Owned Key',
     description:
-      'Detects DynamoDB tables without customer-controlled KMS encryption (SSESpecification).',
+      'Detects DynamoDB tables using the default AWS-owned key: no SSESpecification with SSEEnabled, which opts into at least the AWS-managed KMS key.',
     severity: 'MEDIUM',
     wafPillar: 'Security',
     resourceTypes: ['AWS::DynamoDB::Table', 'AWS::DynamoDB::GlobalTable'],

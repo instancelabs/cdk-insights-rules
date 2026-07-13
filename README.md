@@ -13,12 +13,13 @@ rule for it, and this README shows you exactly how.
   product catalog, each with a before/after example.
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — the contribution workflow.
 
-> **All of CDK Insights' static detection rules are open source** — this package
-> is the product's rule engine, not a teaser. What stays in the private product
-> is the workflow around the rules: CDK synth orchestration, source-location
-> attribution (finding → your TypeScript line), the AI analysis tier, and the
-> hosted service. The handful of checks that need the product's synth pipeline
-> (source-level analysis, cross-stack heuristics) live there too.
+> **Every per-resource detection rule CDK Insights runs is open source, here**
+> — this package is the product's rule engine, not a teaser. What stays in the
+> private product is the workflow around the rules — CDK synth orchestration,
+> source-location attribution (finding → your TypeScript line), the AI analysis
+> tier, and the hosted service — plus the template-level checks (cross-resource,
+> cross-stack, source-level) that need that pipeline and can't be expressed as
+> a pure per-resource rule.
 
 ---
 
@@ -325,7 +326,7 @@ scripts/
   ai-review.mjs       AI-assisted PR review.
   build-catalog.mjs   Regenerates CATALOG.md from the built rules.
 catalog/
-  product-catalog.json  Reference: the full product rule set (all 119).
+  product-catalog.json  Reference snapshot of the product's per-resource rule set.
 ```
 
 ---

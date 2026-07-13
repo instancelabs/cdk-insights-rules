@@ -1,7 +1,7 @@
 import type { Rule } from '../../types';
 
 /**
- * api-gateway-logging-disabled
+ * apigateway-stage-logging-disabled
  *
  * A stage with neither access logging nor execution logging leaves no record
  * of who called the API or why requests failed. (The product catalog's
@@ -10,7 +10,8 @@ import type { Rule } from '../../types';
  */
 export const apigatewayStageLoggingDisabled: Rule = {
   metadata: {
-    ruleId: 'api-gateway-logging-disabled',
+    ruleId: 'apigateway-stage-logging-disabled',
+    legacyRuleIds: ['api-gateway-logging-disabled'],
     name: 'API Gateway Stage Logging Disabled',
     description:
       'Detects API Gateway stages with neither access logging nor execution logging configured.',

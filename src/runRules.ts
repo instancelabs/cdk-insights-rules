@@ -65,8 +65,12 @@ export const runRules = (
 
   for (const rule of rules) {
     const report: ReportFinding = (resourceId, detail) => {
+      const suppressed = suppressedRuleIds(template, resourceId);
       if (
-        suppressedRuleIds(template, resourceId).includes(rule.metadata.ruleId)
+        suppressed.includes(rule.metadata.ruleId) ||
+        (rule.metadata.legacyRuleIds ?? []).some((legacyId) =>
+          suppressed.includes(legacyId)
+        )
       ) {
         return;
       }

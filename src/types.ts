@@ -73,6 +73,11 @@ export type RuleCheck = (template: CfnTemplate, report: ReportFinding) => void;
 export interface RuleMetadata {
   /** Stable, unique, kebab-case, e.g. "s3-bucket-versioning-disabled". */
   ruleId: string;
+  /**
+   * Former ruleIds this rule was published under. Suppressions written
+   * against a legacy id keep working — the runner consults these too.
+   */
+  legacyRuleIds?: string[];
   /** Human-readable name, e.g. "S3 Bucket Versioning Disabled". */
   name: string;
   /** One sentence: what this rule detects. */

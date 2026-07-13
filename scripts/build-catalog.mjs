@@ -5,7 +5,7 @@
  * Run after `npm run build` (it imports the compiled registry):
  *   npm run build && npm run build:catalog
  *
- * The full CDK Insights product runs many more rules than are open-sourced here
+ * The CDK Insights product runs these same per-resource rules (plus closed template-level checks)
  * yet — CATALOG.md lists the ones implemented in the open. The complete list
  * lives at https://cdkinsights.dev/rules (and catalog/product-catalog.json).
  */
@@ -70,7 +70,7 @@ lines.push(
 if (productCount) {
   lines.push('');
   lines.push(
-    `> This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (${productCount} in the product; the few remaining closed checks need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)`
+    '> This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (the product runs these same rules, plus template-level checks that need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)'
   );
 }
 lines.push('');

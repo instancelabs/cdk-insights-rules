@@ -1,7 +1,7 @@
 import type { Rule } from '../../types';
 
 /**
- * api-gateway-method-auth-missing
+ * apigateway-method-auth-missing
  *
  * A REST Method or HTTP-API Route with AuthorizationType NONE is a public,
  * unauthenticated entry point to the backend. CORS preflight (OPTIONS)
@@ -9,7 +9,8 @@ import type { Rule } from '../../types';
  */
 export const apigatewayMethodAuthMissing: Rule = {
   metadata: {
-    ruleId: 'api-gateway-method-auth-missing',
+    ruleId: 'apigateway-method-auth-missing',
+    legacyRuleIds: ['api-gateway-method-auth-missing'],
     name: 'API Gateway Method Without Authorization',
     description:
       'Detects API Gateway methods and routes with no authorization (AuthorizationType NONE), excluding CORS preflight.',

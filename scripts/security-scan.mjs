@@ -10,10 +10,12 @@
  * It is defence-in-depth, not a substitute for human review — but it makes the
  * common malicious patterns impossible to merge by accident.
  *
- * SCOPE: only `src/rules/**` is scanned — that is the surface contributors
- * touch. Changes to the engine (`src/*.ts`), the CDK plugin, `scripts/`, or
- * the workflows are NOT covered by this gate and get correspondingly stricter
- * human review.
+ * SCOPE: all of `src/**` is scanned — rule files under the strictest policy
+ * (no bare imports at all), engine/test files against the same forbidden-
+ * construct list with narrow, documented per-file exemptions below (the CDK
+ * plugin reads the synthesized template from disk; the example contract test
+ * compiles CDK snippets). `scripts/` and workflows are maintainer-owned and
+ * remain under human review + SHA-pinned actions.
  *
  * Usage:
  *   node scripts/security-scan.mjs                 # scan all rule files
@@ -25,11 +27,36 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const projectRoot = process.cwd();
-const rulesDir = join(projectRoot, 'src', 'rules');
+const srcDir = join(projectRoot, 'src');
+const rulesPathSegment = join('src', 'rules');
 
 // Bare (non-relative) imports allowed, by file kind. Rule implementations may
 // import nothing external; test files may import the test runner only.
 const allowedBareImportsInTests = new Set(['vitest']);
+
+// Narrow, documented exemptions for engine files. Key = path relative to the
+// project root (posix). Anything not listed gets the full rule-file policy.
+const fileExemptions = {
+  // The plugin's entire job is reading the template cdk synth just wrote.
+  'src/cdk/plugin.ts': {
+    imports: new Set(['node:fs']),
+    constructs: new Set(['node: builtin import', 'node: import']),
+  },
+  // Exercises the plugin against real files in a temp dir.
+  'src/cdk/plugin.test.ts': {
+    imports: new Set(['node:fs', 'node:os', 'node:path', 'vitest']),
+    constructs: new Set(['node: builtin import', 'node: import']),
+  },
+  // Compiles every rule's CDK example snippet against real aws-cdk-lib to
+  // prove flagged trips and fixed passes. This is the one sanctioned use of
+  // code evaluation in the repo; it runs only under vitest in a no-secrets job.
+  'src/examples.contract.test.ts': {
+    imports: new Set(['aws-cdk-lib', 'aws-cdk-lib/assertions', 'vitest']),
+    // new Function compiles the snippet bodies; dynamic import resolves the
+    // snippet's own `import * as x from 'aws-cdk-lib/...'` lines to modules.
+    constructs: new Set(['new Function()', 'dynamic import()']),
+  },
+};
 
 // Patterns that have no business in a pure template check. Each is a hard fail.
 const forbiddenConstructs = [
@@ -90,14 +117,15 @@ const requestedFiles = process.argv.slice(2);
 const files = (
   requestedFiles.length
     ? requestedFiles.map((file) => join(projectRoot, file))
-    : listRuleFiles(rulesDir)
-).filter((file) => file.includes(join('src', 'rules')) && file.endsWith('.ts'));
+    : listRuleFiles(srcDir)
+).filter((file) => file.includes(join('src', '')) && file.endsWith('.ts'));
 
 const violations = [];
 
 for (const file of files) {
-  const relativePath = relative(projectRoot, file);
+  const relativePath = relative(projectRoot, file).split('\\').join('/');
   const isTestFile = file.endsWith('.test.ts');
+  const exemption = fileExemptions[relativePath];
   let source;
   try {
     source = readFileSync(file, 'utf8');
@@ -106,6 +134,9 @@ for (const file of files) {
   }
 
   for (const { pattern, label } of forbiddenConstructs) {
+    if (exemption?.constructs?.has(label)) {
+      continue;
+    }
     if (pattern.test(source)) {
       violations.push(`${relativePath}: forbidden construct — ${label}`);
     }
@@ -122,7 +153,9 @@ for (const file of files) {
     if (specifier.startsWith('.')) {
       continue;
     }
-    const isAllowed = isTestFile && allowedBareImportsInTests.has(specifier);
+    const isAllowed =
+      (isTestFile && allowedBareImportsInTests.has(specifier)) ||
+      exemption?.imports?.has(specifier) === true;
     if (!isAllowed) {
       violations.push(
         `${relativePath}: disallowed import "${specifier}" — rules may only import from within the package${isTestFile ? ' (tests may also import "vitest")' : ''}`
@@ -142,4 +175,4 @@ if (violations.length) {
   process.exit(1);
 }
 
-console.log(`✓ security scan clean (${files.length} rule file(s) checked).`);
+console.log(`✓ security scan clean (${files.length} source file(s) checked).`);
