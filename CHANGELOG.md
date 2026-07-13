@@ -3,6 +3,16 @@
 All notable changes to this package are documented here. This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-07-13
+
+Five new rules closing the coverage gaps named in the 2026-07-13 external audit (131 rules total):
+
+- **`imagebuilder-ami-public-launch-permission` (CRITICAL)** — an Image Builder distribution whose AMI launch permission includes the "all" user group shares the produced image with every AWS account. Handles both PascalCase and camelCase spellings of the user-authored configuration blob.
+- **`s3-bucket-policy-public-read` (CRITICAL)** — a bucket policy that Allows object reads to a wildcard principal with no scoping condition. Complements the Block-Public-Access rule by flagging the explicit grant itself; CloudFront-OAC-scoped and org/account-scoped statements are not flagged.
+- **`iam-role-anonymous-assume` (CRITICAL)** — a role trust policy assumable by a wildcard principal with no scoping condition: anyone with an AWS account can become the role. Closes the hole beside `iam-cross-account-trust`, which only parses literal account ids.
+- **`secrets-manager-rotation-missing` (MEDIUM)** — a secret with no rotation schedule in the template (Security Hub SecretsManager.1). Stands down for the whole template when any rotation schedule's target is unresolvable, per the no-false-positives stance.
+- **`rds-master-password-plaintext` (HIGH)** — a literal MasterUserPassword in the template. Dynamic references ('{{resolve:...}}') and intrinsics are fine; the companion to `ecs-secrets-plaintext`.
+
 ## [0.4.0] - 2026-07-13
 
 Fixes from an independent three-lens audit (first-touch DX, AWS technical

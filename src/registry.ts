@@ -67,7 +67,9 @@ import { glueJobEncryptionMissing } from './rules/glue/glueJobEncryptionMissing.
 import { iamCrossAccountTrust } from './rules/iam/iamCrossAccountTrust.js';
 import { iamPermissionBoundaryMissing } from './rules/iam/iamPermissionBoundaryMissing.js';
 import { iamPoliciesOverlyPermissive } from './rules/iam/iamPoliciesOverlyPermissive.js';
+import { iamRoleAnonymousAssume } from './rules/iam/iamRoleAnonymousAssume.js';
 import { iamUserDirectPolicies } from './rules/iam/iamUserDirectPolicies.js';
+import { imagebuilderAmiPublicLaunchPermission } from './rules/imagebuilder/imagebuilderAmiPublicLaunchPermission.js';
 import { kinesisEncryptionDisabled } from './rules/kinesis/kinesisEncryptionDisabled.js';
 import { kinesisRetentionMinimum } from './rules/kinesis/kinesisRetentionMinimum.js';
 import { kmsKeyPolicyPublic } from './rules/kms/kmsKeyPolicyPublic.js';
@@ -96,6 +98,7 @@ import { rdsEncryptionDisabled } from './rules/rds/rdsEncryptionDisabled.js';
 import { rdsEnhancedMonitoringDisabled } from './rules/rds/rdsEnhancedMonitoringDisabled.js';
 import { rdsLoggingDisabled } from './rules/rds/rdsLoggingDisabled.js';
 import { rdsManagedSecretWithoutCmk } from './rules/rds/rdsManagedSecretWithoutCmk.js';
+import { rdsMasterPasswordPlaintext } from './rules/rds/rdsMasterPasswordPlaintext.js';
 import { rdsMultiAzGp2Storage } from './rules/rds/rdsMultiAzGp2Storage.js';
 import { rdsPubliclyAccessible } from './rules/rds/rdsPubliclyAccessible.js';
 import { redshiftAuditLoggingDisabled } from './rules/redshift/redshiftAuditLoggingDisabled.js';
@@ -107,12 +110,14 @@ import { route53QueryLoggingDisabled } from './rules/route53/route53QueryLogging
 import { s3BucketAccessLoggingDisabled } from './rules/s3/s3BucketAccessLoggingDisabled.js';
 import { s3BucketEncryptionAwsManaged } from './rules/s3/s3BucketEncryptionAwsManaged.js';
 import { s3BucketPolicyNonSsl } from './rules/s3/s3BucketPolicyNonSsl.js';
+import { s3BucketPolicyPublicRead } from './rules/s3/s3BucketPolicyPublicRead.js';
 import { s3BucketPolicySelfLockout } from './rules/s3/s3BucketPolicySelfLockout.js';
 import { s3BucketPublicAccess } from './rules/s3/s3BucketPublicAccess.js';
 import { s3BucketVersioningDisabled } from './rules/s3/s3BucketVersioningDisabled.js';
 import { s3IntelligentTiering } from './rules/s3/s3IntelligentTiering.js';
 import { s3LifecyclePolicyMissing } from './rules/s3/s3LifecyclePolicyMissing.js';
 import { s3ReplicationMissing } from './rules/s3/s3ReplicationMissing.js';
+import { secretsManagerRotationMissing } from './rules/secretsmanager/secretsManagerRotationMissing.js';
 import { secretsManagerSecretPublic } from './rules/secretsmanager/secretsManagerSecretPublic.js';
 import { snsEncryptionDisabled } from './rules/sns/snsEncryptionDisabled.js';
 import { snsTopicPolicySelfLockout } from './rules/sns/snsTopicPolicySelfLockout.js';
@@ -161,12 +166,14 @@ export const rules: Rule[] = [
   s3BucketVersioningDisabled,
   s3BucketPolicySelfLockout,
   s3BucketPolicyNonSsl,
+  s3BucketPolicyPublicRead,
   s3BucketAccessLoggingDisabled,
   s3ReplicationMissing,
   s3LifecyclePolicyMissing,
   s3IntelligentTiering,
   // RDS
   rdsEncryptionDisabled,
+  rdsMasterPasswordPlaintext,
   rdsPubliclyAccessible,
   rdsManagedSecretWithoutCmk,
   rdsBackupRetentionLow,
@@ -178,12 +185,16 @@ export const rules: Rule[] = [
   iamPoliciesOverlyPermissive,
   iamUserDirectPolicies,
   iamCrossAccountTrust,
+  iamRoleAnonymousAssume,
   iamPermissionBoundaryMissing,
   // KMS
   kmsKeyPolicyPublic,
   kmsKeyPolicySelfLockout,
   // Secrets Manager
   secretsManagerSecretPublic,
+  secretsManagerRotationMissing,
+  // Image Builder
+  imagebuilderAmiPublicLaunchPermission,
   // SNS
   snsEncryptionDisabled,
   snsTopicPolicySelfLockout,
