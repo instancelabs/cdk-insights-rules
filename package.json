@@ -68,15 +68,15 @@
   ],
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1078.0",
-    "@biomejs/biome": "1.9.4",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@types/node": "^22.10.0",
+    "@biomejs/biome": "2.5.4",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@types/node": "^26.1.1",
     "aws-cdk-lib": "^2.261.0",
     "bumper-cli": "^1.6.0",
     "constructs": "^10.6.0",
-    "husky": "^8.0.3",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "husky": "^9.1.7",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }
