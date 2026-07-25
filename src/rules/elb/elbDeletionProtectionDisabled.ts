@@ -1,3 +1,4 @@
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -36,7 +37,9 @@ export const elbDeletionProtectionDisabled: Rule = {
         attributes.some(
           (attribute) =>
             attribute?.Key === 'deletion_protection.enabled' &&
-            (attribute?.Value === 'true' || attribute?.Value === true)
+            // An intrinsic value is undecidable — never flag on it.
+            (isIntrinsic(attribute?.Value) ||
+              asBoolean(attribute?.Value) === true)
         );
       if (!protectionEnabled) {
         report(resourceId, {

@@ -40,6 +40,61 @@ describe('dynamodb-pitr-disabled', () => {
     ).toHaveLength(1);
   });
 
+  it('accepts the CloudFormation string form "true"', () => {
+    expect(
+      run({
+        Resources: {
+          Table: {
+            Type: 'AWS::DynamoDB::Table',
+            Properties: {
+              PointInTimeRecoverySpecification: {
+                PointInTimeRecoveryEnabled: 'true',
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
+  it('skips intrinsic values instead of flagging them', () => {
+    expect(
+      run({
+        Resources: {
+          Table: {
+            Type: 'AWS::DynamoDB::Table',
+            Properties: {
+              PointInTimeRecoverySpecification: {
+                PointInTimeRecoveryEnabled: {
+                  'Fn::If': ['IsProd', true, false],
+                },
+              },
+            },
+          },
+          WholeSpec: {
+            Type: 'AWS::DynamoDB::Table',
+            Properties: {
+              PointInTimeRecoverySpecification: { Ref: 'SpecParam' },
+            },
+          },
+          Global: {
+            Type: 'AWS::DynamoDB::GlobalTable',
+            Properties: {
+              Replicas: [
+                {
+                  Region: 'eu-west-2',
+                  PointInTimeRecoverySpecification: {
+                    PointInTimeRecoveryEnabled: { Ref: 'PitrParam' },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag covered tables and global tables', () => {
     expect(
       run({

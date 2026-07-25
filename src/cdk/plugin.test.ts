@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { lambdaUrlAuthNone } from '../rules/lambda/lambdaUrlAuthNone';
+import type { Rule } from '../types';
 import { CdkInsightsRulesPlugin } from './plugin';
 
 describe('CdkInsightsRulesPlugin', () => {
@@ -120,6 +121,76 @@ describe('CdkInsightsRulesPlugin', () => {
     expect(report.violations[0].ruleName).toBe(
       'cdk-insights-rules/unreadable-template'
     );
+    expect(report.violations[0].violatingResources[0].templatePath).toBe(
+      templatePath
+    );
+  });
+
+  it('groups findings with the same rule and message into one violation', () => {
+    const templatePath = writeTemplate({
+      Resources: {
+        UrlA: { Type: 'AWS::Lambda::Url', Properties: { AuthType: 'NONE' } },
+        UrlB: { Type: 'AWS::Lambda::Url', Properties: { AuthType: 'NONE' } },
+      },
+    });
+
+    const report = new CdkInsightsRulesPlugin({
+      rules: [lambdaUrlAuthNone],
+    }).validate({ templatePaths: [templatePath] });
+
+    expect(report.violations).toHaveLength(1);
+    expect(
+      report.violations[0].violatingResources.map(
+        (resource) => resource.resourceLogicalId
+      )
+    ).toEqual(['UrlA', 'UrlB']);
+  });
+
+  it('propagates remediation steps and compliance frameworks in ruleMetadata', () => {
+    const templatePath = writeTemplate({
+      Resources: {
+        Url: { Type: 'AWS::Lambda::Url', Properties: { AuthType: 'NONE' } },
+      },
+    });
+
+    const report = new CdkInsightsRulesPlugin({
+      rules: [lambdaUrlAuthNone],
+    }).validate({ templatePaths: [templatePath] });
+
+    const metadata = report.violations[0].ruleMetadata;
+    expect(metadata?.wafPillar).toBe(lambdaUrlAuthNone.metadata.wafPillar);
+    expect(metadata?.awsDocUrl).toBe(lambdaUrlAuthNone.metadata.awsDocUrl);
+    expect(metadata?.remediationSteps).toBe(
+      lambdaUrlAuthNone.metadata.remediationSteps.join(' | ')
+    );
+    if (lambdaUrlAuthNone.metadata.complianceFrameworks?.length) {
+      expect(metadata?.complianceFrameworks).toBe(
+        lambdaUrlAuthNone.metadata.complianceFrameworks.join(', ')
+      );
+    }
+  });
+
+  it('fails closed when a rule crashes instead of silently skipping it', () => {
+    const templatePath = writeTemplate({ Resources: {} });
+    const crashingRule: Rule = {
+      ...lambdaUrlAuthNone,
+      metadata: { ...lambdaUrlAuthNone.metadata, ruleId: 'crashing-rule' },
+      check: () => {
+        throw new Error('boom');
+      },
+    };
+
+    const report = new CdkInsightsRulesPlugin({
+      rules: [crashingRule],
+    }).validate({ templatePaths: [templatePath] });
+
+    expect(report.success).toBe(false);
+    expect(report.violations).toHaveLength(1);
+    expect(report.violations[0].ruleName).toBe(
+      'cdk-insights-rules/rule-execution-error'
+    );
+    expect(report.violations[0].description).toContain('crashing-rule');
+    expect(report.violations[0].description).toContain('boom');
     expect(report.violations[0].violatingResources[0].templatePath).toBe(
       templatePath
     );

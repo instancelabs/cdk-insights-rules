@@ -3,6 +3,59 @@
 All notable changes to this package are documented here. This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-25
+
+Consistency hardening from an external review of `0.5.0` (full framework + all
+131 rules). Theme: the "unknown ≠ violation" doctrine was the norm but not
+enforced — a minority of rules could flag values they cannot decide. All such
+paths found are fixed, and a new contract test makes the doctrine mechanical.
+
+### Changed — scan output may shift (fewer false positives)
+
+- **14 rules no longer flag undecidable (intrinsic) or string-boolean values.**
+  Raw `=== true` comparisons (`dynamodb-pitr-disabled`,
+  `apigateway-default-endpoint-enabled`) and flag-path `asBoolean(x) !== true`
+  without an intrinsic guard (`ecs-deployment-circuit-breaker-disabled`,
+  `eks-private-endpoint-access-disabled`, `elasticache-failover-disabled`) now
+  use the guarded idiom; the same class of gap was found and fixed in
+  `elb-logging-disabled`, `elb-deletion-protection-disabled`,
+  `msk-client-authentication-missing`, `msk-broker-logging-disabled`,
+  `glue-connection-network-isolation`, `s3-bucket-policy-non-ssl`, and the
+  S3/SNS/SQS self-lockout rules (an intrinsic `aws:SecureTransport` condition
+  value now counts as the benign TLS shape instead of a lockout).
+- **`lambda-runtime-deprecated` skips CDK-internal helper functions**
+  (log-retention, auto-delete-objects, AwsCustomResource singleton) — their
+  runtime is pinned by the installed aws-cdk-lib and not actionable by the
+  user, matching the other Lambda rules.
+- **`lambda-env-sensitive-data` no longer flags pointer shapes**: literal ARNs,
+  SSM parameter paths, `{{resolve:...}}` dynamic references, URLs, and keys
+  that name a pointer (`SECRET_ARN`, `API_KEY_PARAMETER_NAME`) are the
+  *recommended* remediation and are now skipped. Real literal secrets still
+  flag.
+- **CDK plugin groups findings per rule+message** into one `PolicyViolation`
+  with many `violatingResources` (CDK's native model), instead of one
+  violation per resource.
+
+### Added
+
+- **Intrinsics contract test** (`src/intrinsics.contract.test.ts`): for every
+  rule, the boolean-ish leaves that differ between its own `flagged`/`fixed`
+  examples are replaced with `Fn::If` intrinsics in the fixed template, and
+  the rule must stay silent. This is what surfaced the 9 extra rules above and
+  prevents the class from regressing.
+- **CDK plugin fails closed on a crashing rule**: a rule that throws now emits
+  a HIGH `cdk-insights-rules/rule-execution-error` violation (mirroring the
+  existing `unreadable-template` path) instead of a console warning and a
+  passing build.
+- **CDK plugin propagates full rule metadata**: `remediationSteps` and
+  `complianceFrameworks` now reach `ruleMetadata` alongside `wafPillar` and
+  `awsDocUrl`.
+
+### Fixed
+
+- Documented that the plugin's `version` option is analytics-only
+  (`pluginVersion`) and does not select a rule set.
+
 ## [0.5.0] - 2026-07-13
 
 Five new rules closing the coverage gaps named in the 2026-07-13 external audit (131 rules total):

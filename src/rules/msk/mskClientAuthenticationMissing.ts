@@ -1,4 +1,4 @@
-import { asBoolean } from '../../cfn.js';
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -37,9 +37,14 @@ export const mskClientAuthenticationMissing: Rule = {
       const hasTls =
         Array.isArray(auth?.Tls?.CertificateAuthorityArnList) &&
         auth.Tls.CertificateAuthorityArnList.length > 0;
+      // An intrinsic Enabled could resolve to true — undecidable, never flag.
+      const saslEnabled = (value: unknown): boolean =>
+        isIntrinsic(value) || asBoolean(value) === true;
       const hasSasl =
-        asBoolean(auth?.Sasl?.Scram?.Enabled) === true ||
-        asBoolean(auth?.Sasl?.Iam?.Enabled) === true;
+        isIntrinsic(auth) ||
+        isIntrinsic(auth?.Sasl) ||
+        saslEnabled(auth?.Sasl?.Scram?.Enabled) ||
+        saslEnabled(auth?.Sasl?.Iam?.Enabled);
 
       if (!hasTls && !hasSasl) {
         report(resourceId, {

@@ -1,3 +1,4 @@
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -69,10 +70,14 @@ export const apigatewayDefaultEndpointEnabled: Rule = {
     }
 
     for (const [resourceId, resource] of resources) {
+      // Enabled only when decidably not disabled — intrinsics are unknown,
+      // and CloudFormation accepts the string "true" as a boolean.
+      const disabled = resource.Properties?.DisableExecuteApiEndpoint;
       if (
         resource.Type === 'AWS::ApiGateway::RestApi' &&
         mappedApiIds.has(resourceId) &&
-        resource.Properties?.DisableExecuteApiEndpoint !== true
+        !isIntrinsic(disabled) &&
+        asBoolean(disabled) !== true
       ) {
         report(resourceId, {
           issue:

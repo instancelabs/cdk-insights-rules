@@ -1,3 +1,4 @@
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -33,23 +34,31 @@ export const dynamodbPitrDisabled: Rule = {
       if (!isTable && !isGlobalTable) {
         continue;
       }
-      let covered: boolean;
+      // Uncovered only when decidably false/absent — intrinsics are unknown,
+      // and CloudFormation accepts the string "true" as a boolean.
+      const isUncovered = (spec: unknown): boolean => {
+        if (isIntrinsic(spec)) {
+          return false;
+        }
+        const enabled = (spec as Record<string, unknown> | undefined)
+          ?.PointInTimeRecoveryEnabled;
+        return !isIntrinsic(enabled) && asBoolean(enabled) !== true;
+      };
+
+      let uncovered: boolean;
       if (isTable) {
-        covered =
+        uncovered = isUncovered(
           resource.Properties?.PointInTimeRecoverySpecification
-            ?.PointInTimeRecoveryEnabled === true;
+        );
       } else {
         const replicas = resource.Properties?.Replicas;
-        covered =
+        uncovered =
           Array.isArray(replicas) &&
-          replicas.length > 0 &&
-          replicas.every(
-            (replica) =>
-              replica?.PointInTimeRecoverySpecification
-                ?.PointInTimeRecoveryEnabled === true
+          replicas.some((replica) =>
+            isUncovered(replica?.PointInTimeRecoverySpecification)
           );
       }
-      if (!covered) {
+      if (uncovered) {
         report(resourceId, {
           issue: `DynamoDB ${isGlobalTable ? 'global table' : 'table'} does not have point-in-time recovery enabled.`,
           recommendation:

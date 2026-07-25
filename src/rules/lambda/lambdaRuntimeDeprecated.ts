@@ -1,3 +1,4 @@
+import { isCdkInternalLogicalId } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -63,6 +64,11 @@ export const lambdaRuntimeDeprecated: Rule = {
       template.Resources ?? {}
     )) {
       if (resource.Type !== 'AWS::Lambda::Function') {
+        continue;
+      }
+      // CDK-internal helper functions run on whatever runtime the installed
+      // aws-cdk-lib pins; the user can't change it from their own code.
+      if (isCdkInternalLogicalId(resourceId)) {
         continue;
       }
       const runtime = resource.Properties?.Runtime;

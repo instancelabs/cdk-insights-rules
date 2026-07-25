@@ -41,4 +41,24 @@ describe('elasticache-failover-disabled', () => {
     ).toHaveLength(0);
     expect(run(group({ NumCacheClusters: 1 }))).toHaveLength(0);
   });
+
+  it('skips intrinsic failover and Multi-AZ values instead of flagging them', () => {
+    expect(
+      run(
+        group({
+          NumCacheClusters: 2,
+          AutomaticFailoverEnabled: { 'Fn::If': ['IsProd', true, false] },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        group({
+          NumCacheClusters: 2,
+          AutomaticFailoverEnabled: true,
+          MultiAZEnabled: { Ref: 'MultiAzParam' },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

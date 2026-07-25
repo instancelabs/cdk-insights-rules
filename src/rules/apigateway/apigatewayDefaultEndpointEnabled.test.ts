@@ -70,6 +70,51 @@ describe('apigateway-default-endpoint-enabled', () => {
     ).toHaveLength(0);
   });
 
+  it('accepts the CloudFormation string form "true"', () => {
+    expect(
+      run({
+        Resources: {
+          Domain: domain,
+          Api: {
+            Type: 'AWS::ApiGateway::RestApi',
+            Properties: { Name: 'x', DisableExecuteApiEndpoint: 'true' },
+          },
+          Mapping: {
+            Type: 'AWS::ApiGateway::BasePathMapping',
+            Properties: {
+              DomainName: 'api.example.com',
+              RestApiId: { Ref: 'Api' },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
+  it('skips an intrinsic DisableExecuteApiEndpoint instead of flagging it', () => {
+    expect(
+      run({
+        Resources: {
+          Domain: domain,
+          Api: {
+            Type: 'AWS::ApiGateway::RestApi',
+            Properties: {
+              Name: 'x',
+              DisableExecuteApiEndpoint: { 'Fn::If': ['IsProd', true, false] },
+            },
+          },
+          Mapping: {
+            Type: 'AWS::ApiGateway::BasePathMapping',
+            Properties: {
+              DomainName: 'api.example.com',
+              RestApiId: { Ref: 'Api' },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag a RestApi when no custom domain is present', () => {
     expect(
       run({

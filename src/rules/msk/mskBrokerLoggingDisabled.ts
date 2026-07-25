@@ -1,4 +1,4 @@
-import { asBoolean } from '../../cfn.js';
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -31,10 +31,14 @@ export const mskBrokerLoggingDisabled: Rule = {
         continue;
       }
       const brokerLogs = resource.Properties?.LoggingInfo?.BrokerLogs;
+      // An intrinsic Enabled could resolve to true — undecidable, never flag.
+      const destinationEnabled = (value: unknown): boolean =>
+        isIntrinsic(value) || asBoolean(value) === true;
       const enabled =
-        asBoolean(brokerLogs?.CloudWatchLogs?.Enabled) === true ||
-        asBoolean(brokerLogs?.Firehose?.Enabled) === true ||
-        asBoolean(brokerLogs?.S3?.Enabled) === true;
+        isIntrinsic(brokerLogs) ||
+        destinationEnabled(brokerLogs?.CloudWatchLogs?.Enabled) ||
+        destinationEnabled(brokerLogs?.Firehose?.Enabled) ||
+        destinationEnabled(brokerLogs?.S3?.Enabled);
       if (!enabled) {
         report(resourceId, {
           issue: 'MSK cluster does not have broker logging configured.',

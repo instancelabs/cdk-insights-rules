@@ -4,6 +4,8 @@
  * Insights product so open rules and the product agree on what "public" means.
  */
 
+import { isIntrinsic } from './cfn.js';
+
 /** A single IAM-style policy statement, loosely typed like the template. */
 export interface PolicyStatement {
   Effect?: unknown;
@@ -153,8 +155,14 @@ const hasRootCarveout = (condition: unknown): boolean => {
   return false;
 };
 
+// An intrinsic condition value could resolve to false, making the statement
+// the benign TLS shape — undecidable, so the exemption must apply (a
+// self-lockout rule that can't decide must not flag).
 const isFalsy = (value: unknown): boolean =>
-  value === false || value === 'false' || value === 'False';
+  value === false ||
+  value === 'false' ||
+  value === 'False' ||
+  isIntrinsic(value);
 
 /**
  * True for the standard TLS-enforcement statement (Deny when

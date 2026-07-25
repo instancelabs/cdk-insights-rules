@@ -31,4 +31,39 @@ describe('ecs-deployment-circuit-breaker-disabled', () => {
       run(res({ DeploymentController: { Type: 'CODE_DEPLOY' } }))
     ).toHaveLength(0);
   });
+
+  it('accepts the CloudFormation string form "true"', () => {
+    expect(
+      run(
+        res({
+          DeploymentConfiguration: {
+            DeploymentCircuitBreaker: { Enable: 'true', Rollback: 'true' },
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
+  it('skips intrinsic circuit-breaker values instead of flagging them', () => {
+    expect(
+      run(
+        res({
+          DeploymentConfiguration: {
+            DeploymentCircuitBreaker: {
+              Enable: { 'Fn::If': ['IsProd', true, false] },
+            },
+          },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        res({
+          DeploymentConfiguration: {
+            DeploymentCircuitBreaker: { Ref: 'BreakerParam' },
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

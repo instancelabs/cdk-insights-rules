@@ -1,4 +1,4 @@
-import { asBoolean } from '../../cfn.js';
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -37,6 +37,10 @@ export const ecsDeploymentCircuitBreakerDisabled: Rule = {
       }
       const breaker =
         resource.Properties?.DeploymentConfiguration?.DeploymentCircuitBreaker;
+      // An intrinsic breaker (or Enable) is unknown, not disabled — skip.
+      if (isIntrinsic(breaker) || isIntrinsic(breaker?.Enable)) {
+        continue;
+      }
       if (asBoolean(breaker?.Enable) !== true) {
         report(resourceId, {
           issue:
