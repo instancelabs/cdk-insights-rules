@@ -5,10 +5,10 @@ import type { Rule } from '../../types';
  * waf-webacl-misconfigured
  *
  * Two decidable misconfigurations: a WebACL that defaults to Allow while
- * defining no rules at all (it inspects nothing — pure theatre), and a
+ * defining no rules at all (it inspects nothing - pure theatre), and a
  * WebACL without CloudWatch metrics (attacks invisible). A default-Allow
  * WebACL *with* rules is the standard managed-rule-group shape and is not
- * flagged — the CDK Insights product flags it, which false-positives on the
+ * flagged - the CDK Insights product flags it, which false-positives on the
  * most common legitimate WAF configuration.
  */
 export const wafWebAclMisconfigured: Rule = {
@@ -39,17 +39,23 @@ export const wafWebAclMisconfigured: Rule = {
       const props = resource.Properties ?? {};
       const rules = props.Rules;
       const hasRules = Array.isArray(rules) && rules.length > 0;
-      if (!hasRules) {
+      // An intrinsic Rules list is unknown, not empty - skip that flag.
+      if (!isIntrinsic(rules) && !hasRules) {
         report(resourceId, {
           issue: props.DefaultAction?.Allow
-            ? 'WAF WebACL defaults to Allow and defines no rules — it inspects nothing.'
+            ? 'WAF WebACL defaults to Allow and defines no rules - it inspects nothing.'
             : 'WAF WebACL defines no rules.',
           recommendation:
             'Add rules (e.g. AWS managed rule groups) so the WebACL actually inspects traffic.',
         });
       }
       const metricsEnabled = props.VisibilityConfig?.CloudWatchMetricsEnabled;
-      if (!isIntrinsic(metricsEnabled) && asBoolean(metricsEnabled) !== true) {
+      // An intrinsic VisibilityConfig wrapper is unknown, not disabled - skip.
+      if (
+        !isIntrinsic(props.VisibilityConfig) &&
+        !isIntrinsic(metricsEnabled) &&
+        asBoolean(metricsEnabled) !== true
+      ) {
         report(resourceId, {
           issue: 'WAF WebACL does not have CloudWatch metrics enabled.',
           recommendation:

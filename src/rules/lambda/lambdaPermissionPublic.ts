@@ -61,7 +61,7 @@ export const lambdaPermissionPublic: Rule = {
         report(resourceId, {
           issue: `${resource.Type} grants public access via a wildcard Principal with no source restriction.`,
           recommendation:
-            'Set Principal to a specific AWS account ID, or keep a service principal but add SourceArn/SourceAccount/PrincipalOrgID — a wildcard principal makes the function or layer reachable from any AWS account.',
+            'Set Principal to a specific AWS account ID, or keep a service principal but add SourceArn/SourceAccount/PrincipalOrgID - a wildcard principal makes the function or layer reachable from any AWS account.',
         });
       }
     }

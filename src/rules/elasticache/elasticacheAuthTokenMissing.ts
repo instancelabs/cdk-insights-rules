@@ -21,7 +21,7 @@ export const elasticacheAuthTokenMissing: Rule = {
     awsDocUrl:
       'https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/auth.html',
     remediationSteps: [
-      'Attach RBAC user groups (UserGroupIds) — the modern replacement for AUTH tokens',
+      'Attach RBAC user groups (UserGroupIds) - the modern replacement for AUTH tokens',
       'Or set AuthToken to require authentication on every connection',
     ],
     complianceFrameworks: ['SOC2', 'HIPAA', 'PCI-DSS', 'NIST'],
@@ -44,7 +44,7 @@ export const elasticacheAuthTokenMissing: Rule = {
       ) {
         report(resourceId, {
           issue:
-            'ElastiCache replication group has transit encryption but no AUTH token or RBAC user groups — any client that reaches it can connect.',
+            'ElastiCache replication group has transit encryption but no AUTH token or RBAC user groups - any client that reaches it can connect.',
           recommendation:
             'Attach RBAC user groups (UserGroupIds) or set AuthToken so connections require authentication.',
         });

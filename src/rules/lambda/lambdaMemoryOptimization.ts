@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  * lambda-memory-optimization
  *
  * Memory above 1 GB is often a copy-paste default rather than a measured
- * need; Lambda bills memory x duration. Advisory — CPU-bound functions
+ * need; Lambda bills memory x duration. Advisory - CPU-bound functions
  * legitimately need it (more memory = more vCPU), so suppress where sized
  * deliberately.
  */
@@ -40,7 +40,7 @@ export const lambdaMemoryOptimization: Rule = {
         report(resourceId, {
           issue: `Lambda function allocates ${memory} MB of memory.`,
           recommendation:
-            'Verify the allocation with Lambda Power Tuning — memory is billed per millisecond, and oversized functions pay for headroom they never use.',
+            'Verify the allocation with Lambda Power Tuning - memory is billed per millisecond, and oversized functions pay for headroom they never use.',
         });
       }
     }

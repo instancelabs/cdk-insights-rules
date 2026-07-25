@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  *
  * A rule with no targets matches events and silently drops them. (Ported
  * from the product's eventbridge-dlq-missing, whose implementation actually
- * checks for missing targets — the open catalog names the rule for what it
+ * checks for missing targets - the open catalog names the rule for what it
  * detects; the DLQ concern lives in eventbridge-target-dlq-missing.)
  */
 export const eventbridgeRuleNoTargets: Rule = {
@@ -35,7 +35,7 @@ export const eventbridgeRuleNoTargets: Rule = {
       if (!targets || (Array.isArray(targets) && targets.length === 0)) {
         report(resourceId, {
           issue:
-            'EventBridge rule has no targets — matched events are silently dropped.',
+            'EventBridge rule has no targets - matched events are silently dropped.',
           recommendation:
             'Add at least one target so matched events actually trigger processing.',
         });

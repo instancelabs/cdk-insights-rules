@@ -27,4 +27,21 @@ describe('eks-private-endpoint-access-disabled', () => {
     expect(run(cluster({ EndpointPrivateAccess: true }))).toHaveLength(0);
     expect(run(cluster({ EndpointPublicAccess: false }))).toHaveLength(0);
   });
+
+  it('skips intrinsic endpoint settings instead of flagging them', () => {
+    expect(
+      run(
+        cluster({
+          EndpointPrivateAccess: { 'Fn::If': ['IsProd', true, false] },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        cluster({
+          EndpointPublicAccess: { Ref: 'PublicParam' },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

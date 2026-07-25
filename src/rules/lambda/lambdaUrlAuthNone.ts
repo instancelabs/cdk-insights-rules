@@ -1,7 +1,7 @@
 import type { Rule } from '../../types';
 
 /**
- * lambda-url-auth-none — the reference rule.
+ * lambda-url-auth-none - the reference rule.
  *
  * A Lambda Function URL with `AuthType: NONE` is a public, unauthenticated
  * entry point straight to your function. This is the canonical example of the

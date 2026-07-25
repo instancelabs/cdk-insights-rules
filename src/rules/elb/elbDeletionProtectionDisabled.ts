@@ -1,9 +1,10 @@
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
  * elb-deletion-protection-disabled
  *
- * A deleted load balancer takes its DNS name with it — deletion protection
+ * A deleted load balancer takes its DNS name with it - deletion protection
  * is the guard against a stack update or console mistake taking the front
  * door offline.
  */
@@ -31,12 +32,22 @@ export const elbDeletionProtectionDisabled: Rule = {
         continue;
       }
       const attributes = resource.Properties?.LoadBalancerAttributes;
+      // An intrinsic attribute list (or list entry) may contain the enabling
+      // attribute - undecidable, never flag.
+      if (
+        isIntrinsic(attributes) ||
+        (Array.isArray(attributes) && attributes.some(isIntrinsic))
+      ) {
+        continue;
+      }
       const protectionEnabled =
         Array.isArray(attributes) &&
         attributes.some(
           (attribute) =>
             attribute?.Key === 'deletion_protection.enabled' &&
-            (attribute?.Value === 'true' || attribute?.Value === true)
+            // An intrinsic value is undecidable - never flag on it.
+            (isIntrinsic(attribute?.Value) ||
+              asBoolean(attribute?.Value) === true)
         );
       if (!protectionEnabled) {
         report(resourceId, {

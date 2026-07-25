@@ -346,7 +346,7 @@
       "ruleId": "cloudtrail-logging-disabled",
       "checkKey": "cloudTrailLogging",
       "name": "No CloudTrail Trail Defined",
-      "description": "Flags stacks that define no CloudTrail Trail. CloudTrail is usually configured once at the account or organization level — suppress this rule if account-level logging is already in place.",
+      "description": "Flags stacks that define no CloudTrail Trail. CloudTrail is usually configured once at the account or organization level - suppress this rule if account-level logging is already in place.",
       "severity": "HIGH",
       "wafPillar": "Security",
       "awsDocUrl": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-getting-started.html",
@@ -636,7 +636,7 @@
       "ruleId": "dynamodb-encryption-aws-owned-key",
       "checkKey": "dynamoDBEncryption",
       "name": "DynamoDB Table Uses AWS-Owned Encryption Key",
-      "description": "Detects AWS::DynamoDB::Table resources without SSESpecification.SSEEnabled=true. DynamoDB always encrypts at rest, but the default AWS-owned key cannot be inspected, audited, or rotated by the customer — inadequate for HIPAA / PCI-DSS / FedRAMP workloads.",
+      "description": "Detects AWS::DynamoDB::Table resources without SSESpecification.SSEEnabled=true. DynamoDB always encrypts at rest, but the default AWS-owned key cannot be inspected, audited, or rotated by the customer - inadequate for HIPAA / PCI-DSS / FedRAMP workloads.",
       "severity": "MEDIUM",
       "wafPillar": "Security",
       "awsDocUrl": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/encryption.howitworks.html",
@@ -1347,7 +1347,7 @@
       "remediationSteps": [
         "Replace wildcard Principal with specific 12-digit AWS account IDs",
         "Or scope the policy with a Condition such as aws:PrincipalOrgID",
-        "Verify the StatementId is descriptive — easier to audit later"
+        "Verify the StatementId is descriptive - easier to audit later"
       ],
       "resourceTypes": [
         "AWS::Events::EventBusPolicy"
@@ -1586,7 +1586,7 @@
       "ruleId": "kms-key-policy-self-lockout",
       "checkKey": "kmsKeyPolicySelfLockout",
       "name": "KMS Key Policy Self-Lockout",
-      "description": "Detects AWS::KMS::Key resources whose KeyPolicy contains a Deny statement on kms:*, kms:PutKeyPolicy, or * with a broad Principal and no carveout for the account root or admin role. Such a policy locks the account out of its own key — recovery requires breaking glass on the account root credentials AND scheduling a 7-30 day key deletion (which does not actually let you recover the key, just remove it). Effectively unrecoverable for any data the key has encrypted; AWS Support typically declines to intervene where customers have a self-service path via root.",
+      "description": "Detects AWS::KMS::Key resources whose KeyPolicy contains a Deny statement on kms:*, kms:PutKeyPolicy, or * with a broad Principal and no carveout for the account root or admin role. Such a policy locks the account out of its own key - recovery requires breaking glass on the account root credentials AND scheduling a 7-30 day key deletion (which does not actually let you recover the key, just remove it). Effectively unrecoverable for any data the key has encrypted; AWS Support typically declines to intervene where customers have a self-service path via root.",
       "severity": "CRITICAL",
       "wafPillar": "Security",
       "awsDocUrl": "https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html",
@@ -2265,7 +2265,7 @@
       "ruleId": "s3-bucket-policy-self-lockout",
       "checkKey": "s3BucketPolicySelfLockout",
       "name": "S3 BucketPolicy Self-Lockout",
-      "description": "Detects AWS::S3::BucketPolicy resources containing a Deny statement on s3:DeleteBucket, s3:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own bucket — recovery requires breaking glass on the account root credentials, since AWS Support typically declines to intervene where customers have a self-service path via root.",
+      "description": "Detects AWS::S3::BucketPolicy resources containing a Deny statement on s3:DeleteBucket, s3:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own bucket - recovery requires breaking glass on the account root credentials, since AWS Support typically declines to intervene where customers have a self-service path via root.",
       "severity": "CRITICAL",
       "wafPillar": "Security",
       "awsDocUrl": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-policy-language-overview.html",
@@ -2466,7 +2466,7 @@
       "ruleId": "sns-topic-policy-self-lockout",
       "checkKey": "snsTopicPolicySelfLockout",
       "name": "SNS TopicPolicy Self-Lockout",
-      "description": "Detects AWS::SNS::TopicPolicy resources containing a Deny statement on sns:DeleteTopic, sns:RemovePermission, sns:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own topic — recovery requires breaking glass on the account root credentials to remove the topic policy, or delete-and-recreate the topic if no subscribers depend on its ARN. In fan-out architectures that is often a multi-stack rebuild.",
+      "description": "Detects AWS::SNS::TopicPolicy resources containing a Deny statement on sns:DeleteTopic, sns:RemovePermission, sns:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own topic - recovery requires breaking glass on the account root credentials to remove the topic policy, or delete-and-recreate the topic if no subscribers depend on its ARN. In fan-out architectures that is often a multi-stack rebuild.",
       "severity": "CRITICAL",
       "wafPillar": "Security",
       "awsDocUrl": "https://docs.aws.amazon.com/sns/latest/dg/sns-access-policy-language-key-concepts.html",
@@ -2511,7 +2511,7 @@
       "ruleId": "sqs-queue-policy-self-lockout",
       "checkKey": "sqsQueuePolicySelfLockout",
       "name": "SQS QueuePolicy Self-Lockout",
-      "description": "Detects AWS::SQS::QueuePolicy resources containing a Deny statement on sqs:DeleteQueue, sqs:RemovePermission, sqs:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own queue — recovery requires breaking glass on the account root credentials to remove the queue policy, or delete-and-recreate the queue if nothing else depends on its ARN. In event-driven systems that is often a multi-stack rebuild.",
+      "description": "Detects AWS::SQS::QueuePolicy resources containing a Deny statement on sqs:DeleteQueue, sqs:RemovePermission, sqs:*, or * with a broad Principal and no NotPrincipal or aws:PrincipalArn carveout for the account root or admin role. Such a policy locks the account out of its own queue - recovery requires breaking glass on the account root credentials to remove the queue policy, or delete-and-recreate the queue if nothing else depends on its ARN. In event-driven systems that is often a multi-stack rebuild.",
       "severity": "CRITICAL",
       "wafPillar": "Security",
       "awsDocUrl": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-access-policy-language-basic-structure.html",

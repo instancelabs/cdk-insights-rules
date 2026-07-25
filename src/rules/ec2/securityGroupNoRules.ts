@@ -1,10 +1,11 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
  * security-group-no-rules
  *
  * A security group with neither ingress nor egress rules is usually an
- * orphan — left behind by a refactor, or created and never wired up.
+ * orphan - left behind by a refactor, or created and never wired up.
  */
 export const securityGroupNoRules: Rule = {
   metadata: {
@@ -32,13 +33,17 @@ export const securityGroupNoRules: Rule = {
       const props = resource.Properties ?? {};
       const ingress = props.SecurityGroupIngress;
       const egress = props.SecurityGroupEgress;
+      // An intrinsic rule list is unknown, not empty - skip the resource.
+      if (isIntrinsic(ingress) || isIntrinsic(egress)) {
+        continue;
+      }
       const hasIngress = Array.isArray(ingress) && ingress.length > 0;
       const hasEgress = Array.isArray(egress) && egress.length > 0;
       if (!hasIngress && !hasEgress) {
         report(resourceId, {
           issue: 'Security group has no ingress or egress rules defined.',
           recommendation:
-            'Review whether this group is still needed — empty groups usually indicate orphaned resources or unfinished wiring.',
+            'Review whether this group is still needed - empty groups usually indicate orphaned resources or unfinished wiring.',
         });
       }
     }

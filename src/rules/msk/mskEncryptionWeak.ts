@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
 /**
  * msk-encryption-weak
  *
- * MSK defaults to TLS everywhere; this flags explicit weakening — allowing
+ * MSK defaults to TLS everywhere; this flags explicit weakening - allowing
  * plaintext client-broker traffic, or disabling inter-broker encryption.
  * (The product also nudges toward a customer-managed at-rest key; that is an
  * advisory-severity concern and deliberately not part of this HIGH rule.)

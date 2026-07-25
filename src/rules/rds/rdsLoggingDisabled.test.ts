@@ -18,6 +18,24 @@ describe('rds-logging-disabled', () => {
     ).toHaveLength(2);
   });
 
+  it('skips intrinsic EnableCloudwatchLogsExports instead of flagging it', () => {
+    expect(
+      run({
+        Resources: {
+          Db: {
+            Type: 'AWS::RDS::DBInstance',
+            Properties: {
+              Engine: 'mysql',
+              EnableCloudwatchLogsExports: {
+                'Fn::If': ['Prod', ['error', 'slowquery'], ['error']],
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag exported logs or Aurora member instances', () => {
     expect(
       run({

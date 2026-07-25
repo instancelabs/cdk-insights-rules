@@ -14,7 +14,7 @@ const PUBLIC_ACCESS_FLAGS = [
  * Block Public Access is the bucket-level guardrail against ACL/policy
  * mistakes. Since April 2023 NEW buckets get all four settings enabled by
  * default, so a bucket with no PublicAccessBlockConfiguration is protected by
- * the service default — but the protection is implicit: it does not survive
+ * the service default - but the protection is implicit: it does not survive
  * template reuse against legacy buckets and is invisible in review. We flag
  * missing configuration as an explicitness/hardening nudge (MEDIUM), and
  * flags decidably set to false (an active weakening) the same way.
@@ -57,7 +57,12 @@ export const s3BucketPublicAccess: Rule = {
         continue;
       }
 
-      // Flags set via intrinsics are undecidable — never flag those.
+      // An intrinsic configuration wrapper is unknown, not missing - skip.
+      if (isIntrinsic(publicAccessBlock)) {
+        continue;
+      }
+
+      // Flags set via intrinsics are undecidable - never flag those.
       const disabled = PUBLIC_ACCESS_FLAGS.filter(
         (flag) =>
           !isIntrinsic(publicAccessBlock[flag]) &&

@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 const RECOMMENDED_LOG_TYPES = [
@@ -38,8 +39,18 @@ export const eksControlPlaneLoggingDisabled: Rule = {
       if (resource.Type !== 'AWS::EKS::Cluster') {
         continue;
       }
-      const enabledTypes =
-        resource.Properties?.Logging?.ClusterLogging?.EnabledTypes;
+      const logging = resource.Properties?.Logging;
+      const enabledTypes = logging?.ClusterLogging?.EnabledTypes;
+      // An intrinsic logging container or entry Type is unknown, not missing - skip.
+      if (
+        isIntrinsic(logging) ||
+        isIntrinsic(logging?.ClusterLogging) ||
+        isIntrinsic(enabledTypes) ||
+        (Array.isArray(enabledTypes) &&
+          enabledTypes.some((entry) => isIntrinsic(entry?.Type)))
+      ) {
+        continue;
+      }
       const enabled = Array.isArray(enabledTypes)
         ? enabledTypes
             .map((entry) => entry?.Type)

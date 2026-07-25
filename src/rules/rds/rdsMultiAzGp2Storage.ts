@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  * rds-multi-az-gp2-storage
  *
  * Multi-AZ doubles storage, so gp2 (or the unset default, which is gp2)
- * doubles the overpayment — gp3 delivers the same baseline for less.
+ * doubles the overpayment - gp3 delivers the same baseline for less.
  * (Ported from the product's rds-multi-az-disabled, whose implementation
  * actually checks storage type on Multi-AZ instances; the open catalog names
  * the rule for what it detects.)
@@ -22,7 +22,7 @@ export const rdsMultiAzGp2Storage: Rule = {
     awsDocUrl:
       'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html',
     remediationSteps: [
-      'Set StorageType to gp3 — Multi-AZ doubles storage, doubling the gp2 premium',
+      'Set StorageType to gp3 - Multi-AZ doubles storage, doubling the gp2 premium',
     ],
   },
 
@@ -42,7 +42,7 @@ export const rdsMultiAzGp2Storage: Rule = {
         report(resourceId, {
           issue:
             storageType === 'gp2'
-              ? 'Multi-AZ RDS instance uses gp2 storage — the standby doubles the gp2 premium.'
+              ? 'Multi-AZ RDS instance uses gp2 storage - the standby doubles the gp2 premium.'
               : 'Multi-AZ RDS instance does not set a storage type (defaults to gp2).',
           recommendation:
             'Set StorageType to gp3 for the same baseline performance at lower cost, doubled across the Multi-AZ standby.',

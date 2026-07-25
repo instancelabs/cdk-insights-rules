@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * ecr-lifecycle-policy-missing
  *
- * Without a lifecycle policy every pushed image is stored forever — CI
+ * Without a lifecycle policy every pushed image is stored forever - CI
  * pipelines accumulate storage cost indefinitely.
  */
 export const ecrLifecyclePolicyMissing: Rule = {

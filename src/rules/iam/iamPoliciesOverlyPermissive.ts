@@ -32,7 +32,7 @@ const policyDocumentsOf = (resource: CfnResource): unknown[] => {
  *
  * Flags Allow statements with a bare `*` Action and/or a bare `*` Resource.
  * `Action: *` with `Resource: *` is administrative access; either alone is
- * still far beyond least privilege. Only the bare wildcard is flagged —
+ * still far beyond least privilege. Only the bare wildcard is flagged -
  * `service:*` actions and scoped ARNs are noisy-but-legitimate patterns this
  * rule deliberately ignores. Note: some AWS actions genuinely require
  * `Resource: '*'` (they support no resource-level permissions); suppress the
@@ -84,20 +84,20 @@ export const iamPoliciesOverlyPermissive: Rule = {
       if (wildcardAction && wildcardResource) {
         report(resourceId, {
           issue:
-            'IAM policy allows all actions (*) on all resources (*) — administrative access.',
+            'IAM policy allows all actions (*) on all resources (*) - administrative access.',
           recommendation:
             'Restrict both actions and resources to follow the principle of least privilege.',
         });
       } else if (wildcardAction) {
         report(resourceId, {
-          issue: 'IAM policy allows all actions (*) — overly permissive.',
+          issue: 'IAM policy allows all actions (*) - overly permissive.',
           recommendation:
             'Specify only the required actions instead of a bare wildcard.',
         });
       } else if (wildcardResource) {
         report(resourceId, {
           issue:
-            'IAM policy allows actions on all resources (*) — overly permissive.',
+            'IAM policy allows actions on all resources (*) - overly permissive.',
           recommendation:
             'Restrict Resource to specific ARNs; if the action supports no resource-level permissions, suppress this rule on the resource instead.',
         });

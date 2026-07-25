@@ -4,6 +4,8 @@
  * Insights product so open rules and the product agree on what "public" means.
  */
 
+import { isIntrinsic } from './cfn.js';
+
 /** A single IAM-style policy statement, loosely typed like the template. */
 export interface PolicyStatement {
   Effect?: unknown;
@@ -45,7 +47,7 @@ export const asStatements = (document: unknown): PolicyStatement[] => {
 
 /**
  * True when a Principal grants to the world: the literal `"*"`, or a principal
- * map any of whose values is (or contains) `"*"` — e.g. `{ AWS: "*" }`.
+ * map any of whose values is (or contains) `"*"` - e.g. `{ AWS: "*" }`.
  */
 export const isWildcardPrincipal = (principal: unknown): boolean => {
   if (principal === '*') {
@@ -61,7 +63,7 @@ export const isWildcardPrincipal = (principal: unknown): boolean => {
 
 /**
  * Condition keys that scope a wildcard-principal grant back to an account,
- * organisation, or source — making it broad but not public.
+ * organisation, or source - making it broad but not public.
  */
 const SCOPING_CONDITION_KEYS = new Set([
   'aws:PrincipalAccount',
@@ -153,13 +155,22 @@ const hasRootCarveout = (condition: unknown): boolean => {
   return false;
 };
 
-const isFalsy = (value: unknown): boolean =>
-  value === false || value === 'false' || value === 'False';
+/**
+ * True when a condition value is false in any CloudFormation spelling - or an
+ * intrinsic, which could resolve to false: undecidable, so a rule keyed on
+ * "this value is false" must treat it as possibly-false rather than flag.
+ * (Module-internal export shared with the S3 TLS rule; not public API.)
+ */
+export const isFalsyConditionValue = (value: unknown): boolean =>
+  value === false ||
+  value === 'false' ||
+  value === 'False' ||
+  isIntrinsic(value);
 
 /**
  * True for the standard TLS-enforcement statement (Deny when
  * aws:SecureTransport is false) that CDK's `enforceSSL` emits. It denies only
- * non-TLS requests, so it can never lock the account out — every
+ * non-TLS requests, so it can never lock the account out - every
  * self-lockout rule must exempt it.
  */
 const isSslEnforcementStatement = (statement: PolicyStatement): boolean => {
@@ -171,7 +182,10 @@ const isSslEnforcementStatement = (statement: PolicyStatement): boolean => {
   const boolCondition = (conditionMap.Bool ?? conditionMap.BoolIfExists) as
     | Record<string, unknown>
     | undefined;
-  return !!boolCondition && isFalsy(boolCondition['aws:SecureTransport']);
+  return (
+    !!boolCondition &&
+    isFalsyConditionValue(boolCondition['aws:SecureTransport'])
+  );
 };
 
 /**

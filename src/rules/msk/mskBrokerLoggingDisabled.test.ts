@@ -29,4 +29,25 @@ describe('msk-broker-logging-disabled', () => {
       run(res({ LoggingInfo: { BrokerLogs: { S3: { Enabled: true } } } }))
     ).toHaveLength(0);
   });
+
+  it('skips intrinsic logging containers (LoggingInfo, destination blocks)', () => {
+    expect(run(res({ LoggingInfo: { Ref: 'LoggingParam' } }))).toHaveLength(0);
+    expect(
+      run(
+        res({
+          LoggingInfo: {
+            BrokerLogs: {
+              CloudWatchLogs: {
+                'Fn::If': [
+                  'LogsOn',
+                  { Enabled: true, LogGroup: '/msk' },
+                  { Enabled: false },
+                ],
+              },
+            },
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

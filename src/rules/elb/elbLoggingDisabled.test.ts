@@ -41,4 +41,37 @@ describe('elb-logging-disabled', () => {
       )
     ).toHaveLength(0);
   });
+
+  it('skips intrinsic attribute lists, entries, and values', () => {
+    expect(
+      run(alb({ LoadBalancerAttributes: { Ref: 'AttrsParam' } }))
+    ).toHaveLength(0);
+    expect(
+      run(
+        alb({
+          LoadBalancerAttributes: [
+            {
+              'Fn::If': [
+                'LogsOn',
+                { Key: 'access_logs.s3.enabled', Value: 'true' },
+                { Ref: 'AWS::NoValue' },
+              ],
+            },
+          ],
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        alb({
+          LoadBalancerAttributes: [
+            {
+              Key: 'access_logs.s3.enabled',
+              Value: { 'Fn::If': ['LogsOn', 'true', 'false'] },
+            },
+          ],
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

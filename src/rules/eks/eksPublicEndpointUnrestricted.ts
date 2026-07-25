@@ -1,4 +1,4 @@
-import { asBoolean } from '../../cfn.js';
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -34,6 +34,10 @@ export const eksPublicEndpointUnrestricted: Rule = {
         continue;
       }
       const vpcConfig = resource.Properties?.ResourcesVpcConfig;
+      // An intrinsic endpoint setting is unknown, not unrestricted - skip.
+      if (isIntrinsic(vpcConfig?.EndpointPublicAccess)) {
+        continue;
+      }
       // Public access defaults to true when unset.
       const publicAccessEnabled =
         asBoolean(vpcConfig?.EndpointPublicAccess) !== false;
@@ -41,6 +45,10 @@ export const eksPublicEndpointUnrestricted: Rule = {
         continue;
       }
       const cidrs = vpcConfig?.PublicAccessCidrs;
+      // An intrinsic CIDR list is unknown, not unrestricted - skip.
+      if (isIntrinsic(cidrs)) {
+        continue;
+      }
       const unrestricted =
         !Array.isArray(cidrs) ||
         cidrs.length === 0 ||

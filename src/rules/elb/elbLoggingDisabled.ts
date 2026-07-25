@@ -1,3 +1,4 @@
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -31,12 +32,22 @@ export const elbLoggingDisabled: Rule = {
         continue;
       }
       const attributes = resource.Properties?.LoadBalancerAttributes;
+      // An intrinsic attribute list (or list entry) may contain the enabling
+      // attribute - undecidable, never flag.
+      if (
+        isIntrinsic(attributes) ||
+        (Array.isArray(attributes) && attributes.some(isIntrinsic))
+      ) {
+        continue;
+      }
       const hasAccessLogging =
         Array.isArray(attributes) &&
         attributes.some(
           (attribute) =>
             attribute?.Key === 'access_logs.s3.enabled' &&
-            (attribute?.Value === 'true' || attribute?.Value === true)
+            // An intrinsic value is undecidable - never flag on it.
+            (isIntrinsic(attribute?.Value) ||
+              asBoolean(attribute?.Value) === true)
         );
       if (!hasAccessLogging) {
         report(resourceId, {

@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
 /**
  * efs-encryption-disabled
  *
- * EFS encryption can only be chosen at filesystem creation — an existing
+ * EFS encryption can only be chosen at filesystem creation - an existing
  * unencrypted filesystem requires a data migration to fix. Values set via
  * intrinsics are undecidable and never flagged.
  */
@@ -39,7 +39,7 @@ export const efsEncryptionDisabled: Rule = {
       report(resourceId, {
         issue: 'EFS file system is not encrypted at rest.',
         recommendation:
-          'Set Encrypted to true — encryption can only be enabled at creation, and fixing it later means migrating the data.',
+          'Set Encrypted to true - encryption can only be enabled at creation, and fixing it later means migrating the data.',
       });
     }
   },

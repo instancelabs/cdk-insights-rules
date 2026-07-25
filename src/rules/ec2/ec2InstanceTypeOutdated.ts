@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * ec2-instance-type-outdated
  *
- * t2 instances cost more than t3 for less performance — a leftover from
+ * t2 instances cost more than t3 for less performance - a leftover from
  * templates written before 2018.
  */
 export const ec2InstanceTypeOutdated: Rule = {

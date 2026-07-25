@@ -3,14 +3,14 @@ import type { Rule } from '../../types';
 /**
  * vpc-default-security-group-rules-present
  *
- * CIS AWS Foundations: the default security group must have no rules —
+ * CIS AWS Foundations: the default security group must have no rules -
  * resources should use purpose-built groups.
  *
  * The default SG is created by EC2 alongside the VPC and never appears as an
  * AWS::EC2::SecurityGroup resource in a template ("default" is a reserved
  * group name CloudFormation cannot create). The template-visible way to add
  * rules to it is a standalone AWS::EC2::SecurityGroupIngress/Egress resource
- * whose GroupId is Fn::GetAtt [Vpc, DefaultSecurityGroup] — which is exactly
+ * whose GroupId is Fn::GetAtt [Vpc, DefaultSecurityGroup] - which is exactly
  * what this rule detects.
  */
 

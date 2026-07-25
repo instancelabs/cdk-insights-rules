@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { CfnResource, Rule } from '../../types';
 
 /** True when a usage-plan throttle object sets a rate or burst limit. */
@@ -52,12 +53,12 @@ const collectThrottledStages = (
 };
 
 /**
- * apigateway-throttling-missing — API Gateway stage with no throttling at all.
+ * apigateway-throttling-missing - API Gateway stage with no throttling at all.
  *
  * A stage that sets no rate or burst limits leaves its backend integrations
  * exposed to traffic spikes and uncontrolled cost. A stage counts as throttled
  * when its own MethodSettings set a ThrottlingRateLimit / ThrottlingBurstLimit,
- * or when a usage plan in the template attaches throttle limits to it — both
+ * or when a usage plan in the template attaches throttle limits to it - both
  * are legitimate ways to throttle, so neither is flagged.
  */
 export const apigatewayThrottlingMissing: Rule = {
@@ -89,6 +90,10 @@ export const apigatewayThrottlingMissing: Rule = {
       }
 
       const methodSettings = resource.Properties?.MethodSettings;
+      // An intrinsic MethodSettings list is unknown, not unthrottled - skip.
+      if (isIntrinsic(methodSettings)) {
+        continue;
+      }
       const hasOwnThrottling =
         Array.isArray(methodSettings) &&
         methodSettings.some(

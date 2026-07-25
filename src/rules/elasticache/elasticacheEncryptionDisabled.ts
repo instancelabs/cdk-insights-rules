@@ -53,7 +53,7 @@ export const elasticacheEncryptionDisabled: Rule = {
             'Set AtRestEncryptionEnabled to true to protect cached data at rest.',
         });
       }
-      // On CacheCluster the transit property exists only for Memcached —
+      // On CacheCluster the transit property exists only for Memcached -
       // a Redis CacheCluster cannot set it (Redis needs a ReplicationGroup),
       // so flagging it would produce an unfixable finding.
       if (isCacheCluster && props.Engine !== 'memcached') {

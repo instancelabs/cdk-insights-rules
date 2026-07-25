@@ -8,7 +8,7 @@ import type { Rule } from '../../types';
  * so an *absent* encryption property is a secure default and must not be
  * flagged. The only decidable violation is explicitly opting out:
  * `SqsManagedSseEnabled: false` with no KMS key. (The CDK Insights product
- * historically flagged absence too — this port deliberately tightens that to
+ * historically flagged absence too - this port deliberately tightens that to
  * honour the low-false-positive contract.)
  */
 export const sqsEncryptionDisabled: Rule = {

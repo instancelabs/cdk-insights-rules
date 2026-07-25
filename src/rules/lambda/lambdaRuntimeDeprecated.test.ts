@@ -29,4 +29,21 @@ describe('lambda-runtime-deprecated', () => {
     expect(run(fn('python3.13'))).toHaveLength(0);
     expect(run(fn())).toHaveLength(0);
   });
+
+  it('does not flag CDK-internal helper functions the user cannot configure', () => {
+    expect(
+      run({
+        Resources: {
+          LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a: {
+            Type: 'AWS::Lambda::Function',
+            Properties: { Runtime: 'nodejs18.x' },
+          },
+          AWS679f53fac002430cb0da5b7982bd2287: {
+            Type: 'AWS::Lambda::Function',
+            Properties: { Runtime: 'nodejs18.x' },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
 });

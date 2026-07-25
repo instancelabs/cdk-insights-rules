@@ -17,6 +17,18 @@ describe('redshift-audit-logging-disabled', () => {
     expect(run(cluster({}))).toHaveLength(1);
   });
 
+  it('skips intrinsic LoggingProperties instead of flagging it', () => {
+    expect(
+      run(
+        cluster({
+          LoggingProperties: {
+            'Fn::If': ['Prod', { BucketName: 'logs' }, {}],
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag S3 or CloudWatch logging', () => {
     expect(
       run(cluster({ LoggingProperties: { BucketName: 'logs' } }))

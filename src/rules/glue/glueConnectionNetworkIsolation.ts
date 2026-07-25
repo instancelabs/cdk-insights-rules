@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 const SSL_URL_PATTERN =
@@ -38,7 +39,11 @@ export const glueConnectionNetworkIsolation: Rule = {
       if (input?.ConnectionType !== 'JDBC') {
         continue;
       }
-      if (!input?.PhysicalConnectionRequirements?.SubnetId) {
+      // An intrinsic requirements block may carry a SubnetId - undecidable.
+      if (
+        !isIntrinsic(input?.PhysicalConnectionRequirements) &&
+        !input?.PhysicalConnectionRequirements?.SubnetId
+      ) {
         report(resourceId, {
           issue: 'Glue JDBC connection does not specify a VPC subnet.',
           recommendation:
@@ -47,11 +52,17 @@ export const glueConnectionNetworkIsolation: Rule = {
       }
       const connectionProperties = input?.ConnectionProperties;
       const jdbcUrl = connectionProperties?.JDBC_CONNECTION_URL;
+      // An intrinsic properties block, JDBC_ENFORCE_SSL, or URL is
+      // undecidable - never flag.
+      const sslUnknown =
+        isIntrinsic(connectionProperties) ||
+        isIntrinsic(connectionProperties?.JDBC_ENFORCE_SSL) ||
+        isIntrinsic(jdbcUrl);
       const enforceSsl =
         String(connectionProperties?.JDBC_ENFORCE_SSL).toLowerCase() === 'true';
       const urlEnforcesSsl =
         typeof jdbcUrl === 'string' && SSL_URL_PATTERN.test(jdbcUrl);
-      if (!enforceSsl && !urlEnforcesSsl) {
+      if (!sslUnknown && !enforceSsl && !urlEnforcesSsl) {
         report(resourceId, {
           issue: 'Glue JDBC connection may not enforce SSL.',
           recommendation:

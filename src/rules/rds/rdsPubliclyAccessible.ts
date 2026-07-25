@@ -7,7 +7,7 @@ import type { Rule } from '../../types';
  * `PubliclyAccessible: true` gives the DB instance a public IP; combined with
  * a permissive security group it is reachable from the internet. Databases
  * belong in private subnets behind a bastion, VPN, or SSM. Only a decidable
- * `true` is flagged — absent, false, or intrinsic values are not.
+ * `true` is flagged - absent, false, or intrinsic values are not.
  */
 export const rdsPubliclyAccessible: Rule = {
   metadata: {

@@ -13,7 +13,7 @@ const LOCKOUT_ACTIONS = new Set([
  * True when a Deny's Resource covers the bucket itself (not only objects).
  * A Deny scoped purely to object ARNs (`arn:...:bucket/key`) can't block
  * PutBucketPolicy, so it can't lock the account out. Unparseable or intrinsic
- * resources are treated as covering — a lockout we can't rule out is a lockout
+ * resources are treated as covering - a lockout we can't rule out is a lockout
  * worth reviewing.
  */
 const coversBucketLevel = (resource: unknown): boolean => {
@@ -26,7 +26,7 @@ const coversBucketLevel = (resource: unknown): boolean => {
   }
   for (const item of resources) {
     if (typeof item !== 'string') {
-      return true; // intrinsic — can't rule out
+      return true; // intrinsic - can't rule out
     }
     if (item === '*') {
       return true;
@@ -44,7 +44,7 @@ const coversBucketLevel = (resource: unknown): boolean => {
  *
  * A bucket policy that Denies `s3:*` (or PutBucketPolicy/DeleteBucketPolicy)
  * to `Principal: '*'` with no carveout for the account root or an admin role
- * locks the account out of its own bucket — recovery means breaking glass on
+ * locks the account out of its own bucket - recovery means breaking glass on
  * root credentials, and AWS Support will typically not intervene. The
  * standard TLS-enforcement Deny (aws:SecureTransport=false) is exempt: it
  * denies only non-TLS requests.
@@ -83,7 +83,7 @@ export const s3BucketPolicySelfLockout: Rule = {
         report(resourceId, {
           issue: `Bucket policy Denies ${matched} to Principal '*' with no carveout for the account root or an admin role, locking the account out of the bucket.`,
           recommendation:
-            "Exempt your admin role(s) via a Condition (e.g. ArnNotLike on aws:PrincipalArn), or scope the Deny — recovery from a full lockout requires the account root's credentials.",
+            "Exempt your admin role(s) via a Condition (e.g. ArnNotLike on aws:PrincipalArn), or scope the Deny - recovery from a full lockout requires the account root's credentials.",
         });
       }
     }
