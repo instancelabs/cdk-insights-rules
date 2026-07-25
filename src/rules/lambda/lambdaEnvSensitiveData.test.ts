@@ -27,4 +27,54 @@ describe('lambda-env-sensitive-data', () => {
     expect(run(fn({ TABLE_NAME: 'users', LOG_LEVEL: 'info' }))).toHaveLength(0);
     expect(run(fn({ DB_PASSWORD: { Ref: 'SecretParam' } }))).toHaveLength(0);
   });
+
+  it('does not flag pointer-shaped values (ARN, SSM path, dynamic reference)', () => {
+    expect(
+      run(
+        fn({
+          DB_SECRET:
+            'arn:aws:secretsmanager:eu-west-2:111122223333:secret:db-abc123',
+          API_KEY: '/prod/api-key',
+          DB_PASSWORD:
+            '{{resolve:secretsmanager:prod/db:SecretString:password}}',
+        })
+      )
+    ).toHaveLength(0);
+  });
+
+  it('still flags URL-shaped credentials (webhooks, basic-auth URLs)', () => {
+    expect(
+      run(
+        fn({
+          WEBHOOK_TOKEN: 'https://hooks.example.com/services/T000/B000/XXXX',
+        })
+      )
+    ).toHaveLength(1);
+    expect(
+      run(fn({ API_TOKEN: 'https://admin:hunter2@internal.example.com' }))
+    ).toHaveLength(1);
+  });
+
+  it('still flags credential-material *_KEY_ID keys despite the _id pointer suffix', () => {
+    expect(run(fn({ ACCESS_KEY_ID: 'AKIAIOSFODNN7EXAMPLE' }))).toHaveLength(1);
+  });
+
+  it('does not flag keys that name a pointer to a secret', () => {
+    expect(
+      run(
+        fn({
+          SECRET_ARN: 'db-secret-arn-placeholder',
+          API_KEY_PARAMETER_NAME: 'prod-api-key',
+          TOKEN_PATH: 'auth.token',
+        })
+      )
+    ).toHaveLength(0);
+  });
+
+  it('still flags literal secrets that resemble none of the pointer shapes', () => {
+    expect(run(fn({ API_KEY: 'sk-live-4242424242' }))).toHaveLength(1);
+    expect(run(fn({ SIGNING_KEY: 'c2VjcmV0LXNpZ25pbmcta2V5' }))).toHaveLength(
+      1
+    );
+  });
 });

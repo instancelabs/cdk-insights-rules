@@ -16,7 +16,7 @@ const isUnrestrictedAllow = (statement: PolicyStatement): boolean =>
  * eventbridge-bus-policy-wildcard-principal
  *
  * An event bus policy that Allows `Principal: '*'` with no Condition lets any
- * AWS account put events onto your bus — a straight injection channel into
+ * AWS account put events onto your bus - a straight injection channel into
  * everything the bus triggers. Handles both the legacy top-level
  * Principal/Condition properties and the Statement form (object or JSON
  * string). A wildcard scoped by any Condition (e.g. aws:PrincipalOrgID) is
@@ -77,7 +77,7 @@ export const eventbridgeBusPolicyWildcardPrincipal: Rule = {
       if (statements.some(isUnrestrictedAllow)) {
         report(resourceId, {
           issue:
-            'Event bus policy allows a wildcard principal with no condition — any AWS account can put events onto this bus.',
+            'Event bus policy allows a wildcard principal with no condition - any AWS account can put events onto this bus.',
           recommendation:
             'Restrict the policy to specific account IDs, or scope the wildcard with a Condition such as aws:PrincipalOrgID.',
         });

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Pre-commit checks for cdk-insights-rules.
-# Runs the fast gates (lint + typecheck), then — on main only — reminds you to
+# Runs the fast gates (lint + typecheck), then - on main only - reminds you to
 # bump the version so the merge auto-publishes (release.yml is version-gated).
 # The bump prompt is interactive-only; non-interactive commits and CI never hang.
 set -e
@@ -13,11 +13,11 @@ npm run typecheck
 
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
 if [ "$CURRENT_BRANCH" != "main" ]; then
-  echo "ℹ️  Not on main — skipping version-bump reminder."
+  echo "ℹ️  Not on main - skipping version-bump reminder."
   exit 0
 fi
 
-# (Release commits are detected below via the staged package.json — the commit
+# (Release commits are detected below via the staged package.json - the commit
 # message isn't written yet when pre-commit runs, so it can't be inspected here.)
 
 # Nothing to release if only meta files changed.
@@ -28,7 +28,7 @@ fi
 
 # If package.json is already staged, assume the version was handled deliberately.
 if git diff --cached --name-only | grep -q '^package\.json$'; then
-  echo "ℹ️  package.json staged — assuming the version is handled."
+  echo "ℹ️  package.json staged - assuming the version is handled."
   exit 0
 fi
 
@@ -49,7 +49,7 @@ case "$CHOICE" in
   2) BUMP=minor ;;
   3) BUMP=major ;;
   *)
-    echo "⏭️  Skipping bump — remember to release later."
+    echo "⏭️  Skipping bump - remember to release later."
     exit 0
     ;;
 esac

@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  *
  * MSK encrypts broker volumes with an AWS-managed key by default; a
  * customer-managed key adds key-policy scoping and rotation audit.
- * Advisory (LOW) — the default is encrypted, just not customer-controlled.
+ * Advisory (LOW) - the default is encrypted, just not customer-controlled.
  */
 export const mskDataVolumeCmkMissing: Rule = {
   metadata: {

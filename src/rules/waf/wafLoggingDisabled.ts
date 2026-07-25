@@ -19,7 +19,7 @@ const referencedWebAclId = (resourceArn: unknown): string | undefined => {
  * waf-logging-disabled
  *
  * A WebACL without a LoggingConfiguration blocks and allows traffic with no
- * record of what it decided — useless for tuning or incident response.
+ * record of what it decided - useless for tuning or incident response.
  */
 export const wafLoggingDisabled: Rule = {
   metadata: {

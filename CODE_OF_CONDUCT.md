@@ -14,7 +14,7 @@ sexual identity and orientation.
 Examples of behavior that contributes to a positive environment:
 
 - Being respectful of differing opinions, viewpoints, and experiences
-- Giving and gracefully accepting constructive feedback — including on rule
+- Giving and gracefully accepting constructive feedback - including on rule
   correctness, which is the whole point of this repository
 - Focusing on what is best for the community and the users of the rules
 

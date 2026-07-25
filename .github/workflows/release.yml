@@ -2,7 +2,7 @@ name: Release
 
 # Publishes to npm the same way cdk-insights does: on every push to main, but
 # only when package.json's version actually changed since the previous commit.
-# So the release step is "bump the version in your merge to main" — no tags to
+# So the release step is "bump the version in your merge to main" - no tags to
 # remember. Auth is npm OIDC trusted publishing (no NPM_TOKEN, provenance auto).
 #
 # One-time setup on npmjs.com: the package must exist first (one manual
@@ -54,12 +54,12 @@ jobs:
           CURR=$(node -p "require('./package.json').version")
           echo "version=$CURR" >> "$GITHUB_OUTPUT"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            # Manual runs publish only if this version isn't on npm already —
+            # Manual runs publish only if this version isn't on npm already -
             # otherwise npm publish would fail the job with a 403.
             PKG=$(node -p "require('./package.json').name")
             if npm view "$PKG@$CURR" version >/dev/null 2>&1; then
               echo "changed=false" >> "$GITHUB_OUTPUT"
-              echo "⚠️ $PKG@$CURR already published — nothing to do."
+              echo "⚠️ $PKG@$CURR already published - nothing to do."
             else
               echo "changed=true" >> "$GITHUB_OUTPUT"
             fi
@@ -68,12 +68,12 @@ jobs:
             PKG=$(node -p "require('./package.json').name")
             if [ "$PREV" = "$CURR" ]; then
               echo "changed=false" >> "$GITHUB_OUTPUT"
-              echo "⚠️ version unchanged ($CURR) — nothing to publish."
+              echo "⚠️ version unchanged ($CURR) - nothing to publish."
             elif npm view "$PKG@$CURR" version >/dev/null 2>&1; then
               # Covers manual releases (e.g. the first publish, done by hand
               # before trusted publishing exists) landing on main afterwards.
               echo "changed=false" >> "$GITHUB_OUTPUT"
-              echo "⚠️ $PKG@$CURR already on npm — nothing to publish."
+              echo "⚠️ $PKG@$CURR already on npm - nothing to publish."
             else
               echo "changed=true" >> "$GITHUB_OUTPUT"
               echo "✅ version changed: $PREV → $CURR."

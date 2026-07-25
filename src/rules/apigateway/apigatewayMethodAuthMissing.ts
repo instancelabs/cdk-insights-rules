@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  *
  * A REST Method or HTTP-API Route with AuthorizationType NONE is a public,
  * unauthenticated entry point to the backend. CORS preflight (OPTIONS)
- * methods are exempt — browsers require them to be unauthenticated.
+ * methods are exempt - browsers require them to be unauthenticated.
  */
 export const apigatewayMethodAuthMissing: Rule = {
   metadata: {

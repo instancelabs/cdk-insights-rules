@@ -1,9 +1,10 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
  * acm-certificate-email-validation
  *
- * Email-validated certificates require a human to click a link on renewal —
+ * Email-validated certificates require a human to click a link on renewal -
  * a production outage waiting to happen. Also flags disabled certificate
  * transparency logging.
  */
@@ -33,12 +34,16 @@ export const acmCertificateEmailValidation: Rule = {
         continue;
       }
       const props = resource.Properties ?? {};
-      if (props.ValidationMethod !== 'DNS') {
+      // An intrinsic ValidationMethod is unknown, not email - skip that flag.
+      if (
+        !isIntrinsic(props.ValidationMethod) &&
+        props.ValidationMethod !== 'DNS'
+      ) {
         report(resourceId, {
           issue:
             'ACM certificate uses email validation instead of DNS validation.',
           recommendation:
-            'Use DNS validation so renewals are automatic — email validation needs manual intervention and expires certificates when missed.',
+            'Use DNS validation so renewals are automatic - email validation needs manual intervention and expires certificates when missed.',
         });
       }
       if (props.CertificateTransparencyLoggingPreference === 'DISABLED') {

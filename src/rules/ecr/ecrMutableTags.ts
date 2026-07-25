@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * ecr-mutable-tags
  *
- * Mutable tags let `:v1.2.3` be silently repointed at a different image —
+ * Mutable tags let `:v1.2.3` be silently repointed at a different image -
  * a supply-chain risk and a reproducibility problem.
  */
 export const ecrMutableTags: Rule = {
@@ -36,7 +36,7 @@ export const ecrMutableTags: Rule = {
       if (!isImmutable && typeof mutability !== 'object') {
         report(resourceId, {
           issue:
-            'ECR repository allows mutable image tags — a pushed tag can be silently repointed at a different image.',
+            'ECR repository allows mutable image tags - a pushed tag can be silently repointed at a different image.',
           recommendation:
             'Set ImageTagMutability to IMMUTABLE so deployed tags always reference the image they were built as.',
         });

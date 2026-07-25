@@ -34,7 +34,7 @@ export const s3BucketVersioningDisabled: Rule = {
         continue;
       }
       const status = resource.Properties?.VersioningConfiguration?.Status;
-      // An intrinsic (Ref / Fn::If / ...) may well resolve to "Enabled" —
+      // An intrinsic (Ref / Fn::If / ...) may well resolve to "Enabled" -
       // undecidable from the template, so never flag it.
       if (status !== 'Enabled' && !isIntrinsic(status)) {
         report(resourceId, {

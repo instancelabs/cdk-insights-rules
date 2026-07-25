@@ -8,7 +8,7 @@ const LOCKOUT_ACTIONS = new Set(['*', 'kms:*', 'kms:PutKeyPolicy']);
  *
  * A key policy that Denies `kms:*` or `kms:PutKeyPolicy` to `Principal: '*'`
  * with no root/admin carveout makes the key unmanageable: nobody can edit the
- * policy to undo the Deny. KMS lockouts are the worst of the family — AWS
+ * policy to undo the Deny. KMS lockouts are the worst of the family - AWS
  * cannot restore access to an unmanageable key.
  */
 export const kmsKeyPolicySelfLockout: Rule = {
@@ -44,7 +44,7 @@ export const kmsKeyPolicySelfLockout: Rule = {
         report(resourceId, {
           issue: `KMS key policy Denies ${matched} to Principal '*' with no carveout for the account root or an admin role, making the key unmanageable.`,
           recommendation:
-            'Exempt your admin role(s) or the account root via a Condition — a fully locked key policy cannot be repaired, even by AWS.',
+            'Exempt your admin role(s) or the account root via a Condition - a fully locked key policy cannot be repaired, even by AWS.',
         });
       }
     }

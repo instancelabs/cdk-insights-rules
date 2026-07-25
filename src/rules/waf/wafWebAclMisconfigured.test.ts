@@ -35,6 +35,27 @@ describe('waf-webacl-misconfigured', () => {
     ).toHaveLength(0);
   });
 
+  it('skips intrinsic Rules or VisibilityConfig instead of flagging them', () => {
+    expect(
+      run(
+        webAcl({
+          DefaultAction: { Allow: {} },
+          Rules: { 'Fn::If': ['Prod', [{ Name: 'managed' }], []] },
+          VisibilityConfig: { CloudWatchMetricsEnabled: true },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        webAcl({
+          DefaultAction: { Allow: {} },
+          Rules: [{ Name: 'managed', Priority: 0 }],
+          VisibilityConfig: { Ref: 'VisibilityParam' },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('flags a rule-less WebACL regardless of default action', () => {
     const findings = run(
       webAcl({

@@ -6,7 +6,7 @@ import type { Rule } from '../../types';
  * BackupRetentionPeriod 0 disables automated backups entirely; anything
  * under 7 days is a thin window for point-in-time recovery. Cluster default
  * (unset) is 1 day and counts as low; instance default is also 1 day but the
- * product leaves unset instances unflagged — parity preserved.
+ * product leaves unset instances unflagged - parity preserved.
  */
 export const rdsBackupRetentionLow: Rule = {
   metadata: {

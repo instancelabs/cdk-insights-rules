@@ -17,6 +17,17 @@ describe('cloudwatch-alarm-actions-missing', () => {
     expect(run(res({}))).toHaveLength(2);
   });
 
+  it('skips intrinsic AlarmActions instead of flagging it', () => {
+    expect(
+      run(
+        res({
+          AlarmActions: { 'Fn::If': ['Prod', ['arn:sns'], []] },
+          TreatMissingData: 'notBreaching',
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag a fully configured alarm', () => {
     expect(
       run(

@@ -114,7 +114,7 @@
       },
       "fixed": {
         "code": "import * as backup from 'aws-cdk-lib/aws-backup';\n\n// Customer-managed KMS key + inline Backup Vault Lock (compliance mode).\nnew backup.CfnBackupVault(this, 'Vault', {\n  backupVaultName: 'app-backup-vault',\n  encryptionKeyArn:\n    'arn:aws:kms:eu-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab',\n  lockConfiguration: {\n    minRetentionDays: 30,\n  },\n});",
-        "explanation": "Supplying encryptionKeyArn plus an inline lockConfiguration (minRetentionDays) satisfies both branches of the check — the vault is CMK-encrypted and lock-protected — so zero backup-vault-hardening findings are emitted."
+        "explanation": "Supplying encryptionKeyArn plus an inline lockConfiguration (minRetentionDays) satisfies both branches of the check - the vault is CMK-encrypted and lock-protected - so zero backup-vault-hardening findings are emitted."
       },
       "validated": true
     },
@@ -266,7 +266,7 @@
       "language": "typescript",
       "flagged": {
         "code": "import { SecretValue } from 'aws-cdk-lib';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\nimport * as lambda from 'aws-cdk-lib/aws-lambda';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nconst vpc = new ec2.Vpc(this, 'Vpc', {\n  maxAzs: 2,\n  natGateways: 0,\n  subnetConfiguration: [\n    { name: 'isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },\n  ],\n});\nconst db = new rds.DatabaseInstance(this, 'Db', {\n  engine: rds.DatabaseInstanceEngine.postgres({\n    version: rds.PostgresEngineVersion.VER_16_4,\n  }),\n  vpc,\n  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },\n  credentials: rds.Credentials.fromPassword(\n    'admin',\n    SecretValue.unsafePlainText('SuperSecretPassw0rd!'),\n  ),\n});\n// Lambda references the VPC-only database but is NOT VPC-enabled, so it can\n// never reach it.\nnew lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n  environment: {\n    DB_HOST: db.dbInstanceEndpointAddress,\n  },\n});",
-        "explanation": "The Lambda references the VPC-only RDS endpoint (via an environment variable / Fn::GetAtt dependency) but has no VpcConfig, so it can never reach the database — the cross-resource check fires."
+        "explanation": "The Lambda references the VPC-only RDS endpoint (via an environment variable / Fn::GetAtt dependency) but has no VpcConfig, so it can never reach the database - the cross-resource check fires."
       },
       "fixed": {
         "code": "import { SecretValue } from 'aws-cdk-lib';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\nimport * as lambda from 'aws-cdk-lib/aws-lambda';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nconst vpc = new ec2.Vpc(this, 'Vpc', {\n  maxAzs: 2,\n  natGateways: 0,\n  subnetConfiguration: [\n    { name: 'isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },\n  ],\n});\nconst db = new rds.DatabaseInstance(this, 'Db', {\n  engine: rds.DatabaseInstanceEngine.postgres({\n    version: rds.PostgresEngineVersion.VER_16_4,\n  }),\n  vpc,\n  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },\n  credentials: rds.Credentials.fromPassword(\n    'admin',\n    SecretValue.unsafePlainText('SuperSecretPassw0rd!'),\n  ),\n});\n// Lambda runs inside the VPC and its security group can reach the database.\nconst fn = new lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n  vpc,\n  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },\n  environment: {\n    DB_HOST: db.dbInstanceEndpointAddress,\n  },\n});\ndb.connections.allowDefaultPortFrom(fn);",
@@ -291,12 +291,12 @@
       "ruleId": "stack-architecture-recommendations",
       "language": "typescript",
       "flagged": {
-        "code": "import { SecretValue } from 'aws-cdk-lib';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nconst vpc = new ec2.Vpc(this, 'Vpc', {\n  maxAzs: 2,\n  natGateways: 0,\n  subnetConfiguration: [\n    { name: 'isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },\n  ],\n});\n// RDS owns its master credentials via a hardcoded password — no Secrets\n// Manager rotation, no managed credentials.\nnew rds.DatabaseInstance(this, 'Db', {\n  engine: rds.DatabaseInstanceEngine.postgres({\n    version: rds.PostgresEngineVersion.VER_16_4,\n  }),\n  vpc,\n  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },\n  credentials: rds.Credentials.fromPassword(\n    'admin',\n    SecretValue.unsafePlainText('SuperSecretPassw0rd!'),\n  ),\n});",
+        "code": "import { SecretValue } from 'aws-cdk-lib';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nconst vpc = new ec2.Vpc(this, 'Vpc', {\n  maxAzs: 2,\n  natGateways: 0,\n  subnetConfiguration: [\n    { name: 'isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },\n  ],\n});\n// RDS owns its master credentials via a hardcoded password - no Secrets\n// Manager rotation, no managed credentials.\nnew rds.DatabaseInstance(this, 'Db', {\n  engine: rds.DatabaseInstanceEngine.postgres({\n    version: rds.PostgresEngineVersion.VER_16_4,\n  }),\n  vpc,\n  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },\n  credentials: rds.Credentials.fromPassword(\n    'admin',\n    SecretValue.unsafePlainText('SuperSecretPassw0rd!'),\n  ),\n});",
         "explanation": "The RDS instance owns its master credentials via a hardcoded MasterUserPassword (no ManageMasterUserPassword / MasterUserSecret), so the stack-architecture credential check fires; the absence of alarms adds a second stack-architecture finding."
       },
       "fixed": {
         "code": "import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nconst vpc = new ec2.Vpc(this, 'Vpc', {\n  maxAzs: 2,\n  natGateways: 0,\n  subnetConfiguration: [\n    { name: 'isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },\n  ],\n});\n// RDS-native managed master credentials (Secrets Manager + auto rotation).\nconst db = new rds.DatabaseInstance(this, 'Db', {\n  engine: rds.DatabaseInstanceEngine.postgres({\n    version: rds.PostgresEngineVersion.VER_16_4,\n  }),\n  vpc,\n  vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },\n  manageMasterUserPassword: true,\n});\n// CloudWatch alarm so the stack has monitoring for its critical resource.\nnew cloudwatch.Alarm(this, 'DbCpu', {\n  metric: db.metricCPUUtilization(),\n  threshold: 80,\n  evaluationPeriods: 3,\n});",
-        "explanation": "manageMasterUserPassword: true moves credentials to RDS-managed Secrets Manager rotation (the credential check skips it), and a CloudWatch Alarm covers the \"no alarms for critical resources\" branch — so zero stack-architecture-recommendations findings remain."
+        "explanation": "manageMasterUserPassword: true moves credentials to RDS-managed Secrets Manager rotation (the credential check skips it), and a CloudWatch Alarm covers the \"no alarms for critical resources\" branch - so zero stack-architecture-recommendations findings remain."
       }
     },
     {
@@ -334,7 +334,7 @@
       },
       "fixed": {
         "code": "import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';\n\n// PITR enabled (continuous backups) and server-side encryption set so no\n// co-finding rides along.\nnew dynamodb.Table(this, 'Table', {\n  partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },\n  pointInTimeRecoverySpecification: {\n    pointInTimeRecoveryEnabled: true,\n  },\n  encryption: dynamodb.TableEncryption.AWS_MANAGED,\n});",
-        "explanation": "pointInTimeRecoverySpecification.pointInTimeRecoveryEnabled is true and server-side encryption is set, so PITR is enabled and no PITR finding — or encryption co-finding — is produced."
+        "explanation": "pointInTimeRecoverySpecification.pointInTimeRecoveryEnabled is true and server-side encryption is set, so PITR is enabled and no PITR finding - or encryption co-finding - is produced."
       },
       "validated": true
     },
@@ -356,7 +356,7 @@
       "language": "typescript",
       "flagged": {
         "code": "import { Size } from 'aws-cdk-lib';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\n\n// Unencrypted EBS volume.\nnew ec2.Volume(this, 'Volume', {\n  availabilityZone: 'eu-west-2a',\n  size: Size.gibibytes(50),\n  encrypted: false,\n});",
-        "explanation": "Encrypted is false, so the check flags the volume. (It also defaults to gp2, which the same ruleId flags as a cost item — the conflation.)"
+        "explanation": "Encrypted is false, so the check flags the volume. (It also defaults to gp2, which the same ruleId flags as a cost item - the conflation.)"
       },
       "fixed": {
         "code": "import { Size } from 'aws-cdk-lib';\nimport * as ec2 from 'aws-cdk-lib/aws-ec2';\n\n// Encrypted at rest and gp3 (better price/performance than gp2).\nnew ec2.Volume(this, 'Volume', {\n  availabilityZone: 'eu-west-2a',\n  size: Size.gibibytes(50),\n  encrypted: true,\n  volumeType: ec2.EbsDeviceVolumeType.GP3,\n});",
@@ -386,7 +386,7 @@
       },
       "fixed": {
         "code": "import * as ec2 from 'aws-cdk-lib/aws-ec2';\n\nconst vpc = new ec2.Vpc(this, 'Vpc', {\n  maxAzs: 2,\n  natGateways: 0,\n  subnetConfiguration: [\n    { name: 'isolated', subnetType: ec2.SubnetType.PRIVATE_ISOLATED, cidrMask: 24 },\n  ],\n});\n// allowAllOutbound:false keeps egress off 0.0.0.0/0; a single narrow\n// ingress rule (private CIDR, HTTPS) is the only opening.\nconst sg = new ec2.SecurityGroup(this, 'Sg', {\n  vpc,\n  allowAllOutbound: false,\n});\nsg.addIngressRule(ec2.Peer.ipv4('10.0.0.0/16'), ec2.Port.tcp(443), 'internal https');",
-        "explanation": "The group allows a single narrow ingress (private CIDR, HTTPS) and, with allowAllOutbound false, has no 0.0.0.0/0 egress and is not empty — so none of the security-group finding branches fire."
+        "explanation": "The group allows a single narrow ingress (private CIDR, HTTPS) and, with allowAllOutbound false, has no 0.0.0.0/0 egress and is not empty - so none of the security-group finding branches fire."
       },
       "validated": true
     },
@@ -733,7 +733,7 @@
       "language": "typescript",
       "flagged": {
         "code": "import { Duration } from 'aws-cdk-lib';\nimport * as events from 'aws-cdk-lib/aws-events';\n\n// inside your Stack\nnew events.Rule(this, 'Rule', {\n  schedule: events.Schedule.rate(Duration.hours(1)),\n});",
-        "explanation": "A rule created with no `targets` synthesizes an AWS::Events::Rule with no `Targets`, so every matched event is silently dropped — no action is ever taken. The check flags a rule that has no targets (HIGH, Reliability), and separately flags a rule whose `State` is DISABLED (MEDIUM)."
+        "explanation": "A rule created with no `targets` synthesizes an AWS::Events::Rule with no `Targets`, so every matched event is silently dropped - no action is ever taken. The check flags a rule that has no targets (HIGH, Reliability), and separately flags a rule whose `State` is DISABLED (MEDIUM)."
       },
       "fixed": {
         "code": "import { Duration } from 'aws-cdk-lib';\nimport * as events from 'aws-cdk-lib/aws-events';\nimport * as targets from 'aws-cdk-lib/aws-events-targets';\nimport * as sns from 'aws-cdk-lib/aws-sns';\n\n// inside your Stack\nconst topic = new sns.Topic(this, 'Topic');\nnew events.Rule(this, 'Rule', {\n  schedule: events.Schedule.rate(Duration.hours(1)),\n  targets: [new targets.SnsTopic(topic)],\n});",
@@ -850,7 +850,7 @@
       "language": "typescript",
       "flagged": {
         "code": "import { aws_kms as kms } from 'aws-cdk-lib';\n\nnew kms.CfnKey(this, 'Key', {\n  keyPolicy: {\n    Version: '2012-10-17',\n    Statement: [\n      { Effect: 'Deny', Principal: '*', Action: 'kms:*', Resource: '*' },\n    ],\n  },\n});",
-        "explanation": "A Deny on kms:* for Principal \"*\" with no root carveout locks every identity — including the account root — out of the key, making it effectively unrecoverable."
+        "explanation": "A Deny on kms:* for Principal \"*\" with no root carveout locks every identity - including the account root - out of the key, making it effectively unrecoverable."
       },
       "fixed": {
         "code": "import { Aws, aws_kms as kms } from 'aws-cdk-lib';\n\nnew kms.CfnKey(this, 'Key', {\n  keyPolicy: {\n    Version: '2012-10-17',\n    Statement: [\n      {\n        Sid: 'EnableRootAccess',\n        Effect: 'Allow',\n        Principal: { AWS: `arn:aws:iam::${Aws.ACCOUNT_ID}:root` },\n        Action: 'kms:*',\n        Resource: '*',\n      },\n      {\n        Sid: 'DenyEveryoneButRoot',\n        Effect: 'Deny',\n        NotPrincipal: { AWS: `arn:aws:iam::${Aws.ACCOUNT_ID}:root` },\n        Action: 'kms:*',\n        Resource: '*',\n      },\n    ],\n  },\n});",
@@ -875,12 +875,12 @@
       "ruleId": "lambda-permission-public",
       "language": "typescript",
       "flagged": {
-        "code": "import * as iam from 'aws-cdk-lib/aws-iam';\nimport * as lambda from 'aws-cdk-lib/aws-lambda';\n\nconst fn = new lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});\n// Grants invoke to ANY AWS account with no source restriction — public.\nfn.addPermission('Public', {\n  principal: new iam.AnyPrincipal(),\n});",
-        "explanation": "fn.addPermission with an AnyPrincipal (Principal \"*\") and no source restriction grants invoke to any AWS account — the check flags it CRITICAL public."
+        "code": "import * as iam from 'aws-cdk-lib/aws-iam';\nimport * as lambda from 'aws-cdk-lib/aws-lambda';\n\nconst fn = new lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});\n// Grants invoke to ANY AWS account with no source restriction - public.\nfn.addPermission('Public', {\n  principal: new iam.AnyPrincipal(),\n});",
+        "explanation": "fn.addPermission with an AnyPrincipal (Principal \"*\") and no source restriction grants invoke to any AWS account - the check flags it CRITICAL public."
       },
       "fixed": {
         "code": "import * as iam from 'aws-cdk-lib/aws-iam';\nimport * as lambda from 'aws-cdk-lib/aws-lambda';\n\nconst fn = new lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});\n// Scoped to the S3 service principal and a specific source bucket ARN.\nfn.addPermission('FromBucket', {\n  principal: new iam.ServicePrincipal('s3.amazonaws.com'),\n  sourceArn: 'arn:aws:s3:::my-source-bucket',\n  sourceAccount: '111122223333',\n});",
-        "explanation": "The permission is scoped to the S3 service principal with both a SourceArn and SourceAccount, so it is neither a wildcard nor unrestricted — no finding."
+        "explanation": "The permission is scoped to the S3 service principal with both a SourceArn and SourceAccount, so it is neither a wildcard nor unrestricted - no finding."
       },
       "validated": true
     },
@@ -928,10 +928,10 @@
       "language": "typescript",
       "flagged": {
         "code": "import * as lambda from 'aws-cdk-lib/aws-lambda';\n\n// Variable runtime: resolves to whatever the newest Node.js runtime is at\n// synth time, so a CDK upgrade silently changes the deployed runtime.\nnew lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_LATEST,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});",
-        "explanation": "Runtime.NODEJS_LATEST is a variable runtime; the cdk-insights aspect (wired via Aspects.of(app)) records the __usesVariableRuntime flag and the check flags it. Requires the aspect — a bare synth cannot detect it."
+        "explanation": "Runtime.NODEJS_LATEST is a variable runtime; the cdk-insights aspect (wired via Aspects.of(app)) records the __usesVariableRuntime flag and the check flags it. Requires the aspect - a bare synth cannot detect it."
       },
       "fixed": {
-        "code": "import * as lambda from 'aws-cdk-lib/aws-lambda';\n\n// Explicitly pinned runtime — upgrades are a deliberate, reviewed change.\nnew lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});",
+        "code": "import * as lambda from 'aws-cdk-lib/aws-lambda';\n\n// Explicitly pinned runtime - upgrades are a deliberate, reviewed change.\nnew lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});",
         "explanation": "Pinning Runtime.NODEJS_22_X means the aspect records no variable-runtime flag, so the check emits nothing."
       },
       "validated": true
@@ -1084,7 +1084,7 @@
       "language": "typescript",
       "flagged": {
         "code": "import { Stack, App } from 'aws-cdk-lib';\nimport { Construct } from 'constructs';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nnew rds.CfnDBInstance(this, 'Db', {\n  engine: 'postgres',\n  dbInstanceClass: 'db.t3.micro',\n  allocatedStorage: '20',\n  backupRetentionPeriod: 3,\n});",
-        "explanation": "A standalone PostgreSQL instance sets BackupRetentionPeriod to 3 days — below the 7-day minimum, limiting the point-in-time-recovery window."
+        "explanation": "A standalone PostgreSQL instance sets BackupRetentionPeriod to 3 days - below the 7-day minimum, limiting the point-in-time-recovery window."
       },
       "fixed": {
         "code": "import { Stack, App } from 'aws-cdk-lib';\nimport { Construct } from 'constructs';\nimport * as rds from 'aws-cdk-lib/aws-rds';\n\nnew rds.CfnDBInstance(this, 'Db', {\n  engine: 'postgres',\n  dbInstanceClass: 'db.t3.micro',\n  allocatedStorage: '20',\n  backupRetentionPeriod: 7,\n});",
@@ -1252,12 +1252,12 @@
       "ruleId": "s3-bucket-public-access",
       "language": "typescript",
       "flagged": {
-        "code": "import * as s3 from 'aws-cdk-lib/aws-s3';\n\n// Only ACLs are blocked — public bucket policies and public access are\n// still permitted (BlockPublicPolicy / RestrictPublicBuckets are false).\nnew s3.Bucket(this, 'Bucket', {\n  blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,\n});",
+        "code": "import * as s3 from 'aws-cdk-lib/aws-s3';\n\n// Only ACLs are blocked - public bucket policies and public access are\n// still permitted (BlockPublicPolicy / RestrictPublicBuckets are false).\nnew s3.Bucket(this, 'Bucket', {\n  blockPublicAccess: s3.BlockPublicAccess.BLOCK_ACLS,\n});",
         "explanation": "BLOCK_ACLS leaves BlockPublicPolicy and RestrictPublicBuckets false (and the bucket is unencrypted/unversioned), so the s3Buckets check emits several findings all tagged s3-bucket-public-access."
       },
       "fixed": {
         "code": "import * as s3 from 'aws-cdk-lib/aws-s3';\n\n// Fully hardened: all four public-access blocks on, encrypted, versioned,\n// and TLS enforced.\nnew s3.Bucket(this, 'Bucket', {\n  blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,\n  encryption: s3.BucketEncryption.S3_MANAGED,\n  versioned: true,\n  enforceSSL: true,\n});",
-        "explanation": "A fully hardened bucket — BLOCK_ALL public-access, S3-managed encryption, versioning, and enforced SSL — clears every s3-bucket-public-access branch, yielding zero for that ruleId. (enforceSSL adds a separate bucket-policy resource under a different rule.)"
+        "explanation": "A fully hardened bucket - BLOCK_ALL public-access, S3-managed encryption, versioning, and enforced SSL - clears every s3-bucket-public-access branch, yielding zero for that ruleId. (enforceSSL adds a separate bucket-policy resource under a different rule.)"
       },
       "validated": true
     },
@@ -1413,7 +1413,7 @@
       },
       "fixed": {
         "code": "import * as wafv2 from 'aws-cdk-lib/aws-wafv2';\n\n// Default Block, at least one rule, metrics + sampled requests enabled.\nnew wafv2.CfnWebACL(this, 'Acl', {\n  scope: 'REGIONAL',\n  defaultAction: { block: {} },\n  visibilityConfig: {\n    cloudWatchMetricsEnabled: true,\n    metricName: 'appAcl',\n    sampledRequestsEnabled: true,\n  },\n  rules: [\n    {\n      name: 'AWSCommonRuleSet',\n      priority: 1,\n      statement: {\n        managedRuleGroupStatement: {\n          vendorName: 'AWS',\n          name: 'AWSManagedRulesCommonRuleSet',\n        },\n      },\n      overrideAction: { none: {} },\n      visibilityConfig: {\n        cloudWatchMetricsEnabled: true,\n        metricName: 'commonRuleSet',\n        sampledRequestsEnabled: true,\n      },\n    },\n  ],\n});",
-        "explanation": "DefaultAction Block, at least one rule, and a VisibilityConfig with CloudWatchMetricsEnabled + SampledRequestsEnabled + MetricName clear every branch — zero findings."
+        "explanation": "DefaultAction Block, at least one rule, and a VisibilityConfig with CloudWatchMetricsEnabled + SampledRequestsEnabled + MetricName clear every branch - zero findings."
       },
       "validated": true
     },
@@ -1448,7 +1448,7 @@
       "language": "typescript",
       "flagged": {
         "code": "import * as ec2 from 'aws-cdk-lib/aws-ec2';\n\nnew ec2.CfnLaunchTemplate(this, 'Lt', {\n  launchTemplateData: {\n    instanceType: 't3.micro',\n  },\n});",
-        "explanation": "The launch template does not set MetadataOptions, so instances default to allowing IMDSv1 — a known SSRF-to-credential-theft path."
+        "explanation": "The launch template does not set MetadataOptions, so instances default to allowing IMDSv1 - a known SSRF-to-credential-theft path."
       },
       "fixed": {
         "code": "import * as ec2 from 'aws-cdk-lib/aws-ec2';\n\nnew ec2.CfnLaunchTemplate(this, 'Lt', {\n  launchTemplateData: {\n    instanceType: 't3.micro',\n    metadataOptions: { httpTokens: 'required' },\n  },\n});",

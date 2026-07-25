@@ -6,7 +6,7 @@ import type { Rule } from '../../types';
  *
  * A trust policy that allows a wildcard principal to assume the role with no
  * scoping condition means ANY principal in ANY AWS account can become this
- * role — every permission attached to it is effectively public. This is more
+ * role - every permission attached to it is effectively public. This is more
  * severe than the cross-account case (which at least names an account).
  * Conditions like aws:PrincipalOrgID/SourceArn scope the grant and are not
  * flagged (see isPublicStatement).
@@ -16,7 +16,7 @@ export const iamRoleAnonymousAssume: Rule = {
     ruleId: 'iam-role-anonymous-assume',
     name: 'IAM Role Assumable By Any AWS Account',
     description:
-      'Detects IAM roles whose trust policy allows a wildcard principal to assume them with no scoping condition — anyone with an AWS account can become the role.',
+      'Detects IAM roles whose trust policy allows a wildcard principal to assume them with no scoping condition - anyone with an AWS account can become the role.',
     severity: 'CRITICAL',
     wafPillar: 'Security',
     resourceTypes: ['AWS::IAM::Role'],
@@ -42,7 +42,7 @@ export const iamRoleAnonymousAssume: Rule = {
       if (statements.some(isPublicStatement)) {
         report(resourceId, {
           issue:
-            'IAM role trust policy allows a wildcard principal to assume the role with no scoping condition — any AWS account can assume it.',
+            'IAM role trust policy allows a wildcard principal to assume the role with no scoping condition - any AWS account can assume it.',
           recommendation:
             'Restrict the trust policy to named principals, or scope a broad grant with aws:PrincipalOrgID / sts:ExternalId conditions.',
         });

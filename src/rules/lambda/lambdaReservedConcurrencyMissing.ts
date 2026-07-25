@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  * lambda-reserved-concurrency-missing
  *
  * Without reserved concurrency a runaway function can exhaust the account's
- * concurrency pool and throttle everything else. Advisory — most functions
+ * concurrency pool and throttle everything else. Advisory - most functions
  * are fine sharing the pool; set it on the ones that spike. CDK-internal
  * helper functions are exempt.
  */

@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * secrets-manager-rotation-missing
  *
- * A secret with no rotation schedule is a static, long-lived credential —
+ * A secret with no rotation schedule is a static, long-lived credential -
  * Security Hub SecretsManager.1 territory. A secret counts as covered when
  * any AWS::SecretsManager::RotationSchedule in the template targets it
  * (SecretId via Ref/Fn::GetAtt). A schedule whose SecretId cannot be
@@ -31,7 +31,7 @@ export const secretsManagerRotationMissing: Rule = {
     ruleId: 'secrets-manager-rotation-missing',
     name: 'Secrets Manager Secret Without Rotation',
     description:
-      'Detects Secrets Manager secrets with no rotation schedule in the template — static credentials that never expire.',
+      'Detects Secrets Manager secrets with no rotation schedule in the template - static credentials that never expire.',
     severity: 'MEDIUM',
     wafPillar: 'Security',
     resourceTypes: [
@@ -58,7 +58,7 @@ export const secretsManagerRotationMissing: Rule = {
       }
       const target = resolveSecretRef(resource.Properties?.SecretId);
       if (target === null) {
-        // Rotation targeting something we cannot resolve — coverage is
+        // Rotation targeting something we cannot resolve - coverage is
         // undecidable for this template, so never flag.
         return;
       }
@@ -74,7 +74,7 @@ export const secretsManagerRotationMissing: Rule = {
       }
       report(resourceId, {
         issue:
-          'Secrets Manager secret has no rotation schedule — it is a static, long-lived credential.',
+          'Secrets Manager secret has no rotation schedule - it is a static, long-lived credential.',
         recommendation:
           'Attach a rotation schedule (secret.addRotationSchedule(...) in CDK), or suppress this rule if the secret cannot rotate by design.',
       });

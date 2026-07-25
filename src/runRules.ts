@@ -3,8 +3,8 @@ import type { CfnTemplate, Finding, ReportFinding, Rule } from './types.js';
 
 export interface RunRulesOptions {
   /**
-   * Called when a rule throws. The run always continues — a buggy rule must
-   * never take down a scan — but a rule that crashed produced *no findings*,
+   * Called when a rule throws. The run always continues - a buggy rule must
+   * never take down a scan - but a rule that crashed produced *no findings*,
    * and silently ignoring that would fail open. Defaults to a `console.warn`;
    * pass your own handler to collect errors, or `() => {}` to silence.
    */
@@ -13,7 +13,7 @@ export interface RunRulesOptions {
 
 const warnRuleError = (ruleId: string, error: unknown): void => {
   console.warn(
-    `cdk-insights-rules: rule "${ruleId}" threw and was skipped — its findings are missing from this run.`,
+    `cdk-insights-rules: rule "${ruleId}" threw and was skipped - its findings are missing from this run.`,
     error
   );
 };
@@ -24,7 +24,7 @@ const warnRuleError = (ruleId: string, error: unknown): void => {
  *   Metadata: { 'cdk-insights': { suppress: ['rule-id', ...] } }
  *
  * In CDK: `cfnResource.addMetadata('cdk-insights', { suppress: [...] })`.
- * This is the acknowledged-finding escape hatch — without one, a finding a
+ * This is the acknowledged-finding escape hatch - without one, a finding a
  * user disagrees with can never be made to go away, and they remove the tool
  * instead.
  */
@@ -51,7 +51,7 @@ const suppressedRuleIds = (
  * @param options  `onRuleError` to observe rules that throw.
  *
  * Each rule runs in isolation: if one throws, it's reported via `onRuleError`
- * and skipped, and the rest still run — a single buggy rule can never take
+ * and skipped, and the rest still run - a single buggy rule can never take
  * down a scan. Findings suppressed on the resource (see `suppressedRuleIds`)
  * are dropped.
  */

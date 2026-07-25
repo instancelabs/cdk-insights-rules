@@ -31,7 +31,7 @@ const hasIntelligentTieringTransition = (properties: unknown): boolean => {
  * s3-intelligent-tiering
  *
  * Advisory: Intelligent-Tiering moves objects between access tiers
- * automatically — the low-effort cost win for buckets with unknown access
+ * automatically - the low-effort cost win for buckets with unknown access
  * patterns. Buckets with an IntelligentTieringConfiguration or an
  * INTELLIGENT_TIERING lifecycle transition are covered.
  */

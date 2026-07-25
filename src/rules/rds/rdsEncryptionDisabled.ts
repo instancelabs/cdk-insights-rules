@@ -18,7 +18,7 @@ const isAuroraMemberInstance = (resource: CfnResource): boolean => {
 
 /**
  * A read replica inherits StorageEncrypted from its source and cannot set it
- * — flagging it would produce an unfixable finding.
+ * - flagging it would produce an unfixable finding.
  */
 const isReadReplica = (resource: CfnResource): boolean =>
   resource.Properties?.SourceDBInstanceIdentifier !== undefined;
@@ -27,7 +27,7 @@ const isReadReplica = (resource: CfnResource): boolean =>
  * rds-encryption-disabled
  *
  * Storage encryption cannot be enabled on an existing RDS instance or cluster
- * — it requires a snapshot-and-restore — so catching it at synth time is the
+ * - it requires a snapshot-and-restore - so catching it at synth time is the
  * cheap moment. Flags DB instances and clusters where StorageEncrypted is not
  * decidably true. Aurora member instances (cluster carries the setting) and
  * read replicas (encryption is inherited, not settable) are exempt. MEDIUM to
@@ -74,7 +74,7 @@ export const rdsEncryptionDisabled: Rule = {
       report(resourceId, {
         issue: `RDS ${isCluster ? 'cluster' : 'instance'} does not have storage encryption enabled.`,
         recommendation:
-          'Set StorageEncrypted to true — encryption cannot be enabled later without a snapshot-and-restore migration.',
+          'Set StorageEncrypted to true - encryption cannot be enabled later without a snapshot-and-restore migration.',
       });
     }
   },

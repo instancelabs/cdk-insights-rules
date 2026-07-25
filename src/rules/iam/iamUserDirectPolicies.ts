@@ -7,7 +7,7 @@ const isNonEmptyArray = (value: unknown): boolean =>
  * iam-user-direct-policies
  *
  * CIS AWS Foundations 1.15: users must inherit permissions through groups
- * (or roles), not carry policies directly — per-user grants are unauditable
+ * (or roles), not carry policies directly - per-user grants are unauditable
  * at scale.
  */
 export const iamUserDirectPolicies: Rule = {
@@ -39,7 +39,7 @@ export const iamUserDirectPolicies: Rule = {
         report(resourceId, {
           issue: 'IAM user has inline policies attached directly.',
           recommendation:
-            'Move the policies to an IAM Group and add the user to it — users must inherit permissions through groups (CIS 1.15).',
+            'Move the policies to an IAM Group and add the user to it - users must inherit permissions through groups (CIS 1.15).',
         });
       }
       if (isNonEmptyArray(props.ManagedPolicyArns)) {

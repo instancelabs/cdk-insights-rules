@@ -2,7 +2,7 @@ import { isCdkInternalLogicalId, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
- * lambda-tracing-disabled — Lambda functions without active X-Ray tracing.
+ * lambda-tracing-disabled - Lambda functions without active X-Ray tracing.
  *
  * Without `TracingConfig.Mode: Active`, a function emits no distributed traces,
  * leaving latency and error investigations without segment-level visibility.
@@ -33,7 +33,7 @@ export const lambdaTracingDisabled: Rule = {
         continue;
       }
       // CDK-internal helper functions (log-retention handlers, custom-resource
-      // providers, ...) aren't configurable by the user — flagging them would
+      // providers, ...) aren't configurable by the user - flagging them would
       // produce findings nobody can act on.
       if (isCdkInternalLogicalId(resourceId)) {
         continue;

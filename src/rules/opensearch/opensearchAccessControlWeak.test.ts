@@ -20,6 +20,25 @@ describe('opensearch-access-control-weak', () => {
     expect(run(domain({}))).toHaveLength(2);
   });
 
+  it('skips intrinsic VPCOptions/SubnetIds instead of flagging "not in a VPC"', () => {
+    expect(
+      run(
+        domain({
+          AdvancedSecurityOptions: { Enabled: true },
+          VPCOptions: { SubnetIds: { Ref: 'PrivateSubnets' } },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        domain({
+          AdvancedSecurityOptions: { Enabled: true },
+          VPCOptions: { 'Fn::If': ['Prod', { SubnetIds: ['subnet-1'] }, {}] },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag FGAC enabled and VPC deployment', () => {
     expect(
       run(

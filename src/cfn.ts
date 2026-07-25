@@ -1,7 +1,7 @@
 /**
  * Shared helpers for reading CloudFormation property values safely.
  *
- * Templates aren't only produced by CDK — SAM and hand-written CloudFormation
+ * Templates aren't only produced by CDK - SAM and hand-written CloudFormation
  * are valid inputs too, and those routinely contain intrinsic functions
  * (`Ref`, `Fn::If`, ...) where a rule expects a literal, and strings ("true")
  * where a rule expects a boolean. Rules must never flag a value they cannot
@@ -11,7 +11,7 @@
 /**
  * True when a value is a CloudFormation intrinsic (`{ Ref: ... }`,
  * `{ 'Fn::If': [...] }`, etc.) whose resolved value can't be known from the
- * template alone. Rules should skip — not flag — such values.
+ * template alone. Rules should skip - not flag - such values.
  */
 export const isIntrinsic = (value: unknown): boolean => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -41,7 +41,7 @@ export const asBoolean = (value: unknown): boolean | undefined => {
 };
 
 /**
- * Logical-id patterns of resources the CDK framework synthesizes internally —
+ * Logical-id patterns of resources the CDK framework synthesizes internally -
  * log-retention handlers, auto-delete-objects providers, custom-resource
  * framework functions. Users cannot configure these constructs, so advisory
  * rules (e.g. "enable tracing") must not flag them: a finding the user cannot

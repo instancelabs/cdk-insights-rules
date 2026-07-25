@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * ecs-logging-disabled
  *
- * A container without a LogConfiguration writes stdout/stderr to nowhere —
+ * A container without a LogConfiguration writes stdout/stderr to nowhere -
  * the first debugging session finds nothing.
  */
 export const ecsLoggingDisabled: Rule = {

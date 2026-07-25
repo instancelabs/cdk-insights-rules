@@ -28,6 +28,12 @@ describe('acm-certificate-email-validation', () => {
     ).toHaveLength(1);
   });
 
+  it('skips intrinsic ValidationMethod instead of flagging it', () => {
+    expect(
+      run(cert({ ValidationMethod: { 'Fn::If': ['Prod', 'DNS', 'EMAIL'] } }))
+    ).toHaveLength(0);
+  });
+
   it('does not flag DNS validation with transparency logging', () => {
     expect(run(cert({ ValidationMethod: 'DNS' }))).toHaveLength(0);
   });

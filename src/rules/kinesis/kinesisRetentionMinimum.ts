@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * kinesis-retention-minimum
  *
  * At the 24-hour default retention, a consumer outage longer than a day
- * loses data permanently. Advisory — pipelines that tolerate loss can
+ * loses data permanently. Advisory - pipelines that tolerate loss can
  * suppress it.
  */
 export const kinesisRetentionMinimum: Rule = {

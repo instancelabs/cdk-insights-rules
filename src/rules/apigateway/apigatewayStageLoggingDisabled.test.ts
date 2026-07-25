@@ -20,6 +20,22 @@ describe('api-gateway-logging-disabled', () => {
     ).toHaveLength(1);
   });
 
+  it('skips intrinsic AccessLogSetting, MethodSettings, or LoggingLevel instead of flagging them', () => {
+    expect(
+      run(res({ AccessLogSetting: { 'Fn::If': ['Prod', {}, {}] } }))
+    ).toHaveLength(0);
+    expect(run(res({ MethodSettings: { Ref: 'Settings' } }))).toHaveLength(0);
+    expect(
+      run(
+        res({
+          MethodSettings: [
+            { LoggingLevel: { 'Fn::If': ['Prod', 'INFO', 'OFF'] } },
+          ],
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag access logs or execution logging', () => {
     expect(
       run(res({ AccessLogSetting: { DestinationArn: 'arn:lg' } }))

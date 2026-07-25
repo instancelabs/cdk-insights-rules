@@ -1,6 +1,6 @@
 <!--
 Note: rules.json and rules-examples.json are GENERATED exports from the CDK
-Insights product — please don't hand-edit them in a PR. To propose a rule,
+Insights product - please don't hand-edit them in a PR. To propose a rule,
 open a rule-proposal issue instead. PRs to docs, CATALOG tooling, and the
 contribution guide are very welcome.
 -->

@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * eventbridge-target-dlq-missing
  *
  * When EventBridge exhausts its delivery retries to a target, the event is
- * lost unless the target has a DeadLetterConfig. Advisory (LOW) — many
+ * lost unless the target has a DeadLetterConfig. Advisory (LOW) - many
  * targets tolerate loss; wire DLQs on the ones that don't.
  */
 export const eventbridgeTargetDlqMissing: Rule = {
@@ -39,7 +39,7 @@ export const eventbridgeTargetDlqMissing: Rule = {
       );
       if (withoutDlq.length > 0) {
         report(resourceId, {
-          issue: `EventBridge rule has ${withoutDlq.length} target(s) without a dead-letter queue — events are lost when delivery retries are exhausted.`,
+          issue: `EventBridge rule has ${withoutDlq.length} target(s) without a dead-letter queue - events are lost when delivery retries are exhausted.`,
           recommendation:
             'Set DeadLetterConfig.Arn on targets whose events must not be lost.',
         });

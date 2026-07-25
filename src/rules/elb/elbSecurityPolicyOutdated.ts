@@ -47,14 +47,14 @@ export const elbSecurityPolicyOutdated: Rule = {
       }
       const sslPolicy = resource.Properties?.SslPolicy;
       if (sslPolicy !== undefined && typeof sslPolicy !== 'string') {
-        continue; // intrinsic — undecidable
+        continue; // intrinsic - undecidable
       }
       const effective = sslPolicy ?? DEFAULT_SSL_POLICY;
       if (OUTDATED_SECURITY_POLICIES.has(effective)) {
         report(resourceId, {
           issue: `Load balancer listener uses outdated security policy ${sslPolicy ?? `${DEFAULT_SSL_POLICY} (default)`}.`,
           recommendation:
-            'Set SslPolicy to ELBSecurityPolicy-TLS13-1-2-2021-06 (or at minimum a TLS 1.2-only policy) — the old default still negotiates TLS 1.0/1.1.',
+            'Set SslPolicy to ELBSecurityPolicy-TLS13-1-2-2021-06 (or at minimum a TLS 1.2-only policy) - the old default still negotiates TLS 1.0/1.1.',
         });
       }
     }

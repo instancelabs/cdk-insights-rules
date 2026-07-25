@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * cognito-mfa-disabled
  *
- * A user pool with MfaConfiguration OFF (or unset — OFF is the default)
+ * A user pool with MfaConfiguration OFF (or unset - OFF is the default)
  * leaves accounts protected by passwords alone.
  */
 export const cognitoMfaDisabled: Rule = {

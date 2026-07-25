@@ -35,7 +35,7 @@ export const snsEncryptionDisabled: Rule = {
         report(resourceId, {
           issue: 'SNS topic is not encrypted at rest (no KmsMasterKeyId).',
           recommendation:
-            'Set KmsMasterKeyId — alias/aws/sns for the AWS-managed key, or a customer-managed key when other services must publish to the topic.',
+            'Set KmsMasterKeyId - alias/aws/sns for the AWS-managed key, or a customer-managed key when other services must publish to the topic.',
         });
       }
     }

@@ -20,6 +20,15 @@ describe('security-group-no-rules', () => {
     expect(run(res({}))).toHaveLength(1);
   });
 
+  it('skips intrinsic ingress or egress rule lists instead of flagging them', () => {
+    expect(
+      run(res({ SecurityGroupIngress: { 'Fn::If': ['Prod', [], []] } }))
+    ).toHaveLength(0);
+    expect(
+      run(res({ SecurityGroupEgress: { Ref: 'EgressRules' } }))
+    ).toHaveLength(0);
+  });
+
   it('does not flag groups with ingress or egress rules', () => {
     expect(
       run(res({ SecurityGroupIngress: [{ IpProtocol: 'tcp' }] }))

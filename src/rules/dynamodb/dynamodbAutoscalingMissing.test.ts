@@ -18,6 +18,43 @@ describe('dynamodb-autoscaling-missing', () => {
     expect(run({ Resources: { Table: provisionedTable } })).toHaveLength(1);
   });
 
+  it('skips intrinsic BillingMode or ProvisionedThroughput instead of flagging them', () => {
+    expect(
+      run({
+        Resources: {
+          Table: {
+            Type: 'AWS::DynamoDB::Table',
+            Properties: {
+              BillingMode: { Ref: 'BillingModeParam' },
+              ProvisionedThroughput: {
+                ReadCapacityUnits: 50,
+                WriteCapacityUnits: 50,
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+    expect(
+      run({
+        Resources: {
+          Table: {
+            Type: 'AWS::DynamoDB::Table',
+            Properties: {
+              ProvisionedThroughput: {
+                'Fn::If': [
+                  'Prod',
+                  { ReadCapacityUnits: 50, WriteCapacityUnits: 50 },
+                  { ReadCapacityUnits: 5, WriteCapacityUnits: 5 },
+                ],
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag on-demand tables or scaled tables', () => {
     expect(
       run({

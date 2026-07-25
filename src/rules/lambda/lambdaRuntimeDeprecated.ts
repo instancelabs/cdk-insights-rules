@@ -1,3 +1,4 @@
+import { isCdkInternalLogicalId } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -23,7 +24,7 @@ const DEPRECATED_RUNTIMES: Record<string, string> = {
   java8: 'java21',
   'java8.al2': 'java21',
   // java11 deliberately absent: AWS has not announced Lambda deprecation for
-  // it (Corretto 11 support runs to 2027) — flagging it would overclaim.
+  // it (Corretto 11 support runs to 2027) - flagging it would overclaim.
   'dotnetcore1.0': 'dotnet8',
   'dotnetcore2.0': 'dotnet8',
   'dotnetcore2.1': 'dotnet8',
@@ -63,6 +64,11 @@ export const lambdaRuntimeDeprecated: Rule = {
       template.Resources ?? {}
     )) {
       if (resource.Type !== 'AWS::Lambda::Function') {
+        continue;
+      }
+      // CDK-internal helper functions run on whatever runtime the installed
+      // aws-cdk-lib pins; the user can't change it from their own code.
+      if (isCdkInternalLogicalId(resourceId)) {
         continue;
       }
       const runtime = resource.Properties?.Runtime;

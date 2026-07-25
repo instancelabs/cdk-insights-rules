@@ -5,7 +5,7 @@ const OUTDATED_TLS_VERSIONS = ['SSLv3', 'TLSv1', 'TLSv1_2016', 'TLSv1.1_2016'];
 /**
  * cloudfront-tls-outdated
  *
- * With a custom certificate, MinimumProtocolVersion defaults to TLSv1 —
+ * With a custom certificate, MinimumProtocolVersion defaults to TLSv1 -
  * protocols with known weaknesses. Distributions on the default CloudFront
  * certificate can't set a minimum version and are exempt.
  */
@@ -51,7 +51,7 @@ export const cloudfrontTlsOutdated: Rule = {
         report(resourceId, {
           issue: `CloudFront distribution uses an outdated minimum TLS version (${minVersion ?? 'TLSv1 default'}).`,
           recommendation:
-            'Set MinimumProtocolVersion to TLSv1.2_2021 or later — older TLS versions have known vulnerabilities.',
+            'Set MinimumProtocolVersion to TLSv1.2_2021 or later - older TLS versions have known vulnerabilities.',
         });
       }
     }

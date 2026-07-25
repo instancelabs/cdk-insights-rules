@@ -86,7 +86,7 @@ const detectInvocations = (
  * retries unless a DeadLetterConfig or an EventInvokeConfig OnFailure
  * destination captures it. Poll-based sources (SQS/Kinesis) need an
  * OnFailure destination on the EventSourceMapping instead. Functions whose
- * invocation mode cannot be inferred from the template are NOT flagged —
+ * invocation mode cannot be inferred from the template are NOT flagged -
  * they may be sync-invoked from another stack. (The product flags those as
  * "unknown"; the open rule stays conservative.)
  */
@@ -137,7 +137,7 @@ export const lambdaDlqMissing: Rule = {
           issue:
             'Lambda function consumes an event source mapping without a failure destination.',
           recommendation:
-            'Set DestinationConfig.OnFailure on the EventSourceMapping — function-level DLQs do not apply to poll-based sources like SQS/Kinesis.',
+            'Set DestinationConfig.OnFailure on the EventSourceMapping - function-level DLQs do not apply to poll-based sources like SQS/Kinesis.',
         });
       }
     }

@@ -39,7 +39,7 @@ export const secretsManagerSecretPublic: Rule = {
       }
       const props = resource.Properties ?? {};
       // BlockPublicPolicy makes Secrets Manager reject public policies at
-      // deploy time — the secret can't actually be exposed.
+      // deploy time - the secret can't actually be exposed.
       if (asBoolean(props.BlockPublicPolicy) === true) {
         continue;
       }

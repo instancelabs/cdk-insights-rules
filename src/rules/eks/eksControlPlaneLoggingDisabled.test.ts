@@ -29,6 +29,30 @@ describe('eks-control-plane-logging-disabled', () => {
     expect(findings[0].issue).not.toContain('api,');
   });
 
+  it('skips intrinsic logging containers or entry Types instead of flagging them', () => {
+    expect(run(cluster({ Logging: { Ref: 'LoggingConfig' } }))).toHaveLength(0);
+    expect(
+      run(
+        cluster({
+          Logging: {
+            ClusterLogging: { EnabledTypes: { 'Fn::If': ['Prod', [], []] } },
+          },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        cluster({
+          Logging: {
+            ClusterLogging: {
+              EnabledTypes: [{ Type: { Ref: 'LogTypeParam' } }],
+            },
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag all five log types enabled', () => {
     expect(
       run(

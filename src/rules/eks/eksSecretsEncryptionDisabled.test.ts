@@ -20,6 +20,12 @@ describe('eks-secrets-encryption-disabled', () => {
     ).toHaveLength(1);
   });
 
+  it('skips intrinsic EncryptionConfig instead of flagging it', () => {
+    expect(
+      run(cluster({ EncryptionConfig: { 'Fn::If': ['Prod', [], []] } }))
+    ).toHaveLength(0);
+  });
+
   it('does not flag a cluster encrypting secrets', () => {
     expect(
       run(

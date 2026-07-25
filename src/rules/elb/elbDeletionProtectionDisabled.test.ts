@@ -28,4 +28,27 @@ describe('elb-deletion-protection-disabled', () => {
       run(alb([{ Key: 'deletion_protection.enabled', Value: 'true' }]))
     ).toHaveLength(0);
   });
+
+  it('skips intrinsic attribute lists, entries, and values', () => {
+    expect(
+      run({
+        Resources: {
+          Alb: {
+            Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer',
+            Properties: { LoadBalancerAttributes: { Ref: 'AttrsParam' } },
+          },
+        },
+      })
+    ).toHaveLength(0);
+    expect(
+      run(
+        alb([
+          {
+            Key: 'deletion_protection.enabled',
+            Value: { 'Fn::If': ['Protect', 'true', 'false'] },
+          },
+        ])
+      )
+    ).toHaveLength(0);
+  });
 });

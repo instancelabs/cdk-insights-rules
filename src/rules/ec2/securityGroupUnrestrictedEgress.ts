@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * security-group-unrestricted-egress
  *
  * Advisory: allow-all egress is CDK's own default (allowAllOutbound), so
- * this is LOW by design — it exists to make the choice visible for
+ * this is LOW by design - it exists to make the choice visible for
  * defence-in-depth environments (egress filtering, exfiltration controls),
  * not to fail builds.
  */
@@ -42,7 +42,7 @@ export const securityGroupUnrestrictedEgress: Rule = {
           issue:
             'Security group allows unrestricted egress to the internet (0.0.0.0/0).',
           recommendation:
-            'Where egress filtering matters (exfiltration controls, compliance), restrict outbound rules to specific destinations; otherwise suppress — allow-all outbound is the CDK default.',
+            'Where egress filtering matters (exfiltration controls, compliance), restrict outbound rules to specific destinations; otherwise suppress - allow-all outbound is the CDK default.',
         });
       }
     }

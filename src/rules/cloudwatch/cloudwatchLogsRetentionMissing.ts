@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * cloudwatch-logs-retention-missing
  *
- * A log group without RetentionInDays keeps every byte forever — the classic
+ * A log group without RetentionInDays keeps every byte forever - the classic
  * slow-burn CloudWatch bill.
  */
 export const cloudwatchLogsRetentionMissing: Rule = {
@@ -32,7 +32,7 @@ export const cloudwatchLogsRetentionMissing: Rule = {
       ) {
         report(resourceId, {
           issue:
-            'CloudWatch log group has no retention period — logs are kept (and billed) forever.',
+            'CloudWatch log group has no retention period - logs are kept (and billed) forever.',
           recommendation:
             'Set RetentionInDays so storage is bounded; 30-90 days suits most operational logs.',
         });

@@ -1,4 +1,4 @@
-import { asBoolean } from '../../cfn.js';
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -35,12 +35,21 @@ export const ecsDeploymentCircuitBreakerDisabled: Rule = {
       if (controller && controller !== 'ECS') {
         continue; // CODE_DEPLOY / EXTERNAL manage their own rollback
       }
-      const breaker =
-        resource.Properties?.DeploymentConfiguration?.DeploymentCircuitBreaker;
+      const deploymentConfig = resource.Properties?.DeploymentConfiguration;
+      const breaker = deploymentConfig?.DeploymentCircuitBreaker;
+      // An intrinsic at any level (config, breaker, Enable) is unknown, not
+      // disabled - skip.
+      if (
+        isIntrinsic(deploymentConfig) ||
+        isIntrinsic(breaker) ||
+        isIntrinsic(breaker?.Enable)
+      ) {
+        continue;
+      }
       if (asBoolean(breaker?.Enable) !== true) {
         report(resourceId, {
           issue:
-            'ECS service does not enable the deployment circuit breaker — a failed rolling deployment will not stop or roll back automatically.',
+            'ECS service does not enable the deployment circuit breaker - a failed rolling deployment will not stop or roll back automatically.',
           recommendation:
             'Enable DeploymentCircuitBreaker with Rollback: true so failed deployments revert to the last healthy task set.',
         });

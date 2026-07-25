@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * s3-bucket-encryption-aws-managed
  *
  * S3 applies SSE-S3 to every bucket by default (since Jan 2023), so a
- * missing BucketEncryption block is not "unencrypted" — it means encryption
+ * missing BucketEncryption block is not "unencrypted" - it means encryption
  * is not customer-controlled. Compliance regimes that require auditable,
  * customer-managed keys (KMS with key policy + rotation) need it explicit.
  */
@@ -20,7 +20,7 @@ export const s3BucketEncryptionAwsManaged: Rule = {
     awsDocUrl:
       'https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-encryption.html',
     remediationSteps: [
-      'Set BucketEncryption explicitly — SSE-KMS with a customer-managed key where compliance requires auditable key control (in CDK: encryption: s3.BucketEncryption.KMS)',
+      'Set BucketEncryption explicitly - SSE-KMS with a customer-managed key where compliance requires auditable key control (in CDK: encryption: s3.BucketEncryption.KMS)',
     ],
     complianceFrameworks: ['SOC2', 'HIPAA', 'PCI-DSS', 'NIST'],
   },
@@ -37,7 +37,7 @@ export const s3BucketEncryptionAwsManaged: Rule = {
           issue:
             'S3 bucket has no explicit encryption configuration (the SSE-S3 default applies).',
           recommendation:
-            'Configure BucketEncryption explicitly — use SSE-KMS with a customer-managed key where key rotation and access must be auditable.',
+            'Configure BucketEncryption explicitly - use SSE-KMS with a customer-managed key where key rotation and access must be auditable.',
         });
       }
     }

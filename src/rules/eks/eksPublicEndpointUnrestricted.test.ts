@@ -29,6 +29,20 @@ describe('eks-public-endpoint-unrestricted', () => {
     ).toHaveLength(1);
   });
 
+  it('skips intrinsic EndpointPublicAccess or PublicAccessCidrs instead of flagging them', () => {
+    expect(
+      run(cluster({ EndpointPublicAccess: { Ref: 'PublicAccessParam' } }))
+    ).toHaveLength(0);
+    expect(
+      run(
+        cluster({
+          EndpointPublicAccess: true,
+          PublicAccessCidrs: { Ref: 'AllowedCidrs' },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag restricted CIDRs or a private-only endpoint', () => {
     expect(
       run(

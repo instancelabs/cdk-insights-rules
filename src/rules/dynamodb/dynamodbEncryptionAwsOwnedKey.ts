@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * dynamodb-encryption-aws-owned-key
  *
- * Without an SSESpecification, DynamoDB encrypts with an AWS-owned key —
+ * Without an SSESpecification, DynamoDB encrypts with an AWS-owned key -
  * fine for general use, but compliance regimes (HIPAA, PCI-DSS) expect
  * customer-controlled keys with auditable rotation. Intrinsic/unknown
  * SSEEnabled values are never flagged.
@@ -38,14 +38,14 @@ export const dynamodbEncryptionAwsOwnedKey: Rule = {
       if (sseEnabled === true) {
         continue;
       }
-      // Intrinsics and other non-boolean values are undecidable — skip.
+      // Intrinsics and other non-boolean values are undecidable - skip.
       if (sseEnabled !== undefined && typeof sseEnabled !== 'boolean') {
         continue;
       }
       report(resourceId, {
         issue: `DynamoDB ${isGlobalTable ? 'global table' : 'table'} is not configured with KMS encryption (defaults to an AWS-owned key).`,
         recommendation:
-          'Set SSESpecification.SSEEnabled to true — add a customer-managed KMSMasterKeyId if your compliance regime requires customer-controlled rotation and audit.',
+          'Set SSESpecification.SSEEnabled to true - add a customer-managed KMSMasterKeyId if your compliance regime requires customer-controlled rotation and audit.',
       });
     }
   },

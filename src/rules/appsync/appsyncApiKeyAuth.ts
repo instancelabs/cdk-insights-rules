@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * appsync-api-key-auth
  *
- * API-key auth on AppSync is a shared static credential — fine for demos,
+ * API-key auth on AppSync is a shared static credential - fine for demos,
  * wrong for production. Only the primary AuthenticationType is checked;
  * an API key as an *additional* auth mode alongside IAM/Cognito is a common
  * legitimate pattern and is not flagged.

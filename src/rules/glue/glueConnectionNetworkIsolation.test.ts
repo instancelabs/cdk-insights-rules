@@ -58,4 +58,22 @@ describe('glue-connection-network-isolation', () => {
     ).toHaveLength(0);
     expect(run(connection({ ConnectionType: 'NETWORK' }))).toHaveLength(0);
   });
+
+  it('skips intrinsic ConnectionProperties and PhysicalConnectionRequirements', () => {
+    expect(
+      run(
+        connection({
+          ConnectionType: 'JDBC',
+          ConnectionProperties: { Ref: 'JdbcProps' },
+          PhysicalConnectionRequirements: {
+            'Fn::If': [
+              'InVpc',
+              { SubnetId: 'subnet-12345678' },
+              { Ref: 'AWS::NoValue' },
+            ],
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

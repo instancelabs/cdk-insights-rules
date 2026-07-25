@@ -1,4 +1,4 @@
-import { asBoolean } from '../../cfn.js';
+import { asBoolean, isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -33,6 +33,14 @@ export const eksPrivateEndpointAccessDisabled: Rule = {
         continue;
       }
       const vpcConfig = resource.Properties?.ResourcesVpcConfig;
+      // Intrinsic endpoint settings are unknown, not disabled - skip.
+      if (
+        isIntrinsic(vpcConfig) ||
+        isIntrinsic(vpcConfig?.EndpointPublicAccess) ||
+        isIntrinsic(vpcConfig?.EndpointPrivateAccess)
+      ) {
+        continue;
+      }
       const publicEnabled =
         asBoolean(vpcConfig?.EndpointPublicAccess) !== false; // default true
       if (
@@ -41,7 +49,7 @@ export const eksPrivateEndpointAccessDisabled: Rule = {
       ) {
         report(resourceId, {
           issue:
-            'EKS cluster has only public endpoint access enabled — node-to-API traffic leaves the VPC.',
+            'EKS cluster has only public endpoint access enabled - node-to-API traffic leaves the VPC.',
           recommendation:
             'Enable EndpointPrivateAccess so cluster control traffic stays inside the VPC.',
         });

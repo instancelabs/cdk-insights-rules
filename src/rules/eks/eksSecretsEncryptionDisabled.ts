@@ -1,10 +1,11 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
  * eks-secrets-encryption-disabled
  *
  * Without an EncryptionConfig covering `secrets`, Kubernetes secrets sit in
- * etcd protected only by the default EBS-layer encryption — envelope
+ * etcd protected only by the default EBS-layer encryption - envelope
  * encryption with your own KMS key is the EKS security baseline.
  */
 export const eksSecretsEncryptionDisabled: Rule = {
@@ -32,6 +33,10 @@ export const eksSecretsEncryptionDisabled: Rule = {
         continue;
       }
       const encryptionConfig = resource.Properties?.EncryptionConfig;
+      // An intrinsic EncryptionConfig is unknown, not missing - skip.
+      if (isIntrinsic(encryptionConfig)) {
+        continue;
+      }
       const hasSecretsEncryption =
         Array.isArray(encryptionConfig) &&
         encryptionConfig.some(

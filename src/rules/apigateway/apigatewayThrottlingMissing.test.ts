@@ -36,6 +36,21 @@ describe('apigateway-throttling-missing', () => {
     ).toContain('apigateway-throttling-missing');
   });
 
+  it('skips intrinsic MethodSettings instead of flagging it', () => {
+    expect(
+      run({
+        Resources: {
+          Stage: {
+            Type: 'AWS::ApiGateway::Stage',
+            Properties: {
+              MethodSettings: { 'Fn::If': ['Prod', [], []] },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag a Stage throttled by a usage plan (Ref)', () => {
     expect(
       run({

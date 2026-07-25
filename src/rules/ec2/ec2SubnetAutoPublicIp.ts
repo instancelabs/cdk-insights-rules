@@ -7,7 +7,7 @@ import type { Rule } from '../../types';
  * A subnet with MapPublicIpOnLaunch hands every instance launched into it a
  * public IP by default. Advisory: public subnets in a standard VPC layout
  * legitimately set this (the CDK Vpc construct does for PUBLIC subnets), so
- * this rule is LOW — it exists to make the blast radius visible, not to
+ * this rule is LOW - it exists to make the blast radius visible, not to
  * fail builds. (The product ships it as MEDIUM; the open catalog downgrades
  * it because it fires on default CDK VPCs.)
  */

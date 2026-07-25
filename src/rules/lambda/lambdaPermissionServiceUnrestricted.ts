@@ -11,12 +11,12 @@ const isServicePrincipal = (principal: unknown): boolean =>
   typeof principal === 'string' && principal.endsWith('.amazonaws.com');
 
 /**
- * lambda-permission-service-unrestricted — the confused-deputy companion to
+ * lambda-permission-service-unrestricted - the confused-deputy companion to
  * lambda-permission-public.
  *
  * A Lambda permission granting a *service* principal (s3.amazonaws.com,
  * sns.amazonaws.com, ...) without SourceArn / SourceAccount / PrincipalOrgID
- * lets that service invoke the function on behalf of ANY account — an
+ * lets that service invoke the function on behalf of ANY account - an
  * attacker points their own bucket/topic at your function.
  */
 export const lambdaPermissionServiceUnrestricted: Rule = {
@@ -52,7 +52,7 @@ export const lambdaPermissionServiceUnrestricted: Rule = {
         report(resourceId, {
           issue: `Lambda permission grants ${props?.Principal} invoke rights without a SourceArn/SourceAccount restriction.`,
           recommendation:
-            'Add SourceArn (the specific bucket/topic/rule allowed to invoke) or SourceAccount — without one, the service will invoke your function on behalf of any AWS account (confused deputy).',
+            'Add SourceArn (the specific bucket/topic/rule allowed to invoke) or SourceAccount - without one, the service will invoke your function on behalf of any AWS account (confused deputy).',
         });
       }
     }
