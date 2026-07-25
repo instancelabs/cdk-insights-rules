@@ -16,9 +16,13 @@ import type { CfnTemplate } from './types';
  * intrinsics makes them undecidable — and an undecidable template that was
  * previously compliant must produce zero findings.
  *
- * Rules whose examples differ by no boolean-ish leaf (string modes, policy
- * documents, added resources) are outside this suite's reach and pass
- * vacuously; the per-rule unit tests cover their intrinsic handling.
+ * Known limits (covered by per-rule unit tests instead):
+ * - Only boolean-ish LEAVES are substituted. A container block that is itself
+ *   an intrinsic (`SomeConfig: { 'Fn::If': [...] }`), string/number/array
+ *   deciders, and rules whose examples differ by no boolean-ish leaf all pass
+ *   this suite vacuously.
+ * - Array items are compared by index; an insertion that shifts a decider to
+ *   an index where the old value coincidentally matches is not detected.
  */
 
 const UNDECIDABLE = { 'Fn::If': ['IntrinsicsContractCondition', true, false] };

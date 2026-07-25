@@ -35,10 +35,15 @@ export const ecsDeploymentCircuitBreakerDisabled: Rule = {
       if (controller && controller !== 'ECS') {
         continue; // CODE_DEPLOY / EXTERNAL manage their own rollback
       }
-      const breaker =
-        resource.Properties?.DeploymentConfiguration?.DeploymentCircuitBreaker;
-      // An intrinsic breaker (or Enable) is unknown, not disabled — skip.
-      if (isIntrinsic(breaker) || isIntrinsic(breaker?.Enable)) {
+      const deploymentConfig = resource.Properties?.DeploymentConfiguration;
+      const breaker = deploymentConfig?.DeploymentCircuitBreaker;
+      // An intrinsic at any level (config, breaker, Enable) is unknown, not
+      // disabled — skip.
+      if (
+        isIntrinsic(deploymentConfig) ||
+        isIntrinsic(breaker) ||
+        isIntrinsic(breaker?.Enable)
+      ) {
         continue;
       }
       if (asBoolean(breaker?.Enable) !== true) {

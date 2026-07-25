@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -33,7 +34,11 @@ export const acmCertificateEmailValidation: Rule = {
         continue;
       }
       const props = resource.Properties ?? {};
-      if (props.ValidationMethod !== 'DNS') {
+      // An intrinsic ValidationMethod is unknown, not email — skip that flag.
+      if (
+        !isIntrinsic(props.ValidationMethod) &&
+        props.ValidationMethod !== 'DNS'
+      ) {
         report(resourceId, {
           issue:
             'ACM certificate uses email validation instead of DNS validation.',

@@ -41,7 +41,12 @@ configuration is worse than a missing rule. So every rule must be:
    trips the rule and `example.fixed` does not — CI proves this by actually
    synthesizing both snippets with `aws-cdk-lib` and running your rule on the
    output (`src/examples.contract.test.ts`).
-5. `npm run ci` passes locally (lint + typecheck + test + security scan).
+5. The rule never flags a value it cannot decide — CI substitutes the
+   boolean-ish deciding properties from your own example with `Fn::If`
+   intrinsics and fails if the rule still fires
+   (`src/intrinsics.contract.test.ts`); guard deciding reads with
+   `isIntrinsic` from `src/cfn.ts`.
+6. `npm run ci` passes locally (lint + typecheck + test + security scan).
 
 One rule per PR — it's easier to review and validate.
 

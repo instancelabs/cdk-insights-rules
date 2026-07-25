@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { CfnResource, Rule } from '../../types';
 
 /** True when a usage-plan throttle object sets a rate or burst limit. */
@@ -89,6 +90,10 @@ export const apigatewayThrottlingMissing: Rule = {
       }
 
       const methodSettings = resource.Properties?.MethodSettings;
+      // An intrinsic MethodSettings list is unknown, not unthrottled — skip.
+      if (isIntrinsic(methodSettings)) {
+        continue;
+      }
       const hasOwnThrottling =
         Array.isArray(methodSettings) &&
         methodSettings.some(

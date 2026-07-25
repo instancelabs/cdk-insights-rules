@@ -49,7 +49,12 @@ export const opensearchAccessControlWeak: Rule = {
         });
       }
       const subnetIds = props.VPCOptions?.SubnetIds;
-      if (!Array.isArray(subnetIds) || subnetIds.length === 0) {
+      // An intrinsic VPCOptions/SubnetIds is unknown, not "no VPC" — skip.
+      if (
+        !isIntrinsic(props.VPCOptions) &&
+        !isIntrinsic(subnetIds) &&
+        (!Array.isArray(subnetIds) || subnetIds.length === 0)
+      ) {
         report(resourceId, {
           issue: 'OpenSearch domain is not deployed within a VPC.',
           recommendation:

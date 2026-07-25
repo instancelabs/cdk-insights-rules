@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { CfnTemplate, Rule } from '../../types';
 
 const collectReferencedIds = (value: unknown, out: Set<string>): void => {
@@ -73,6 +74,13 @@ export const dynamodbAutoscalingMissing: Rule = {
         continue;
       }
       const billingMode = resource.Properties?.BillingMode;
+      // An intrinsic BillingMode or ProvisionedThroughput is unknown — skip.
+      if (
+        isIntrinsic(billingMode) ||
+        isIntrinsic(resource.Properties?.ProvisionedThroughput)
+      ) {
+        continue;
+      }
       if (billingMode === 'PAY_PER_REQUEST') {
         continue;
       }

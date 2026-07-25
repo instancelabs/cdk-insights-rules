@@ -23,6 +23,17 @@ describe('autoscaling-group-no-elb-healthcheck', () => {
     ).toHaveLength(1);
   });
 
+  it('skips intrinsic HealthCheckType instead of flagging it', () => {
+    expect(
+      run(
+        asg({
+          TargetGroupARNs: ['arn:tg'],
+          HealthCheckType: { 'Fn::If': ['Prod', 'ELB', 'EC2'] },
+        })
+      )
+    ).toHaveLength(0);
+  });
+
   it('does not flag ELB health checks or unattached groups', () => {
     expect(
       run(asg({ TargetGroupARNs: ['arn:tg'], HealthCheckType: 'ELB' }))

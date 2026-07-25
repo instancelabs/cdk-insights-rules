@@ -1,15 +1,6 @@
-import { isIntrinsic } from '../../cfn.js';
-import { asStatements } from '../../policy.js';
+import { asStatements, isFalsyConditionValue } from '../../policy.js';
 import type { PolicyStatement } from '../../policy.js';
 import type { Rule } from '../../types';
-
-// An intrinsic condition value could resolve to false, so whether the Deny
-// enforces TLS is undecidable — treat it as enforcing rather than flag it.
-const isFalsy = (value: unknown): boolean =>
-  value === false ||
-  value === 'false' ||
-  value === 'False' ||
-  isIntrinsic(value);
 
 const actionsCoverAllS3 = (action: unknown): boolean => {
   const actions =
@@ -57,7 +48,10 @@ const enforcesTls = (statement: PolicyStatement): boolean => {
   const boolCondition = (condition?.Bool ?? condition?.BoolIfExists) as
     | Record<string, unknown>
     | undefined;
-  if (!boolCondition || !isFalsy(boolCondition['aws:SecureTransport'])) {
+  if (
+    !boolCondition ||
+    !isFalsyConditionValue(boolCondition['aws:SecureTransport'])
+  ) {
     return false;
   }
   return (

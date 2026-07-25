@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 const isNonEmptyArray = (value: unknown): boolean =>
@@ -37,6 +38,10 @@ export const autoscalingGroupNoElbHealthcheck: Rule = {
       const attachedToLb =
         isNonEmptyArray(props.LoadBalancerNames) ||
         isNonEmptyArray(props.TargetGroupARNs);
+      // An intrinsic HealthCheckType is unknown, not non-ELB — skip.
+      if (isIntrinsic(props.HealthCheckType)) {
+        continue;
+      }
       if (attachedToLb && props.HealthCheckType !== 'ELB') {
         report(resourceId, {
           issue:

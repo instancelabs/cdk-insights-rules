@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -32,6 +33,10 @@ export const securityGroupNoRules: Rule = {
       const props = resource.Properties ?? {};
       const ingress = props.SecurityGroupIngress;
       const egress = props.SecurityGroupEgress;
+      // An intrinsic rule list is unknown, not empty — skip the resource.
+      if (isIntrinsic(ingress) || isIntrinsic(egress)) {
+        continue;
+      }
       const hasIngress = Array.isArray(ingress) && ingress.length > 0;
       const hasEgress = Array.isArray(egress) && egress.length > 0;
       if (!hasIngress && !hasEgress) {

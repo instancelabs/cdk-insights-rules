@@ -39,7 +39,11 @@ export const glueConnectionNetworkIsolation: Rule = {
       if (input?.ConnectionType !== 'JDBC') {
         continue;
       }
-      if (!input?.PhysicalConnectionRequirements?.SubnetId) {
+      // An intrinsic requirements block may carry a SubnetId — undecidable.
+      if (
+        !isIntrinsic(input?.PhysicalConnectionRequirements) &&
+        !input?.PhysicalConnectionRequirements?.SubnetId
+      ) {
         report(resourceId, {
           issue: 'Glue JDBC connection does not specify a VPC subnet.',
           recommendation:
@@ -48,8 +52,10 @@ export const glueConnectionNetworkIsolation: Rule = {
       }
       const connectionProperties = input?.ConnectionProperties;
       const jdbcUrl = connectionProperties?.JDBC_CONNECTION_URL;
-      // An intrinsic JDBC_ENFORCE_SSL or URL is undecidable — never flag.
+      // An intrinsic properties block, JDBC_ENFORCE_SSL, or URL is
+      // undecidable — never flag.
       const sslUnknown =
+        isIntrinsic(connectionProperties) ||
         isIntrinsic(connectionProperties?.JDBC_ENFORCE_SSL) ||
         isIntrinsic(jdbcUrl);
       const enforceSsl =

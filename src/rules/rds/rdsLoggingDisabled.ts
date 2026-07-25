@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { CfnResource, Rule } from '../../types';
 
 const isAuroraMemberInstance = (resource: CfnResource): boolean => {
@@ -46,6 +47,10 @@ export const rdsLoggingDisabled: Rule = {
         continue;
       }
       const exports = resource.Properties?.EnableCloudwatchLogsExports;
+      // An intrinsic export list is unknown, not missing — skip.
+      if (isIntrinsic(exports)) {
+        continue;
+      }
       if (!Array.isArray(exports) || exports.length === 0) {
         report(resourceId, {
           issue: `RDS ${isCluster ? 'cluster' : 'instance'} does not export logs to CloudWatch.`,

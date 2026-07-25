@@ -12,26 +12,46 @@ paths found are fixed, and a new contract test makes the doctrine mechanical.
 
 ### Changed — scan output may shift (fewer false positives)
 
-- **14 rules no longer flag undecidable (intrinsic) or string-boolean values.**
-  Raw `=== true` comparisons (`dynamodb-pitr-disabled`,
-  `apigateway-default-endpoint-enabled`) and flag-path `asBoolean(x) !== true`
-  without an intrinsic guard (`ecs-deployment-circuit-breaker-disabled`,
-  `eks-private-endpoint-access-disabled`, `elasticache-failover-disabled`) now
-  use the guarded idiom; the same class of gap was found and fixed in
-  `elb-logging-disabled`, `elb-deletion-protection-disabled`,
-  `msk-client-authentication-missing`, `msk-broker-logging-disabled`,
-  `glue-connection-network-isolation`, `s3-bucket-policy-non-ssl`, and the
-  S3/SNS/SQS self-lockout rules (an intrinsic `aws:SecureTransport` condition
-  value now counts as the benign TLS shape instead of a lockout).
+- **30 rules no longer flag undecidable (intrinsic) or string-boolean values.**
+  Three classes, all the same doctrine violation:
+  - *Boolean deciders*: raw `=== true` comparisons (`dynamodb-pitr-disabled`,
+    `apigateway-default-endpoint-enabled`) and flag-path
+    `asBoolean(x) !== true` without an intrinsic guard
+    (`ecs-deployment-circuit-breaker-disabled`,
+    `eks-private-endpoint-access-disabled`, `elasticache-failover-disabled`,
+    `elb-logging-disabled`, `elb-deletion-protection-disabled`,
+    `msk-client-authentication-missing`, `msk-broker-logging-disabled`,
+    `glue-connection-network-isolation`) — including intrinsic *container*
+    blocks (`DeploymentConfiguration`, `LoggingInfo`, `ClientAuthentication`
+    mechanism blocks, `LoadBalancerAttributes` and entries,
+    `ConnectionProperties`, `PhysicalConnectionRequirements`, global-table
+    replica entries), not just leaves.
+  - *Policy condition values*: an intrinsic `aws:SecureTransport` value now
+    counts as the benign TLS shape instead of a lockout/missing-TLS finding
+    (`s3-bucket-policy-non-ssl` and the S3/SNS/SQS/KMS self-lockout rules,
+    via the shared `isFalsyConditionValue` in `policy.ts`).
+  - *List and wrapper deciders*: whole-list intrinsics no longer read as
+    "empty/missing" and intrinsic config wrappers are no longer read through
+    with `?.` — `cloudwatch-alarm-actions-missing`,
+    `eks-public-endpoint-unrestricted`, `rds-logging-disabled`,
+    `opensearch-access-control-weak`, `apigateway-stage-logging-disabled`,
+    `apigateway-throttling-missing`, `s3-bucket-public-access`,
+    `eks-secrets-encryption-disabled`, `eks-control-plane-logging-disabled`,
+    `redshift-audit-logging-disabled`,
+    `autoscaling-group-no-elb-healthcheck`,
+    `acm-certificate-email-validation`, `dynamodb-autoscaling-missing`,
+    `waf-web-acl-misconfigured`, `security-group-no-rules`.
 - **`lambda-runtime-deprecated` skips CDK-internal helper functions**
   (log-retention, auto-delete-objects, AwsCustomResource singleton) — their
   runtime is pinned by the installed aws-cdk-lib and not actionable by the
   user, matching the other Lambda rules.
 - **`lambda-env-sensitive-data` no longer flags pointer shapes**: literal ARNs,
-  SSM parameter paths, `{{resolve:...}}` dynamic references, URLs, and keys
-  that name a pointer (`SECRET_ARN`, `API_KEY_PARAMETER_NAME`) are the
-  *recommended* remediation and are now skipped. Real literal secrets still
-  flag.
+  SSM parameter paths, `{{resolve:...}}` dynamic references, and keys that
+  name a pointer (`SECRET_ARN`, `API_KEY_PARAMETER_NAME`) are the
+  *recommended* remediation and are now skipped. URLs are deliberately still
+  flagged (webhook and basic-auth URLs are themselves credentials), and
+  `*_KEY_ID` keys (`ACCESS_KEY_ID`) are carved out of the pointer-suffix
+  exemption. Real literal secrets still flag.
 - **CDK plugin groups findings per rule+message** into one `PolicyViolation`
   with many `violatingResources` (CDK's native model), instead of one
   violation per resource.
@@ -44,9 +64,12 @@ paths found are fixed, and a new contract test makes the doctrine mechanical.
   the rule must stay silent. This is what surfaced the 9 extra rules above and
   prevents the class from regressing.
 - **CDK plugin fails closed on a crashing rule**: a rule that throws now emits
-  a HIGH `cdk-insights-rules/rule-execution-error` violation (mirroring the
+  a `cdk-insights-rules/rule-execution-error` violation (mirroring the
   existing `unreadable-template` path) instead of a console warning and a
-  passing build.
+  passing build. Both plugin-internal violations use severity `error` — CDK's
+  own formatter vocabulary — so they render red and sort first; catalog
+  findings keep the catalog's severity taxonomy (surfaced by CDK as
+  `customSeverity`).
 - **CDK plugin propagates full rule metadata**: `remediationSteps` and
   `complianceFrameworks` now reach `ruleMetadata` alongside `wafPillar` and
   `awsDocUrl`.

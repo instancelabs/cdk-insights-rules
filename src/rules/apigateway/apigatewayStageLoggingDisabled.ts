@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -35,6 +36,17 @@ export const apigatewayStageLoggingDisabled: Rule = {
         continue;
       }
       const props = resource.Properties ?? {};
+      // An intrinsic logging setting is unknown, not disabled — skip.
+      if (
+        isIntrinsic(props.AccessLogSetting) ||
+        isIntrinsic(props.MethodSettings) ||
+        (Array.isArray(props.MethodSettings) &&
+          props.MethodSettings.some((setting) =>
+            isIntrinsic(setting?.LoggingLevel)
+          ))
+      ) {
+        continue;
+      }
       const hasAccessLogs = Boolean(props.AccessLogSetting?.DestinationArn);
       const methodSettings = props.MethodSettings;
       const hasExecutionLogs =

@@ -155,10 +155,13 @@ const hasRootCarveout = (condition: unknown): boolean => {
   return false;
 };
 
-// An intrinsic condition value could resolve to false, making the statement
-// the benign TLS shape — undecidable, so the exemption must apply (a
-// self-lockout rule that can't decide must not flag).
-const isFalsy = (value: unknown): boolean =>
+/**
+ * True when a condition value is false in any CloudFormation spelling — or an
+ * intrinsic, which could resolve to false: undecidable, so a rule keyed on
+ * "this value is false" must treat it as possibly-false rather than flag.
+ * (Module-internal export shared with the S3 TLS rule; not public API.)
+ */
+export const isFalsyConditionValue = (value: unknown): boolean =>
   value === false ||
   value === 'false' ||
   value === 'False' ||
@@ -179,7 +182,10 @@ const isSslEnforcementStatement = (statement: PolicyStatement): boolean => {
   const boolCondition = (conditionMap.Bool ?? conditionMap.BoolIfExists) as
     | Record<string, unknown>
     | undefined;
-  return !!boolCondition && isFalsy(boolCondition['aws:SecureTransport']);
+  return (
+    !!boolCondition &&
+    isFalsyConditionValue(boolCondition['aws:SecureTransport'])
+  );
 };
 
 /**

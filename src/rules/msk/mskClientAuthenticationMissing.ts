@@ -37,16 +37,21 @@ export const mskClientAuthenticationMissing: Rule = {
       const hasTls =
         Array.isArray(auth?.Tls?.CertificateAuthorityArnList) &&
         auth.Tls.CertificateAuthorityArnList.length > 0;
-      // An intrinsic Enabled could resolve to true — undecidable, never flag.
-      const saslEnabled = (value: unknown): boolean =>
-        isIntrinsic(value) || asBoolean(value) === true;
+      // An intrinsic at any level (auth, mechanism block, Enabled) could
+      // resolve to an enabled mechanism — undecidable, never flag.
+      const mechanismOn = (block: unknown): boolean =>
+        isIntrinsic(block) ||
+        isIntrinsic((block as Record<string, unknown> | undefined)?.Enabled) ||
+        asBoolean((block as Record<string, unknown> | undefined)?.Enabled) ===
+          true;
       const hasSasl =
         isIntrinsic(auth) ||
         isIntrinsic(auth?.Sasl) ||
-        saslEnabled(auth?.Sasl?.Scram?.Enabled) ||
-        saslEnabled(auth?.Sasl?.Iam?.Enabled);
+        mechanismOn(auth?.Sasl?.Scram) ||
+        mechanismOn(auth?.Sasl?.Iam);
+      const tlsUnknown = isIntrinsic(auth?.Tls);
 
-      if (!hasTls && !hasSasl) {
+      if (!hasTls && !tlsUnknown && !hasSasl) {
         report(resourceId, {
           issue: 'MSK cluster has no client authentication configured.',
           recommendation:

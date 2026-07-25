@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -31,6 +32,10 @@ export const redshiftAuditLoggingDisabled: Rule = {
         continue;
       }
       const logging = resource.Properties?.LoggingProperties;
+      // An intrinsic LoggingProperties is unknown, not disabled — skip.
+      if (isIntrinsic(logging)) {
+        continue;
+      }
       const usesS3 = Boolean(logging?.BucketName);
       const usesCloudWatch =
         logging?.LogDestinationType === 'cloudwatch' ||

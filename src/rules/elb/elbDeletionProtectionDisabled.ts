@@ -32,6 +32,14 @@ export const elbDeletionProtectionDisabled: Rule = {
         continue;
       }
       const attributes = resource.Properties?.LoadBalancerAttributes;
+      // An intrinsic attribute list (or list entry) may contain the enabling
+      // attribute — undecidable, never flag.
+      if (
+        isIntrinsic(attributes) ||
+        (Array.isArray(attributes) && attributes.some(isIntrinsic))
+      ) {
+        continue;
+      }
       const protectionEnabled =
         Array.isArray(attributes) &&
         attributes.some(

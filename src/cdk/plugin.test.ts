@@ -121,6 +121,7 @@ describe('CdkInsightsRulesPlugin', () => {
     expect(report.violations[0].ruleName).toBe(
       'cdk-insights-rules/unreadable-template'
     );
+    expect(report.violations[0].severity).toBe('error');
     expect(report.violations[0].violatingResources[0].templatePath).toBe(
       templatePath
     );
@@ -189,6 +190,8 @@ describe('CdkInsightsRulesPlugin', () => {
     expect(report.violations[0].ruleName).toBe(
       'cdk-insights-rules/rule-execution-error'
     );
+    // 'error' is CDK-formatter vocabulary: renders red and sorts first.
+    expect(report.violations[0].severity).toBe('error');
     expect(report.violations[0].description).toContain('crashing-rule');
     expect(report.violations[0].description).toContain('boom');
     expect(report.violations[0].violatingResources[0].templatePath).toBe(

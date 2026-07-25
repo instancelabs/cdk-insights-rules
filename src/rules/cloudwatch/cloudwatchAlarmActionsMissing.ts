@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -33,7 +34,11 @@ export const cloudwatchAlarmActionsMissing: Rule = {
       }
       const props = resource.Properties ?? {};
       const actions = props.AlarmActions;
-      if (!Array.isArray(actions) || actions.length === 0) {
+      // An intrinsic AlarmActions list is unknown, not missing — skip.
+      if (
+        !isIntrinsic(actions) &&
+        (!Array.isArray(actions) || actions.length === 0)
+      ) {
         report(resourceId, {
           issue: 'CloudWatch alarm has no alarm actions configured.',
           recommendation:

@@ -57,6 +57,32 @@ describe('s3-bucket-public-access', () => {
     ).toHaveLength(0);
   });
 
+  it('skips an intrinsic PublicAccessBlockConfiguration wrapper instead of flagging it', () => {
+    expect(
+      run({
+        Resources: {
+          Bucket: {
+            Type: 'AWS::S3::Bucket',
+            Properties: {
+              PublicAccessBlockConfiguration: {
+                'Fn::If': [
+                  'Prod',
+                  {
+                    BlockPublicAcls: true,
+                    BlockPublicPolicy: true,
+                    IgnorePublicAcls: true,
+                    RestrictPublicBuckets: true,
+                  },
+                  {},
+                ],
+              },
+            },
+          },
+        },
+      })
+    ).toHaveLength(0);
+  });
+
   it('does not flag flags set via intrinsics (undecidable)', () => {
     expect(
       run({

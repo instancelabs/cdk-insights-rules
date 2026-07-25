@@ -28,7 +28,7 @@ describe('lambda-env-sensitive-data', () => {
     expect(run(fn({ DB_PASSWORD: { Ref: 'SecretParam' } }))).toHaveLength(0);
   });
 
-  it('does not flag pointer-shaped values (ARN, SSM path, dynamic reference, URL)', () => {
+  it('does not flag pointer-shaped values (ARN, SSM path, dynamic reference)', () => {
     expect(
       run(
         fn({
@@ -37,10 +37,26 @@ describe('lambda-env-sensitive-data', () => {
           API_KEY: '/prod/api-key',
           DB_PASSWORD:
             '{{resolve:secretsmanager:prod/db:SecretString:password}}',
-          TOKEN_ENDPOINT_SECRET: 'https://auth.example.com/token',
         })
       )
     ).toHaveLength(0);
+  });
+
+  it('still flags URL-shaped credentials (webhooks, basic-auth URLs)', () => {
+    expect(
+      run(
+        fn({
+          WEBHOOK_TOKEN: 'https://hooks.example.com/services/T000/B000/XXXX',
+        })
+      )
+    ).toHaveLength(1);
+    expect(
+      run(fn({ API_TOKEN: 'https://admin:hunter2@internal.example.com' }))
+    ).toHaveLength(1);
+  });
+
+  it('still flags credential-material *_KEY_ID keys despite the _id pointer suffix', () => {
+    expect(run(fn({ ACCESS_KEY_ID: 'AKIAIOSFODNN7EXAMPLE' }))).toHaveLength(1);
   });
 
   it('does not flag keys that name a pointer to a secret', () => {

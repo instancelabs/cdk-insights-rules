@@ -124,4 +124,41 @@ describe('dynamodb-pitr-disabled', () => {
       })
     ).toHaveLength(0);
   });
+
+  it('skips an intrinsic replica entry but flags a decidably missing replica list', () => {
+    expect(
+      run({
+        Resources: {
+          Global: {
+            Type: 'AWS::DynamoDB::GlobalTable',
+            Properties: {
+              Replicas: [
+                {
+                  'Fn::If': [
+                    'IsProd',
+                    { Region: 'us-east-1' },
+                    { Ref: 'AWS::NoValue' },
+                  ],
+                },
+              ],
+            },
+          },
+          IntrinsicList: {
+            Type: 'AWS::DynamoDB::GlobalTable',
+            Properties: { Replicas: { 'Fn::If': ['A', [], []] } },
+          },
+        },
+      })
+    ).toHaveLength(0);
+    expect(
+      run({
+        Resources: {
+          Global: {
+            Type: 'AWS::DynamoDB::GlobalTable',
+            Properties: {},
+          },
+        },
+      })
+    ).toHaveLength(1);
+  });
 });

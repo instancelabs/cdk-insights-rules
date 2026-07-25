@@ -30,20 +30,28 @@ const isSensitiveKey = (key: string): boolean =>
  * Keys that name a *pointer to* a secret rather than the secret itself —
  * SECRET_ARN, API_KEY_PARAMETER_NAME, TOKEN_PATH. The value of such a
  * variable is a lookup handle, which is exactly the recommended shape.
+ * `*_KEY_ID` is carved out: ACCESS_KEY_ID-style keys hold real credential
+ * material, not a lookup handle.
  */
 const POINTER_KEY_SUFFIX = /[_-](arn|name|path|url|uri|ref|id|alias)$/i;
+const CREDENTIAL_ID_KEY = /key[_-]?id$/i;
 
-const isPointerKey = (key: string): boolean =>
-  POINTER_KEY_SUFFIX.test(normalizeKey(key));
+const isPointerKey = (key: string): boolean => {
+  const normalized = normalizeKey(key);
+  return (
+    POINTER_KEY_SUFFIX.test(normalized) && !CREDENTIAL_ID_KEY.test(normalized)
+  );
+};
 
 /**
  * Values that are references to a secret, not the secret itself. Flagging
  * these punishes users for following the remediation this rule recommends.
+ * URLs are deliberately NOT exempted: webhook URLs and basic-auth URLs are
+ * themselves credentials.
  */
 const POINTER_VALUE_PATTERNS: RegExp[] = [
   /^\{\{resolve:/, // CloudFormation dynamic reference — the recommended shape
   /^arn:[a-zA-Z-]*:/, // an ARN locates the secret; it is not the secret
-  /^https?:\/\//, // endpoint URLs commonly live in *_TOKEN_URL-style keys
   /^\/[A-Za-z0-9_.\-/]+$/, // SSM parameter path, e.g. /prod/api-key
 ];
 

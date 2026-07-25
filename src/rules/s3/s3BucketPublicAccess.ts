@@ -57,6 +57,11 @@ export const s3BucketPublicAccess: Rule = {
         continue;
       }
 
+      // An intrinsic configuration wrapper is unknown, not missing — skip.
+      if (isIntrinsic(publicAccessBlock)) {
+        continue;
+      }
+
       // Flags set via intrinsics are undecidable — never flag those.
       const disabled = PUBLIC_ACCESS_FLAGS.filter(
         (flag) =>

@@ -52,11 +52,18 @@ export const dynamodbPitrDisabled: Rule = {
         );
       } else {
         const replicas = resource.Properties?.Replicas;
-        uncovered =
-          Array.isArray(replicas) &&
-          replicas.some((replica) =>
-            isUncovered(replica?.PointInTimeRecoverySpecification)
-          );
+        if (isIntrinsic(replicas)) {
+          continue; // whole replica list is undecidable
+        }
+        // A missing/empty Replicas list is decidably uncovered; an intrinsic
+        // replica entry (conditional region) is unknown and skipped.
+        uncovered = !Array.isArray(replicas)
+          ? true
+          : replicas.some(
+              (replica) =>
+                !isIntrinsic(replica) &&
+                isUncovered(replica?.PointInTimeRecoverySpecification)
+            );
       }
       if (uncovered) {
         report(resourceId, {

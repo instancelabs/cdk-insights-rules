@@ -219,11 +219,16 @@ npm run ci        # lint + typecheck + test + security scan — the same gates C
 The contract tests do a lot of review before a human ever looks:
 [`src/rules.contract.test.ts`](src/rules.contract.test.ts) checks your rule for
 a unique kebab-case id, complete metadata, that it produces nothing on an empty
-template, and that it never mutates its input and is deterministic — and
+template, and that it never mutates its input and is deterministic —
 [`src/examples.contract.test.ts`](src/examples.contract.test.ts) **synthesizes
 your before/after example with real `aws-cdk-lib`** and proves `flagged` trips
 the rule while `fixed` does not, so examples can never drift from the detection
-logic.
+logic — and [`src/intrinsics.contract.test.ts`](src/intrinsics.contract.test.ts)
+**enforces the "unknown ≠ violation" doctrine mechanically**: it takes the
+boolean-ish properties that differ between your own `flagged`/`fixed` examples,
+replaces them with `Fn::If` intrinsics, and fails if your rule flags a value it
+cannot decide. If your rule fails that gate, guard the deciding read with
+`isIntrinsic` from [`src/cfn.ts`](src/cfn.ts).
 
 ---
 
@@ -320,7 +325,9 @@ src/
   defineRule.ts       Authoring helper.
   rules/<service>/    One file per rule (+ a co-located test).
   cdk/                The CDK policy-validation plugin (the "./cdk" entry point).
+  testutil/           Test-only example synthesizer (excluded from the build).
   examples.contract.test.ts  Synthesizes every rule's example and proves it.
+  intrinsics.contract.test.ts  Proves rules never flag undecidable values.
 scripts/
   security-scan.mjs   Static safety gate for rule files.
   ai-review.mjs       AI-assisted PR review.

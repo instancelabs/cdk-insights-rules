@@ -30,15 +30,21 @@ export const mskBrokerLoggingDisabled: Rule = {
       if (resource.Type !== 'AWS::MSK::Cluster') {
         continue;
       }
-      const brokerLogs = resource.Properties?.LoggingInfo?.BrokerLogs;
-      // An intrinsic Enabled could resolve to true — undecidable, never flag.
-      const destinationEnabled = (value: unknown): boolean =>
-        isIntrinsic(value) || asBoolean(value) === true;
+      const loggingInfo = resource.Properties?.LoggingInfo;
+      const brokerLogs = loggingInfo?.BrokerLogs;
+      // An intrinsic at any level (LoggingInfo, BrokerLogs, destination,
+      // Enabled) could resolve to an enabled destination — never flag.
+      const destinationOn = (block: unknown): boolean =>
+        isIntrinsic(block) ||
+        isIntrinsic((block as Record<string, unknown> | undefined)?.Enabled) ||
+        asBoolean((block as Record<string, unknown> | undefined)?.Enabled) ===
+          true;
       const enabled =
+        isIntrinsic(loggingInfo) ||
         isIntrinsic(brokerLogs) ||
-        destinationEnabled(brokerLogs?.CloudWatchLogs?.Enabled) ||
-        destinationEnabled(brokerLogs?.Firehose?.Enabled) ||
-        destinationEnabled(brokerLogs?.S3?.Enabled);
+        destinationOn(brokerLogs?.CloudWatchLogs) ||
+        destinationOn(brokerLogs?.Firehose) ||
+        destinationOn(brokerLogs?.S3);
       if (!enabled) {
         report(resourceId, {
           issue: 'MSK cluster does not have broker logging configured.',

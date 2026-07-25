@@ -40,4 +40,35 @@ describe('msk-client-authentication-missing', () => {
       run(cluster({ Tls: { CertificateAuthorityArnList: ['arn:...'] } }))
     ).toHaveLength(0);
   });
+
+  it('skips intrinsic authentication containers (Tls, Scram, Iam blocks)', () => {
+    expect(
+      run(
+        cluster({
+          Tls: {
+            'Fn::If': [
+              'UseMtls',
+              {
+                CertificateAuthorityArnList: [
+                  'arn:aws:acm-pca:eu-west-2:111122223333:certificate-authority/ca',
+                ],
+              },
+              { Ref: 'AWS::NoValue' },
+            ],
+          },
+        })
+      )
+    ).toHaveLength(0);
+    expect(
+      run(
+        cluster({
+          Sasl: {
+            Iam: {
+              'Fn::If': ['UseIam', { Enabled: true }, { Enabled: false }],
+            },
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

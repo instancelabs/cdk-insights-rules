@@ -1,3 +1,4 @@
+import { isIntrinsic } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
@@ -32,6 +33,10 @@ export const eksSecretsEncryptionDisabled: Rule = {
         continue;
       }
       const encryptionConfig = resource.Properties?.EncryptionConfig;
+      // An intrinsic EncryptionConfig is unknown, not missing — skip.
+      if (isIntrinsic(encryptionConfig)) {
+        continue;
+      }
       const hasSecretsEncryption =
         Array.isArray(encryptionConfig) &&
         encryptionConfig.some(

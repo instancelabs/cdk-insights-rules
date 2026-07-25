@@ -66,4 +66,20 @@ describe('ecs-deployment-circuit-breaker-disabled', () => {
       )
     ).toHaveLength(0);
   });
+
+  it('skips an intrinsic DeploymentConfiguration container', () => {
+    expect(
+      run(
+        res({
+          DeploymentConfiguration: {
+            'Fn::If': [
+              'IsProd',
+              { DeploymentCircuitBreaker: { Enable: true, Rollback: true } },
+              { Ref: 'AWS::NoValue' },
+            ],
+          },
+        })
+      )
+    ).toHaveLength(0);
+  });
 });

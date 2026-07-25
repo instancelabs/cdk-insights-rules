@@ -39,7 +39,8 @@ export const wafWebAclMisconfigured: Rule = {
       const props = resource.Properties ?? {};
       const rules = props.Rules;
       const hasRules = Array.isArray(rules) && rules.length > 0;
-      if (!hasRules) {
+      // An intrinsic Rules list is unknown, not empty — skip that flag.
+      if (!isIntrinsic(rules) && !hasRules) {
         report(resourceId, {
           issue: props.DefaultAction?.Allow
             ? 'WAF WebACL defaults to Allow and defines no rules — it inspects nothing.'
@@ -49,7 +50,12 @@ export const wafWebAclMisconfigured: Rule = {
         });
       }
       const metricsEnabled = props.VisibilityConfig?.CloudWatchMetricsEnabled;
-      if (!isIntrinsic(metricsEnabled) && asBoolean(metricsEnabled) !== true) {
+      // An intrinsic VisibilityConfig wrapper is unknown, not disabled — skip.
+      if (
+        !isIntrinsic(props.VisibilityConfig) &&
+        !isIntrinsic(metricsEnabled) &&
+        asBoolean(metricsEnabled) !== true
+      ) {
         report(resourceId, {
           issue: 'WAF WebACL does not have CloudWatch metrics enabled.',
           recommendation:
