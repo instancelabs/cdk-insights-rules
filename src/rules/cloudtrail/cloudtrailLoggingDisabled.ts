@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
 /**
  * cloudtrail-logging-disabled
  *
- * A Trail with `IsLogging: false` exists but records nothing — audit history
+ * A Trail with `IsLogging: false` exists but records nothing - audit history
  * silently stops. (The CDK Insights product also reports stacks that define
  * no Trail at all; that variant is inherently per-account, not per-stack, so
  * the open rule keeps only the decidable case.)
@@ -37,7 +37,7 @@ export const cloudtrailLoggingDisabled: Rule = {
       ) {
         report(resourceId, {
           issue:
-            'CloudTrail trail has IsLogging set to false — it exists but records no audit events.',
+            'CloudTrail trail has IsLogging set to false - it exists but records no audit events.',
           recommendation:
             'Set IsLogging to true; a defined-but-disabled trail gives a false sense of audit coverage.',
         });

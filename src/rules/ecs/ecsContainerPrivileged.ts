@@ -2,7 +2,7 @@ import { asBoolean } from '../../cfn.js';
 import type { Rule } from '../../types';
 
 /**
- * ecs-container-privileged — flag privileged containers.
+ * ecs-container-privileged - flag privileged containers.
  *
  * A container running in privileged mode gets access to the host, so a
  * container compromise can escalate into a host compromise. We report the task
@@ -48,7 +48,7 @@ export const ecsContainerPrivileged: Rule = {
         report(resourceId, {
           issue: `ECS task definition has a container running in privileged mode: ${names}.`,
           recommendation:
-            'Remove Privileged: true unless strictly required — a privileged container can access the host and turn a container compromise into host compromise.',
+            'Remove Privileged: true unless strictly required - a privileged container can access the host and turn a container compromise into host compromise.',
         });
       }
     }

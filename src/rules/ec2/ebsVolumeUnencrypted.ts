@@ -39,7 +39,7 @@ export const ebsVolumeUnencrypted: Rule = {
       report(resourceId, {
         issue: 'EBS volume is not encrypted.',
         recommendation:
-          'Set Encrypted to true (optionally with a customer-managed KmsKeyId) to protect data at rest — encryption cannot be added to an existing volume.',
+          'Set Encrypted to true (optionally with a customer-managed KmsKeyId) to protect data at rest - encryption cannot be added to an existing volume.',
       });
     }
   },

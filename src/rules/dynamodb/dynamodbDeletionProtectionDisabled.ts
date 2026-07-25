@@ -29,7 +29,7 @@ export const dynamodbDeletionProtectionDisabled: Rule = {
   },
 
   check: (template, report) => {
-    // Not protected only when decidably false/absent — intrinsics are unknown,
+    // Not protected only when decidably false/absent - intrinsics are unknown,
     // and CloudFormation accepts the string "true" as a boolean.
     const isUnprotected = (value: unknown): boolean =>
       !isIntrinsic(value) && asBoolean(value) !== true;

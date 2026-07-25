@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * imagebuilder-ami-public-launch-permission
  *
  * An AMI distribution with LaunchPermissionConfiguration.UserGroups
- * containing "all" shares the produced image with EVERY AWS account —
+ * containing "all" shares the produced image with EVERY AWS account -
  * a classic data-exfiltration path (baked-in credentials, agents, code).
  * The AmiDistributionConfiguration blob is user-authored JSON, so both
  * PascalCase (raw CFN) and camelCase spellings are checked.
@@ -64,7 +64,7 @@ export const imagebuilderAmiPublicLaunchPermission: Rule = {
           issue:
             'Image Builder distribution shares the produced AMI with all AWS accounts (LaunchPermissionConfiguration UserGroups includes "all").',
           recommendation:
-            'Share the AMI only with specific accounts (UserIds / TargetAccountIds) or your organization (OrganizationArns) — a public AMI exposes everything baked into the image.',
+            'Share the AMI only with specific accounts (UserIds / TargetAccountIds) or your organization (OrganizationArns) - a public AMI exposes everything baked into the image.',
         });
       }
     }

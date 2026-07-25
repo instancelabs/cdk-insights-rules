@@ -49,7 +49,7 @@ export const opensearchAccessControlWeak: Rule = {
         });
       }
       const subnetIds = props.VPCOptions?.SubnetIds;
-      // An intrinsic VPCOptions/SubnetIds is unknown, not "no VPC" — skip.
+      // An intrinsic VPCOptions/SubnetIds is unknown, not "no VPC" - skip.
       if (
         !isIntrinsic(props.VPCOptions) &&
         !isIntrinsic(subnetIds) &&

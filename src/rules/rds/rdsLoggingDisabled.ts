@@ -47,7 +47,7 @@ export const rdsLoggingDisabled: Rule = {
         continue;
       }
       const exports = resource.Properties?.EnableCloudwatchLogsExports;
-      // An intrinsic export list is unknown, not missing — skip.
+      // An intrinsic export list is unknown, not missing - skip.
       if (isIntrinsic(exports)) {
         continue;
       }

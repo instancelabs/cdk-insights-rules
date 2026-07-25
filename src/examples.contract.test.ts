@@ -7,7 +7,7 @@ import type { Rule } from './types';
 /**
  * The guarantee behind every rule's before/after example: `flagged` MUST trip
  * the rule and `fixed` MUST NOT. This suite enforces it by actually running
- * each snippet — the code is executed inside a real CDK stack, synthesized
+ * each snippet - the code is executed inside a real CDK stack, synthesized
  * with aws-cdk-lib, and the resulting template is fed to the rule. An example
  * that drifts from the detection logic fails CI.
  */

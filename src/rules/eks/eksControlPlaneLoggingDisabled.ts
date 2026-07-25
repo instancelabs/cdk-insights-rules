@@ -41,7 +41,7 @@ export const eksControlPlaneLoggingDisabled: Rule = {
       }
       const logging = resource.Properties?.Logging;
       const enabledTypes = logging?.ClusterLogging?.EnabledTypes;
-      // An intrinsic logging container or entry Type is unknown, not missing — skip.
+      // An intrinsic logging container or entry Type is unknown, not missing - skip.
       if (
         isIntrinsic(logging) ||
         isIntrinsic(logging?.ClusterLogging) ||

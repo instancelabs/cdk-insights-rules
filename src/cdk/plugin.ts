@@ -19,7 +19,7 @@ import type { CfnTemplate, Rule, Severity } from '../types.js';
  * The plugin's shapes are declared locally (below) rather than imported from
  * aws-cdk-lib. CDK's `IPolicyValidationPluginBeta1` and the graduated
  * `IPolicyValidationPlugin` are structurally identical, so one class satisfies
- * both — and this package stays zero-dependency and version-agnostic. You only
+ * both - and this package stays zero-dependency and version-agnostic. You only
  * need aws-cdk-lib in your own project to call `Validations.of(app)`.
  */
 
@@ -57,14 +57,14 @@ export interface CdkInsightsRulesPluginOptions {
   readonly rules?: Rule[];
   /**
    * Drop violations below this severity. Defaults to MEDIUM: LOW rules are
-   * advisory best-practice nudges, and a validation plugin fails `cdk synth` —
+   * advisory best-practice nudges, and a validation plugin fails `cdk synth` -
    * failing every build over advisory findings would train users to ignore the
    * tool. Opt into `'LOW'` explicitly to gate on everything.
    */
   readonly minimumSeverity?: Severity;
   /**
    * Reported back to CDK for analytics as `pluginVersion`; an arbitrary
-   * semver string. It does NOT select a rule set — the catalog is whatever
+   * semver string. It does NOT select a rule set - the catalog is whatever
    * this installed package version ships (or the `rules` option).
    */
   readonly version?: string;
@@ -79,7 +79,7 @@ const SEVERITY_ORDER: Record<Severity, number> = {
 
 /**
  * Everything the catalog knows about a rule, flattened into CDK's
- * string-to-string ruleMetadata shape so reports carry the full picture —
+ * string-to-string ruleMetadata shape so reports carry the full picture -
  * not just the pillar and doc link.
  */
 const ruleMetadataOf = (rule: Rule): { [key: string]: string } => {
@@ -128,7 +128,7 @@ export class CdkInsightsRulesPlugin {
         resources: PolicyViolatingResource[];
       }
     >();
-    // A rule that throws produced no findings — silently passing that check
+    // A rule that throws produced no findings - silently passing that check
     // would fail open, the dangerous direction in a synth gate.
     const crashed = new Map<
       string,
@@ -144,7 +144,7 @@ export class CdkInsightsRulesPlugin {
       } catch (error) {
         // CDK just wrote this template, so failing to read it means something
         // is genuinely wrong. Silently skipping would validate nothing and
-        // still report success — fail loudly instead.
+        // still report success - fail loudly instead.
         violations.push({
           ruleName: 'cdk-insights-rules/unreadable-template',
           description: `Could not read or parse the synthesized template, so no rules were run against it: ${
@@ -213,7 +213,7 @@ export class CdkInsightsRulesPlugin {
     for (const [ruleId, { error, templatePaths }] of crashed) {
       violations.push({
         ruleName: 'cdk-insights-rules/rule-execution-error',
-        description: `Rule "${ruleId}" threw and was skipped — its checks did not run, so this report may be incomplete: ${
+        description: `Rule "${ruleId}" threw and was skipped - its checks did not run, so this report may be incomplete: ${
           error instanceof Error ? error.message : String(error)
         }`,
         violatingResources: templatePaths.map((templatePath) => ({

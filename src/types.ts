@@ -3,7 +3,7 @@
  *
  * A rule is data + a pure function. It inspects a synthesized CloudFormation
  * template and reports a finding whenever it spots a misconfiguration. That's
- * the whole surface — no I/O, no network, no CDK, no filesystem. If you can
+ * the whole surface - no I/O, no network, no CDK, no filesystem. If you can
  * decide it from the template, you can write a rule for it.
  */
 
@@ -24,7 +24,7 @@ export interface CfnResource {
   Type: string;
   /**
    * Resource properties. Intentionally loose (`any`) so rules can read any
-   * property without wrestling the type system — you are inspecting arbitrary
+   * property without wrestling the type system - you are inspecting arbitrary
    * synthesized templates, so always guard your access (`?.`).
    */
   // biome-ignore lint/suspicious/noExplicitAny: templates are arbitrary JSON
@@ -54,7 +54,7 @@ export interface Finding {
 
 /**
  * The reporter a rule is handed to flag a finding. Severity, pillar and ruleId
- * come from the rule's metadata — you only describe *what* is wrong and *how* to
+ * come from the rule's metadata - you only describe *what* is wrong and *how* to
  * fix it, for a specific resource. It's injected into every check so rules never
  * construct findings themselves.
  */
@@ -75,7 +75,7 @@ export interface RuleMetadata {
   ruleId: string;
   /**
    * Former ruleIds this rule was published under. Suppressions written
-   * against a legacy id keep working — the runner consults these too.
+   * against a legacy id keep working - the runner consults these too.
    */
   legacyRuleIds?: string[];
   /** Human-readable name, e.g. "S3 Bucket Versioning Disabled". */

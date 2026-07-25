@@ -25,7 +25,7 @@ export const synthesizeExample = async (
       const match = line.match(IMPORT_LINE);
       if (!match) {
         throw new Error(
-          `Example imports must have the form "import * as x from 'aws-cdk-lib/...';" — got: ${line}`
+          `Example imports must have the form "import * as x from 'aws-cdk-lib/...';" - got: ${line}`
         );
       }
       aliases.push(match[1]);

@@ -18,7 +18,7 @@ In scope for this package:
 - Supply-chain issues in the release workflow (npm trusted publishing, OIDC).
 
 Not in scope: a rule failing to detect a misconfiguration (that's a normal
-bug — please open an issue), or vulnerabilities in the private CDK Insights
+bug - please open an issue), or vulnerabilities in the private CDK Insights
 product (report those to the address on [cdkinsights.dev](https://cdkinsights.dev)).
 
 ## Supported versions

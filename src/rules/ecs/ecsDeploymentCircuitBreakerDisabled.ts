@@ -38,7 +38,7 @@ export const ecsDeploymentCircuitBreakerDisabled: Rule = {
       const deploymentConfig = resource.Properties?.DeploymentConfiguration;
       const breaker = deploymentConfig?.DeploymentCircuitBreaker;
       // An intrinsic at any level (config, breaker, Enable) is unknown, not
-      // disabled — skip.
+      // disabled - skip.
       if (
         isIntrinsic(deploymentConfig) ||
         isIntrinsic(breaker) ||
@@ -49,7 +49,7 @@ export const ecsDeploymentCircuitBreakerDisabled: Rule = {
       if (asBoolean(breaker?.Enable) !== true) {
         report(resourceId, {
           issue:
-            'ECS service does not enable the deployment circuit breaker — a failed rolling deployment will not stop or roll back automatically.',
+            'ECS service does not enable the deployment circuit breaker - a failed rolling deployment will not stop or roll back automatically.',
           recommendation:
             'Enable DeploymentCircuitBreaker with Rollback: true so failed deployments revert to the last healthy task set.',
         });

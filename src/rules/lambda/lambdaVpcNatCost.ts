@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * lambda-vpc-nat-cost
  *
  * VPC-attached Lambdas in a stack that also runs a NAT gateway route their
- * AWS-service traffic through it — hourly plus per-GB charges for calls
+ * AWS-service traffic through it - hourly plus per-GB charges for calls
  * that VPC endpoints would carry free.
  */
 export const lambdaVpcNatCost: Rule = {
@@ -40,7 +40,7 @@ export const lambdaVpcNatCost: Rule = {
       if (Array.isArray(subnetIds) && subnetIds.length > 0) {
         report(resourceId, {
           issue:
-            'VPC-attached Lambda function shares a template with a NAT gateway — its AWS-service traffic is metered through NAT.',
+            'VPC-attached Lambda function shares a template with a NAT gateway - its AWS-service traffic is metered through NAT.',
           recommendation:
             'Confirm VPC attachment is required, and add VPC endpoints for the AWS services the function calls so traffic bypasses NAT data-processing charges.',
         });

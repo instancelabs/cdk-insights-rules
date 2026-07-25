@@ -34,7 +34,7 @@ export const cloudwatchAlarmActionsMissing: Rule = {
       }
       const props = resource.Properties ?? {};
       const actions = props.AlarmActions;
-      // An intrinsic AlarmActions list is unknown, not missing — skip.
+      // An intrinsic AlarmActions list is unknown, not missing - skip.
       if (
         !isIntrinsic(actions) &&
         (!Array.isArray(actions) || actions.length === 0)

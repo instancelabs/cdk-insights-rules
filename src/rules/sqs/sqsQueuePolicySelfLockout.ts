@@ -14,7 +14,7 @@ const LOCKOUT_ACTIONS = new Set([
  * A queue policy that Denies `sqs:*` (or the permission-management actions)
  * to `Principal: '*'` with no root/admin carveout locks the account out of
  * managing its own queue. The standard TLS-enforcement Deny that CDK's
- * `enforceSSL: true` emits (Deny with aws:SecureTransport=false) is exempt —
+ * `enforceSSL: true` emits (Deny with aws:SecureTransport=false) is exempt -
  * it denies only non-TLS requests.
  */
 export const sqsQueuePolicySelfLockout: Rule = {

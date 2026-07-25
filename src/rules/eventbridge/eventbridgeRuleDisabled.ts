@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * eventbridge-rule-disabled
  *
  * A disabled rule sits in the template looking configured while matching
- * nothing — usually a leftover from debugging that never got re-enabled.
+ * nothing - usually a leftover from debugging that never got re-enabled.
  */
 export const eventbridgeRuleDisabled: Rule = {
   metadata: {
@@ -33,7 +33,7 @@ export const eventbridgeRuleDisabled: Rule = {
         report(resourceId, {
           issue: 'EventBridge rule is disabled.',
           recommendation:
-            'Set State to ENABLED so the rule matches events — or remove it if it is intentionally retired.',
+            'Set State to ENABLED so the rule matches events - or remove it if it is intentionally retired.',
         });
       }
     }

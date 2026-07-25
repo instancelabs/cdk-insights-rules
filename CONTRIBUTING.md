@@ -3,9 +3,9 @@
 Thanks for helping CDK Insights catch more real problems. Participation is
 governed by our [Code of Conduct](CODE_OF_CONDUCT.md). There are two ways in:
 
-- **Propose a rule** — an idea, no code. Open a
+- **Propose a rule** - an idea, no code. Open a
   [rule proposal issue](https://github.com/instancelabs/cdk-insights-rules/issues/new?template=propose-a-rule.yml).
-- **Contribute a rule** — the code. A check function, a test, and a registry
+- **Contribute a rule** - the code. A check function, a test, and a registry
   entry. Read on.
 
 The full walkthrough (anatomy, the four steps, the contract) is in the
@@ -17,17 +17,17 @@ checklist and the bar a rule has to clear.
 CDK Insights optimises for **trust**. A rule that fires on a secure or default
 configuration is worse than a missing rule. So every rule must be:
 
-- **Deterministic** — decidable from the synthesized template alone.
-- **Low false-positive** — it must not fire on a valid or default-secure config.
+- **Deterministic** - decidable from the synthesized template alone.
+- **Low false-positive** - it must not fire on a valid or default-secure config.
   If a "bad" pattern is sometimes legitimate, scope the rule tightly or drop the
   severity to advisory (LOW). Never flag a value you cannot decide: intrinsics
   (`Ref`, `Fn::If`, ...) may resolve to the safe setting, and CloudFormation
-  accepts `"true"` as a boolean — use `isIntrinsic` / `asBoolean` from
+  accepts `"true"` as a boolean - use `isIntrinsic` / `asBoolean` from
   [`src/cfn.ts`](src/cfn.ts).
-- **Actionable** — the fix is a specific property change the user controls.
-- **Pure** — no network, filesystem, process, `eval`, dynamic imports, or any
+- **Actionable** - the fix is a specific property change the user controls.
+- **Pure** - no network, filesystem, process, `eval`, dynamic imports, or any
   import outside this package. This is enforced mechanically (see below).
-- **Mapped** — exactly one Well-Architected pillar.
+- **Mapped** - exactly one Well-Architected pillar.
 
 ## Submitting a rule (checklist)
 
@@ -38,38 +38,38 @@ configuration is worse than a missing rule. So every rule must be:
 3. The rule is added to the array in `src/registry.ts` **and** exported from
    `src/index.ts` (the contract test fails if either is missing).
 4. `ruleId` is unique and kebab-case; metadata is complete; `example.flagged`
-   trips the rule and `example.fixed` does not — CI proves this by actually
+   trips the rule and `example.fixed` does not - CI proves this by actually
    synthesizing both snippets with `aws-cdk-lib` and running your rule on the
    output (`src/examples.contract.test.ts`).
-5. The rule never flags a value it cannot decide — CI substitutes the
+5. The rule never flags a value it cannot decide - CI substitutes the
    boolean-ish deciding properties from your own example with `Fn::If`
    intrinsics and fails if the rule still fires
    (`src/intrinsics.contract.test.ts`); guard deciding reads with
    `isIntrinsic` from `src/cfn.ts`.
 6. `npm run ci` passes locally (lint + typecheck + test + security scan).
 
-One rule per PR — it's easier to review and validate.
+One rule per PR - it's easier to review and validate.
 
 ## How your PR is checked
 
 | Gate | What it does | Blocking? |
 | --- | --- | --- |
-| `security-scan` | Rejects `eval`, `require`, dynamic `import`, `child_process`, `fs`, `process`, `fetch`, node builtins, constructor/`Reflect` escapes, obfuscation, or non-package imports in rule files (`src/rules/**` — anything outside that surface gets stricter human review instead). | **Yes** |
+| `security-scan` | Rejects `eval`, `require`, dynamic `import`, `child_process`, `fs`, `process`, `fetch`, node builtins, constructor/`Reflect` escapes, obfuscation, or non-package imports in rule files (`src/rules/**` - anything outside that surface gets stricter human review instead). | **Yes** |
 | `typecheck` + tests | Contract tests validate shape/uniqueness/purity and synthesize your before/after example to prove it matches the detection logic; your tests validate behaviour. | **Yes** |
 | AI review | When a maintainer applies the `ai-review` label, Claude posts a structured review (correctness, false-positive risk, integration fit, security) as a PR comment. Its output is schema-validated and escaped before rendering, and it flags suspected prompt-injection attempts. | No (advisory) |
-| Maintainer review | A human makes the final call — every new rule gets one. The AI review is treated as untrusted input: it can raise concerns worth chasing, but a clean AI review never shortcuts human review. | **Yes** |
+| Maintainer review | A human makes the final call - every new rule gets one. The AI review is treated as untrusted input: it can raise concerns worth chasing, but a clean AI review never shortcuts human review. | **Yes** |
 
 ## What a good proposal looks like
 
 If you're proposing rather than coding, answer these (the issue template asks
 for them):
 
-1. **Resource type(s)** — e.g. `AWS::Lambda::Url`.
-2. **The condition** — the exact property gap, e.g. `Properties.AuthType === 'NONE'`.
-3. **Why it matters** — the concrete risk, with an AWS docs link.
-4. **Severity + pillar** — with a one-line justification.
-5. **A before/after CDK snippet** — the single most useful thing you can include.
-6. **False-positive edge cases** — when is the pattern legitimate, and how does
+1. **Resource type(s)** - e.g. `AWS::Lambda::Url`.
+2. **The condition** - the exact property gap, e.g. `Properties.AuthType === 'NONE'`.
+3. **Why it matters** - the concrete risk, with an AWS docs link.
+4. **Severity + pillar** - with a one-line justification.
+5. **A before/after CDK snippet** - the single most useful thing you can include.
+6. **False-positive edge cases** - when is the pattern legitimate, and how does
    the rule avoid flagging it?
 
 ## Ground rules

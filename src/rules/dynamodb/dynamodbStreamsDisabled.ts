@@ -33,7 +33,7 @@ export const dynamodbStreamsDisabled: Rule = {
         report(resourceId, {
           issue: 'DynamoDB table does not have streams enabled.',
           recommendation:
-            'Consider StreamSpecification for item-level change capture — the hook for event-driven processing, audits, and replication.',
+            'Consider StreamSpecification for item-level change capture - the hook for event-driven processing, audits, and replication.',
         });
       }
     }

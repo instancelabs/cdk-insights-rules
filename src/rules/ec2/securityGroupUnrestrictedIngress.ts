@@ -86,7 +86,7 @@ export const securityGroupUnrestrictedIngress: Rule = {
       }
       const dangerous = open.flatMap(exposedDangerousServices);
       const detail = dangerous.length
-        ? ` — including ${[...new Set(dangerous)].join(', ')}`
+        ? ` - including ${[...new Set(dangerous)].join(', ')}`
         : '';
       report(resourceId, {
         issue: `Security group allows unrestricted ingress from the internet (0.0.0.0/0 or ::/0)${detail}.`,

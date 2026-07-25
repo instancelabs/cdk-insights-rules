@@ -4,7 +4,7 @@ import type { Rule } from '../../types';
  * cloudfront-waf-missing
  *
  * A distribution without a WebACL has no edge protection against common
- * exploits or volumetric abuse. Advisory by nature — static-asset-only
+ * exploits or volumetric abuse. Advisory by nature - static-asset-only
  * distributions may legitimately skip WAF; suppress the rule there.
  */
 export const cloudfrontWafMissing: Rule = {

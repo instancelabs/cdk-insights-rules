@@ -33,7 +33,7 @@ export const elbLoggingDisabled: Rule = {
       }
       const attributes = resource.Properties?.LoadBalancerAttributes;
       // An intrinsic attribute list (or list entry) may contain the enabling
-      // attribute — undecidable, never flag.
+      // attribute - undecidable, never flag.
       if (
         isIntrinsic(attributes) ||
         (Array.isArray(attributes) && attributes.some(isIntrinsic))
@@ -45,7 +45,7 @@ export const elbLoggingDisabled: Rule = {
         attributes.some(
           (attribute) =>
             attribute?.Key === 'access_logs.s3.enabled' &&
-            // An intrinsic value is undecidable — never flag on it.
+            // An intrinsic value is undecidable - never flag on it.
             (isIntrinsic(attribute?.Value) ||
               asBoolean(attribute?.Value) === true)
         );

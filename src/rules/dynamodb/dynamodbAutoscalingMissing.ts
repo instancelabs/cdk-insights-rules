@@ -74,7 +74,7 @@ export const dynamodbAutoscalingMissing: Rule = {
         continue;
       }
       const billingMode = resource.Properties?.BillingMode;
-      // An intrinsic BillingMode or ProvisionedThroughput is unknown — skip.
+      // An intrinsic BillingMode or ProvisionedThroughput is unknown - skip.
       if (
         isIntrinsic(billingMode) ||
         isIntrinsic(resource.Properties?.ProvisionedThroughput)

@@ -47,7 +47,7 @@ export const asStatements = (document: unknown): PolicyStatement[] => {
 
 /**
  * True when a Principal grants to the world: the literal `"*"`, or a principal
- * map any of whose values is (or contains) `"*"` — e.g. `{ AWS: "*" }`.
+ * map any of whose values is (or contains) `"*"` - e.g. `{ AWS: "*" }`.
  */
 export const isWildcardPrincipal = (principal: unknown): boolean => {
   if (principal === '*') {
@@ -63,7 +63,7 @@ export const isWildcardPrincipal = (principal: unknown): boolean => {
 
 /**
  * Condition keys that scope a wildcard-principal grant back to an account,
- * organisation, or source — making it broad but not public.
+ * organisation, or source - making it broad but not public.
  */
 const SCOPING_CONDITION_KEYS = new Set([
   'aws:PrincipalAccount',
@@ -156,7 +156,7 @@ const hasRootCarveout = (condition: unknown): boolean => {
 };
 
 /**
- * True when a condition value is false in any CloudFormation spelling — or an
+ * True when a condition value is false in any CloudFormation spelling - or an
  * intrinsic, which could resolve to false: undecidable, so a rule keyed on
  * "this value is false" must treat it as possibly-false rather than flag.
  * (Module-internal export shared with the S3 TLS rule; not public API.)
@@ -170,7 +170,7 @@ export const isFalsyConditionValue = (value: unknown): boolean =>
 /**
  * True for the standard TLS-enforcement statement (Deny when
  * aws:SecureTransport is false) that CDK's `enforceSSL` emits. It denies only
- * non-TLS requests, so it can never lock the account out — every
+ * non-TLS requests, so it can never lock the account out - every
  * self-lockout rule must exempt it.
  */
 const isSslEnforcementStatement = (statement: PolicyStatement): boolean => {

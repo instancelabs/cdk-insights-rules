@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  * msk-client-authentication-missing
  *
  * An MSK cluster with no client authentication (no SASL/SCRAM, no IAM, no
- * mutual TLS) — or with unauthenticated access explicitly enabled — accepts
+ * mutual TLS) - or with unauthenticated access explicitly enabled - accepts
  * connections from anything that can reach the brokers.
  */
 export const mskClientAuthenticationMissing: Rule = {
@@ -38,7 +38,7 @@ export const mskClientAuthenticationMissing: Rule = {
         Array.isArray(auth?.Tls?.CertificateAuthorityArnList) &&
         auth.Tls.CertificateAuthorityArnList.length > 0;
       // An intrinsic at any level (auth, mechanism block, Enabled) could
-      // resolve to an enabled mechanism — undecidable, never flag.
+      // resolve to an enabled mechanism - undecidable, never flag.
       const mechanismOn = (block: unknown): boolean =>
         isIntrinsic(block) ||
         isIntrinsic((block as Record<string, unknown> | undefined)?.Enabled) ||

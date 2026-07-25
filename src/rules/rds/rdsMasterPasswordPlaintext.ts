@@ -7,7 +7,7 @@ import type { Rule } from '../../types';
  * in CloudFormation's stored template, and in every artifact bucket and log
  * that touches them. Dynamic references ('{{resolve:secretsmanager:...}}',
  * '{{resolve:ssm-secure:...}}') and intrinsics (Ref to a NoEcho parameter,
- * Fn::* expressions) resolve at deploy time and are fine — only a decidable
+ * Fn::* expressions) resolve at deploy time and are fine - only a decidable
  * literal is flagged. The companion to ecs-secrets-plaintext.
  */
 
@@ -51,7 +51,7 @@ export const rdsMasterPasswordPlaintext: Rule = {
       }
       report(resourceId, {
         issue:
-          'RDS master password is a plaintext literal in the template — it is visible to anyone who can read the template, the stack, or the deploy artifacts.',
+          'RDS master password is a plaintext literal in the template - it is visible to anyone who can read the template, the stack, or the deploy artifacts.',
         recommendation:
           'Let RDS manage the credential (ManageMasterUserPassword / rds.Credentials.fromGeneratedSecret) or use a Secrets Manager dynamic reference, then rotate the exposed password.',
       });

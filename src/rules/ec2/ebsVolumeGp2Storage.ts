@@ -33,7 +33,7 @@ export const ebsVolumeGp2Storage: Rule = {
         report(resourceId, {
           issue: 'EBS volume uses gp2 storage.',
           recommendation:
-            'Switch to gp3 — same baseline performance at lower cost, with IOPS and throughput tunable independently.',
+            'Switch to gp3 - same baseline performance at lower cost, with IOPS and throughput tunable independently.',
         });
       }
     }

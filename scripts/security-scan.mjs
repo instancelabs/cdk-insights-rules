@@ -7,10 +7,10 @@
  * enforces that mechanically so a contributed (or compromised) rule can't run
  * arbitrary code in CI, in the package, or in a consumer's build.
  *
- * It is defence-in-depth, not a substitute for human review — but it makes the
+ * It is defence-in-depth, not a substitute for human review - but it makes the
  * common malicious patterns impossible to merge by accident.
  *
- * SCOPE: all of `src/**` is scanned — rule files under the strictest policy
+ * SCOPE: all of `src/**` is scanned - rule files under the strictest policy
  * (no bare imports at all), engine/test files against the same forbidden-
  * construct list with narrow, documented per-file exemptions below (the CDK
  * plugin reads the synthesized template from disk; the example contract test
@@ -139,12 +139,12 @@ for (const file of files) {
       continue;
     }
     if (pattern.test(source)) {
-      violations.push(`${relativePath}: forbidden construct — ${label}`);
+      violations.push(`${relativePath}: forbidden construct - ${label}`);
     }
   }
 
-  // Rule examples are CDK snippets stored in template literals — data, not
-  // code — and may legitimately contain their own import lines. Strip
+  // Rule examples are CDK snippets stored in template literals - data, not
+  // code - and may legitimately contain their own import lines. Strip
   // template-literal contents for the import check only; the forbidden-
   // construct patterns above still scan the full source including examples.
   const sourceWithoutTemplateLiterals = source.replace(/`[^`]*`/g, '``');
@@ -159,7 +159,7 @@ for (const file of files) {
       exemption?.imports?.has(specifier) === true;
     if (!isAllowed) {
       violations.push(
-        `${relativePath}: disallowed import "${specifier}" — rules may only import from within the package${isTestFile ? ' (tests may also import "vitest")' : ''}`
+        `${relativePath}: disallowed import "${specifier}" - rules may only import from within the package${isTestFile ? ' (tests may also import "vitest")' : ''}`
       );
     }
   }
@@ -168,7 +168,7 @@ for (const file of files) {
 if (violations.length) {
   console.error('✗ security scan failed:\n');
   for (const violation of violations) {
-    console.error(`  - ${violation}`);
+    console.error(` - ${violation}`);
   }
   console.error(
     `\n${violations.length} violation(s) across ${files.length} file(s).`

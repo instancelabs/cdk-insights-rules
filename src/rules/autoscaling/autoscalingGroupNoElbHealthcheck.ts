@@ -8,7 +8,7 @@ const isNonEmptyArray = (value: unknown): boolean =>
  * autoscaling-group-no-elb-healthcheck
  *
  * An ASG behind a load balancer with the default EC2 health check only
- * recycles instances on hardware failure — an app that hangs but keeps its
+ * recycles instances on hardware failure - an app that hangs but keeps its
  * instance healthy stays in service. ELB health checks close that gap.
  */
 export const autoscalingGroupNoElbHealthcheck: Rule = {
@@ -38,7 +38,7 @@ export const autoscalingGroupNoElbHealthcheck: Rule = {
       const attachedToLb =
         isNonEmptyArray(props.LoadBalancerNames) ||
         isNonEmptyArray(props.TargetGroupARNs);
-      // An intrinsic HealthCheckType is unknown, not non-ELB — skip.
+      // An intrinsic HealthCheckType is unknown, not non-ELB - skip.
       if (isIntrinsic(props.HealthCheckType)) {
         continue;
       }

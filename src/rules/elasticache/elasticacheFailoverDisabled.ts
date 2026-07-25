@@ -46,7 +46,7 @@ export const elasticacheFailoverDisabled: Rule = {
       const hasReplicas =
         numNodeGroups > 1 || replicasPerNodeGroup > 0 || numCacheClusters > 1;
 
-      // Intrinsic values are unknown, not disabled — never flag on them.
+      // Intrinsic values are unknown, not disabled - never flag on them.
       const failoverUnknown = isIntrinsic(props.AutomaticFailoverEnabled);
       const multiAzUnknown = isIntrinsic(props.MultiAZEnabled);
 

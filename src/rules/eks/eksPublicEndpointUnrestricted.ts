@@ -34,7 +34,7 @@ export const eksPublicEndpointUnrestricted: Rule = {
         continue;
       }
       const vpcConfig = resource.Properties?.ResourcesVpcConfig;
-      // An intrinsic endpoint setting is unknown, not unrestricted — skip.
+      // An intrinsic endpoint setting is unknown, not unrestricted - skip.
       if (isIntrinsic(vpcConfig?.EndpointPublicAccess)) {
         continue;
       }
@@ -45,7 +45,7 @@ export const eksPublicEndpointUnrestricted: Rule = {
         continue;
       }
       const cidrs = vpcConfig?.PublicAccessCidrs;
-      // An intrinsic CIDR list is unknown, not unrestricted — skip.
+      // An intrinsic CIDR list is unknown, not unrestricted - skip.
       if (isIntrinsic(cidrs)) {
         continue;
       }

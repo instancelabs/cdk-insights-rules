@@ -35,7 +35,7 @@ export const route53HealthCheckSuboptimal: Rule = {
         report(resourceId, {
           issue: 'Route53 health check uses HTTP instead of HTTPS.',
           recommendation:
-            'Check the HTTPS endpoint users actually hit — an HTTP check can pass while TLS is broken.',
+            'Check the HTTPS endpoint users actually hit - an HTTP check can pass while TLS is broken.',
         });
       }
       if (config?.RequestInterval === 30) {

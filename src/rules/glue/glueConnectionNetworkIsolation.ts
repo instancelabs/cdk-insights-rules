@@ -39,7 +39,7 @@ export const glueConnectionNetworkIsolation: Rule = {
       if (input?.ConnectionType !== 'JDBC') {
         continue;
       }
-      // An intrinsic requirements block may carry a SubnetId — undecidable.
+      // An intrinsic requirements block may carry a SubnetId - undecidable.
       if (
         !isIntrinsic(input?.PhysicalConnectionRequirements) &&
         !input?.PhysicalConnectionRequirements?.SubnetId
@@ -53,7 +53,7 @@ export const glueConnectionNetworkIsolation: Rule = {
       const connectionProperties = input?.ConnectionProperties;
       const jdbcUrl = connectionProperties?.JDBC_CONNECTION_URL;
       // An intrinsic properties block, JDBC_ENFORCE_SSL, or URL is
-      // undecidable — never flag.
+      // undecidable - never flag.
       const sslUnknown =
         isIntrinsic(connectionProperties) ||
         isIntrinsic(connectionProperties?.JDBC_ENFORCE_SSL) ||

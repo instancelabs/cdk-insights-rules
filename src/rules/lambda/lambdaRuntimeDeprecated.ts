@@ -24,7 +24,7 @@ const DEPRECATED_RUNTIMES: Record<string, string> = {
   java8: 'java21',
   'java8.al2': 'java21',
   // java11 deliberately absent: AWS has not announced Lambda deprecation for
-  // it (Corretto 11 support runs to 2027) — flagging it would overclaim.
+  // it (Corretto 11 support runs to 2027) - flagging it would overclaim.
   'dotnetcore1.0': 'dotnet8',
   'dotnetcore2.0': 'dotnet8',
   'dotnetcore2.1': 'dotnet8',

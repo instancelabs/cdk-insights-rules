@@ -31,7 +31,7 @@ const accountIdsFromPrincipal = (principal: unknown): string[] => {
  *
  * A role trust policy naming a literal AWS account grants that whole account
  * assume rights. It cannot be decided from one template whether the account
- * is foreign, so this is a verify-it's-intentional finding — and statements
+ * is foreign, so this is a verify-it's-intentional finding - and statements
  * that already carry a Condition (ExternalId, PrincipalOrgID, ...) are
  * treated as deliberately scoped and not flagged.
  */

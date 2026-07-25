@@ -22,7 +22,7 @@ export const s3BucketPolicyPublicRead: Rule = {
     ruleId: 's3-bucket-policy-public-read',
     name: 'S3 Bucket Policy Grants Public Read',
     description:
-      'Detects S3 bucket policies that allow object reads to a wildcard principal with no scoping condition — the bucket contents are publicly downloadable.',
+      'Detects S3 bucket policies that allow object reads to a wildcard principal with no scoping condition - the bucket contents are publicly downloadable.',
     severity: 'CRITICAL',
     wafPillar: 'Security',
     resourceTypes: ['AWS::S3::BucketPolicy'],
@@ -53,7 +53,7 @@ export const s3BucketPolicyPublicRead: Rule = {
       if (grantsPublicRead) {
         report(resourceId, {
           issue:
-            'Bucket policy allows object reads to a wildcard principal with no scoping condition — the bucket is publicly readable.',
+            'Bucket policy allows object reads to a wildcard principal with no scoping condition - the bucket is publicly readable.',
           recommendation:
             'Front public content with CloudFront Origin Access Control and scope the policy to the distribution ARN; if the bucket is intentionally public, suppress this rule to record the decision.',
         });

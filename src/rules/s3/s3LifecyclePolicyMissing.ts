@@ -3,7 +3,7 @@ import type { Rule } from '../../types';
 /**
  * s3-lifecycle-policy-missing
  *
- * A bucket with no lifecycle rules never transitions or expires anything —
+ * A bucket with no lifecycle rules never transitions or expires anything -
  * storage (and noncurrent versions, on versioned buckets) grows forever.
  */
 export const s3LifecyclePolicyMissing: Rule = {

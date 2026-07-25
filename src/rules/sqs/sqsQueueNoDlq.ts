@@ -2,7 +2,7 @@ import type { CfnResource, Rule } from '../../types';
 
 /**
  * Read a queue's RedrivePolicy. In raw CloudFormation the policy may be a
- * JSON-encoded *string* rather than an object — parse it so both forms work.
+ * JSON-encoded *string* rather than an object - parse it so both forms work.
  */
 const redrivePolicyOf = (
   resource: CfnResource
@@ -58,7 +58,7 @@ const queueNameFromArn = (arn: unknown): string | undefined => {
 };
 
 /**
- * sqs-queue-no-dlq — flag queues without a dead-letter queue.
+ * sqs-queue-no-dlq - flag queues without a dead-letter queue.
  *
  * A queue with no RedrivePolicy silently loses messages that repeatedly fail
  * processing. Two passes: first collect the queues that are themselves used as
@@ -88,7 +88,7 @@ export const sqsQueueNoDlq: Rule = {
   check: (template, report) => {
     const entries = Object.entries(template.Resources ?? {});
 
-    // Pass 1 — queues used AS dead-letter targets, by logical id or queue name.
+    // Pass 1 - queues used AS dead-letter targets, by logical id or queue name.
     const deadLetterIds = new Set<string>();
     const deadLetterNames = new Set<string>();
     for (const [, resource] of entries) {
@@ -106,7 +106,7 @@ export const sqsQueueNoDlq: Rule = {
       }
     }
 
-    // Pass 2 — queues with no RedrivePolicy that aren't themselves a DLQ.
+    // Pass 2 - queues with no RedrivePolicy that aren't themselves a DLQ.
     for (const [resourceId, resource] of entries) {
       if (resource.Type !== 'AWS::SQS::Queue') {
         continue;

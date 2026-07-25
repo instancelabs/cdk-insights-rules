@@ -9,7 +9,7 @@ const actionsCoverAllS3 = (action: unknown): boolean => {
 };
 
 /**
- * True when the Deny's Resource covers both the bucket and its objects — a
+ * True when the Deny's Resource covers both the bucket and its objects - a
  * TLS Deny that misses one still leaves unencrypted access to the other.
  * Intrinsics and unparseable ARNs count as covering (can't be ruled out).
  */
@@ -25,11 +25,11 @@ const coversBucketAndObjects = (resource: unknown): boolean => {
   let objectLevel = false;
   for (const item of resources) {
     if (typeof item !== 'string' || item === '*') {
-      return true; // intrinsic or wildcard — can't rule out
+      return true; // intrinsic or wildcard - can't rule out
     }
     const arnBody = item.split(':::')[1];
     if (arnBody === undefined) {
-      return true; // unparseable — be safe
+      return true; // unparseable - be safe
     }
     if (arnBody.includes('/')) {
       objectLevel = true;
@@ -66,7 +66,7 @@ const enforcesTls = (statement: PolicyStatement): boolean => {
  * A bucket that already carries a policy should also enforce TLS: a Deny on
  * `aws:SecureTransport = false` covering all S3 actions on the bucket and its
  * objects (what CDK's `enforceSSL: true` emits). Only buckets that *have* a
- * BucketPolicy are checked — the rule scopes to the resource that can carry
+ * BucketPolicy are checked - the rule scopes to the resource that can carry
  * the statement.
  */
 export const s3BucketPolicyNonSsl: Rule = {

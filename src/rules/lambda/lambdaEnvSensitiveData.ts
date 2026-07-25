@@ -27,7 +27,7 @@ const isSensitiveKey = (key: string): boolean =>
   SENSITIVE_KEY_PATTERN.test(normalizeKey(key));
 
 /**
- * Keys that name a *pointer to* a secret rather than the secret itself —
+ * Keys that name a *pointer to* a secret rather than the secret itself -
  * SECRET_ARN, API_KEY_PARAMETER_NAME, TOKEN_PATH. The value of such a
  * variable is a lookup handle, which is exactly the recommended shape.
  * `*_KEY_ID` is carved out: ACCESS_KEY_ID-style keys hold real credential
@@ -50,7 +50,7 @@ const isPointerKey = (key: string): boolean => {
  * themselves credentials.
  */
 const POINTER_VALUE_PATTERNS: RegExp[] = [
-  /^\{\{resolve:/, // CloudFormation dynamic reference — the recommended shape
+  /^\{\{resolve:/, // CloudFormation dynamic reference - the recommended shape
   /^arn:[a-zA-Z-]*:/, // an ARN locates the secret; it is not the secret
   /^\/[A-Za-z0-9_.\-/]+$/, // SSM parameter path, e.g. /prod/api-key
 ];
@@ -63,12 +63,12 @@ const isPointerValue = (value: string): boolean =>
  *
  * Environment variables named like secrets with literal string values are
  * readable in the console, GetFunctionConfiguration, and stack templates.
- * Only literal string values are flagged — a Ref/dynamic reference to SSM or
+ * Only literal string values are flagged - a Ref/dynamic reference to SSM or
  * Secrets Manager resolves outside the template and is the recommended shape.
  * Literal strings that are themselves pointers (ARNs, SSM parameter paths,
  * `{{resolve:...}}` dynamic references) or whose key names a pointer
  * (SECRET_ARN, API_KEY_PARAMETER_NAME) are also skipped. URLs are NOT
- * skipped — webhook and basic-auth URLs are themselves credentials.
+ * skipped - webhook and basic-auth URLs are themselves credentials.
  */
 export const lambdaEnvSensitiveData: Rule = {
   metadata: {

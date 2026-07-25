@@ -2,7 +2,7 @@ import { asStatements, isWildcardPrincipal } from '../../policy.js';
 import type { Rule } from '../../types';
 
 /**
- * True when a trust-policy principal includes an AWS account/user/role —
+ * True when a trust-policy principal includes an AWS account/user/role -
  * i.e. the role is assumable by people or foreign workloads, not only by an
  * AWS service.
  */
@@ -24,7 +24,7 @@ const hasAwsPrincipal = (principal: unknown): boolean => {
  * iam-permission-boundary-missing
  *
  * Permission boundaries cap what a delegated role can ever do. Only roles
- * assumable by AWS principals (people, accounts, `*`) are flagged — pure
+ * assumable by AWS principals (people, accounts, `*`) are flagged - pure
  * service roles (lambda.amazonaws.com etc.) are what every CDK construct
  * generates, and flagging them would bury the signal. (The product flags
  * every role; the open rule deliberately scopes to delegation roles.)

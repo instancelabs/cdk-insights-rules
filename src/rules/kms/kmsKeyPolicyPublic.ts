@@ -40,7 +40,7 @@ export const kmsKeyPolicyPublic: Rule = {
           issue:
             'KMS key policy grants access to a wildcard principal with no scoping condition, making the key publicly usable.',
           recommendation:
-            'Restrict the key policy to specific IAM roles, users, or accounts — or scope the wildcard with a Condition like kms:CallerAccount or aws:PrincipalOrgID.',
+            'Restrict the key policy to specific IAM roles, users, or accounts - or scope the wildcard with a Condition like kms:CallerAccount or aws:PrincipalOrgID.',
         });
       }
     }

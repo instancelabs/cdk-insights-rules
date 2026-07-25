@@ -16,7 +16,7 @@ const resolveApiLogicalId = (value: unknown): string | undefined => {
 };
 
 /**
- * apigateway-default-endpoint-enabled — default execute-api endpoint left on
+ * apigateway-default-endpoint-enabled - default execute-api endpoint left on
  * while a custom domain is mapped to the API.
  *
  * When a REST API is fronted by a custom domain (and typically a WAF or other
@@ -24,7 +24,7 @@ const resolveApiLogicalId = (value: unknown): string | undefined => {
  * clients call the API directly and bypass those controls. To keep false
  * positives low, this rule only fires for a REST API that a mapping
  * (`AWS::ApiGateway::BasePathMapping` or `AWS::ApiGatewayV2::ApiMapping`)
- * actually ties to a custom domain in the same template — a domain for some
+ * actually ties to a custom domain in the same template - a domain for some
  * *other* API never flags this one.
  */
 export const apigatewayDefaultEndpointEnabled: Rule = {
@@ -70,7 +70,7 @@ export const apigatewayDefaultEndpointEnabled: Rule = {
     }
 
     for (const [resourceId, resource] of resources) {
-      // Enabled only when decidably not disabled — intrinsics are unknown,
+      // Enabled only when decidably not disabled - intrinsics are unknown,
       // and CloudFormation accepts the string "true" as a boolean.
       const disabled = resource.Properties?.DisableExecuteApiEndpoint;
       if (

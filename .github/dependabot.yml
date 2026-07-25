@@ -4,7 +4,7 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # devDependencies only — the package itself has zero runtime dependencies.
+    # devDependencies only - the package itself has zero runtime dependencies.
     groups:
       dev-dependencies:
         patterns: ['*']

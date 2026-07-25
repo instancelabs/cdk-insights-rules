@@ -33,7 +33,7 @@ export const mskBrokerLoggingDisabled: Rule = {
       const loggingInfo = resource.Properties?.LoggingInfo;
       const brokerLogs = loggingInfo?.BrokerLogs;
       // An intrinsic at any level (LoggingInfo, BrokerLogs, destination,
-      // Enabled) could resolve to an enabled destination — never flag.
+      // Enabled) could resolve to an enabled destination - never flag.
       const destinationOn = (block: unknown): boolean =>
         isIntrinsic(block) ||
         isIntrinsic((block as Record<string, unknown> | undefined)?.Enabled) ||

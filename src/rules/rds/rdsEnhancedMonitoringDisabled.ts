@@ -47,7 +47,7 @@ export const rdsEnhancedMonitoringDisabled: Rule = {
         typeof raw !== 'number' &&
         typeof raw !== 'string'
       ) {
-        continue; // intrinsic — undecidable
+        continue; // intrinsic - undecidable
       }
       report(resourceId, {
         issue: 'RDS instance does not have enhanced monitoring enabled.',

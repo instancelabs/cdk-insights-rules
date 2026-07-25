@@ -13,7 +13,7 @@ import type { CfnTemplate } from './types';
  * example pair: any boolean-ish leaf that differs between the synthesized
  * `flagged` and `fixed` templates is, by the example's own claim, what flips
  * the rule. Replacing those leaves in the `fixed` template with `Fn::If`
- * intrinsics makes them undecidable — and an undecidable template that was
+ * intrinsics makes them undecidable - and an undecidable template that was
  * previously compliant must produce zero findings.
  *
  * Known limits (covered by per-rule unit tests instead):
@@ -78,7 +78,7 @@ describe('intrinsics contract: undecidable deciding values never flag', () => {
 
       const paths = booleanDiffPaths(fixed.Resources, flagged.Resources);
       if (paths.length === 0) {
-        return; // no boolean-ish decider — vacuous for this suite
+        return; // no boolean-ish decider - vacuous for this suite
       }
 
       const undecidable = structuredClone(fixed) as CfnTemplate;
@@ -99,7 +99,7 @@ describe('intrinsics contract: undecidable deciding values never flag', () => {
         findings,
         `${rule.metadata.ruleId} flagged a value it cannot decide (intrinsic at ${paths
           .map((p) => p.join('.'))
-          .join(', ')}) — unknown is not a violation`
+          .join(', ')}) - unknown is not a violation`
       ).toHaveLength(0);
     });
   }

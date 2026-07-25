@@ -5,7 +5,7 @@ import type { Rule } from '../../types';
  *
  * Two hardening signals for backup vaults: a customer-managed encryption
  * key, and a vault lock (inline LockConfiguration or a separate
- * BackupVaultLock resource) so backups can't be deleted — the ransomware
+ * BackupVaultLock resource) so backups can't be deleted - the ransomware
  * defence.
  */
 export const backupVaultHardening: Rule = {
@@ -66,7 +66,7 @@ export const backupVaultHardening: Rule = {
         report(resourceId, {
           issue: 'Backup vault has no vault lock configured.',
           recommendation:
-            'Add a LockConfiguration (or BackupVaultLock) so backups cannot be deleted before retention expires — the core ransomware defence for backups.',
+            'Add a LockConfiguration (or BackupVaultLock) so backups cannot be deleted before retention expires - the core ransomware defence for backups.',
         });
       }
     }

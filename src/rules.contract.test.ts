@@ -43,7 +43,7 @@ const kitchenSink = (): CfnTemplate => ({
 
 /**
  * Invariants every rule in the catalog must satisfy. These run in CI on every
- * PR, so a contributed rule is checked for shape, uniqueness, and — critically —
+ * PR, so a contributed rule is checked for shape, uniqueness, and - critically -
  * that its own before/after example actually behaves the way it claims.
  */
 

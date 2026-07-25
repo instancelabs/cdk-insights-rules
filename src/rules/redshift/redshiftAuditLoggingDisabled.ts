@@ -32,7 +32,7 @@ export const redshiftAuditLoggingDisabled: Rule = {
         continue;
       }
       const logging = resource.Properties?.LoggingProperties;
-      // An intrinsic LoggingProperties is unknown, not disabled — skip.
+      // An intrinsic LoggingProperties is unknown, not disabled - skip.
       if (isIntrinsic(logging)) {
         continue;
       }

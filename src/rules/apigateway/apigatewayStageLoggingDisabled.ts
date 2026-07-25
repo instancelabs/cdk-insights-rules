@@ -36,7 +36,7 @@ export const apigatewayStageLoggingDisabled: Rule = {
         continue;
       }
       const props = resource.Properties ?? {};
-      // An intrinsic logging setting is unknown, not disabled — skip.
+      // An intrinsic logging setting is unknown, not disabled - skip.
       if (
         isIntrinsic(props.AccessLogSetting) ||
         isIntrinsic(props.MethodSettings) ||

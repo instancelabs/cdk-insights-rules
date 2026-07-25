@@ -12,12 +12,12 @@ const hasSourceRestriction = (
   );
 
 /**
- * lambda-permission-scoped-wildcard — the advisory companion to
+ * lambda-permission-scoped-wildcard - the advisory companion to
  * lambda-permission-public.
  *
  * A wildcard Principal that IS scoped by SourceArn / SourceAccount /
  * PrincipalOrgID is broad but not public. Naming the specific account ids
- * is still preferable — the restriction is one condition-edit away from
+ * is still preferable - the restriction is one condition-edit away from
  * public. LayerVersionPermissions scoped by OrganizationId are the
  * documented org-sharing pattern and are exempt.
  */
@@ -59,9 +59,9 @@ export const lambdaPermissionScopedWildcard: Rule = {
         continue;
       }
       report(resourceId, {
-        issue: `${resource.Type} uses a wildcard Principal scoped only by a source/org restriction — broad but not public.`,
+        issue: `${resource.Type} uses a wildcard Principal scoped only by a source/org restriction - broad but not public.`,
         recommendation:
-          'Prefer specific AWS account IDs over Principal "*" — the scoping condition is a single edit away from making the grant public.',
+          'Prefer specific AWS account IDs over Principal "*" - the scoping condition is a single edit away from making the grant public.',
       });
     }
   },

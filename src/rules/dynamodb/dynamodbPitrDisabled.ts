@@ -34,7 +34,7 @@ export const dynamodbPitrDisabled: Rule = {
       if (!isTable && !isGlobalTable) {
         continue;
       }
-      // Uncovered only when decidably false/absent — intrinsics are unknown,
+      // Uncovered only when decidably false/absent - intrinsics are unknown,
       // and CloudFormation accepts the string "true" as a boolean.
       const isUncovered = (spec: unknown): boolean => {
         if (isIntrinsic(spec)) {
@@ -69,7 +69,7 @@ export const dynamodbPitrDisabled: Rule = {
         report(resourceId, {
           issue: `DynamoDB ${isGlobalTable ? 'global table' : 'table'} does not have point-in-time recovery enabled.`,
           recommendation:
-            'Enable PointInTimeRecoverySpecification for continuous backups over the last 35 days — the recovery path for accidental writes and deletes.',
+            'Enable PointInTimeRecoverySpecification for continuous backups over the last 35 days - the recovery path for accidental writes and deletes.',
         });
       }
     }
