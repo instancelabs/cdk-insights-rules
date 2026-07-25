@@ -49,7 +49,9 @@ export const mskClientAuthenticationMissing: Rule = {
         isIntrinsic(auth?.Sasl) ||
         mechanismOn(auth?.Sasl?.Scram) ||
         mechanismOn(auth?.Sasl?.Iam);
-      const tlsUnknown = isIntrinsic(auth?.Tls);
+      const tlsUnknown =
+        isIntrinsic(auth?.Tls) ||
+        isIntrinsic(auth?.Tls?.CertificateAuthorityArnList);
 
       if (!hasTls && !tlsUnknown && !hasSasl) {
         report(resourceId, {

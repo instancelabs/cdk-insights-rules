@@ -40,7 +40,7 @@ paths found are fixed, and a new contract test makes the doctrine mechanical.
     `redshift-audit-logging-disabled`,
     `autoscaling-group-no-elb-healthcheck`,
     `acm-certificate-email-validation`, `dynamodb-autoscaling-missing`,
-    `waf-web-acl-misconfigured`, `security-group-no-rules`.
+    `waf-webacl-misconfigured`, `security-group-no-rules`.
 - **`lambda-runtime-deprecated` skips CDK-internal helper functions**
   (log-retention, auto-delete-objects, AwsCustomResource singleton) — their
   runtime is pinned by the installed aws-cdk-lib and not actionable by the

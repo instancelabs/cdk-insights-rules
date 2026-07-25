@@ -66,8 +66,9 @@ const isPointerValue = (value: string): boolean =>
  * Only literal string values are flagged — a Ref/dynamic reference to SSM or
  * Secrets Manager resolves outside the template and is the recommended shape.
  * Literal strings that are themselves pointers (ARNs, SSM parameter paths,
- * `{{resolve:...}}` dynamic references, URLs) or whose key names a pointer
- * (SECRET_ARN, API_KEY_PARAMETER_NAME) are also skipped.
+ * `{{resolve:...}}` dynamic references) or whose key names a pointer
+ * (SECRET_ARN, API_KEY_PARAMETER_NAME) are also skipped. URLs are NOT
+ * skipped — webhook and basic-auth URLs are themselves credentials.
  */
 export const lambdaEnvSensitiveData: Rule = {
   metadata: {

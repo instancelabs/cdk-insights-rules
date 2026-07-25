@@ -41,6 +41,12 @@ describe('msk-client-authentication-missing', () => {
     ).toHaveLength(0);
   });
 
+  it('skips an intrinsic CertificateAuthorityArnList inside a plain Tls block', () => {
+    expect(
+      run(cluster({ Tls: { CertificateAuthorityArnList: { Ref: 'CaArns' } } }))
+    ).toHaveLength(0);
+  });
+
   it('skips intrinsic authentication containers (Tls, Scram, Iam blocks)', () => {
     expect(
       run(
