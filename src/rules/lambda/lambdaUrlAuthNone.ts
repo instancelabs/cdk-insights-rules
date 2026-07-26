@@ -46,7 +46,7 @@ export const lambdaUrlAuthNone: Rule = {
     flagged: `import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 const fn = new lambda.Function(this, 'Fn', {
-  runtime: lambda.Runtime.NODEJS_20_X,
+  runtime: lambda.Runtime.NODEJS_24_X,
   handler: 'index.handler',
   code: lambda.Code.fromInline('exports.handler = async () => {};'),
 });
@@ -54,7 +54,7 @@ fn.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.NONE });`,
     fixed: `import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 const fn = new lambda.Function(this, 'Fn', {
-  runtime: lambda.Runtime.NODEJS_20_X,
+  runtime: lambda.Runtime.NODEJS_24_X,
   handler: 'index.handler',
   code: lambda.Code.fromInline('exports.handler = async () => {};'),
 });

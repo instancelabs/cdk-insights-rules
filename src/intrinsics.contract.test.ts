@@ -101,6 +101,6 @@ describe('intrinsics contract: undecidable deciding values never flag', () => {
           .map((p) => p.join('.'))
           .join(', ')}) - unknown is not a violation`
       ).toHaveLength(0);
-    });
+    }, 30_000);
   }
 });

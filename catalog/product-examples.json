@@ -905,8 +905,8 @@
         "explanation": "nodejs18.x is past end-of-life and no longer receives security patches."
       },
       "fixed": {
-        "code": "import { aws_lambda as lambda } from 'aws-cdk-lib';\n\nnew lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_22_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});",
-        "explanation": "nodejs22.x is a currently supported runtime that still receives security updates."
+        "code": "import { aws_lambda as lambda } from 'aws-cdk-lib';\n\nnew lambda.Function(this, 'Fn', {\n  runtime: lambda.Runtime.NODEJS_24_X,\n  handler: 'index.handler',\n  code: lambda.Code.fromInline('exports.handler = async () => {};'),\n});",
+        "explanation": "nodejs24.x is the current LTS runtime and receives security updates."
       },
       "validated": true
     },

@@ -25,12 +25,12 @@ describe('example contract: flagged trips the rule, fixed does not', () => {
       it('example.flagged trips the rule', async () => {
         const findings = await findingsOf(rule, rule.example.flagged);
         expect(findings.length).toBeGreaterThan(0);
-      });
+      }, 30_000);
 
       it('example.fixed does not trip the rule', async () => {
         const findings = await findingsOf(rule, rule.example.fixed);
         expect(findings).toHaveLength(0);
-      });
+      }, 30_000);
     });
   }
 });

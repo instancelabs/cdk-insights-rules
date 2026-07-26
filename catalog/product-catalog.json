@@ -1725,7 +1725,7 @@
       "awsDocUrl": "https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_lambda.Runtime.html",
       "complianceFrameworks": [],
       "remediationSteps": [
-        "Pin an explicit runtime (e.g. Runtime.NODEJS_22_X)",
+        "Pin an explicit runtime (e.g. Runtime.NODEJS_24_X)",
         "Or set useLatestRuntimeVersion: false on NodejsFunction",
         "Treat runtime upgrades as a deliberate, reviewed change"
       ],
