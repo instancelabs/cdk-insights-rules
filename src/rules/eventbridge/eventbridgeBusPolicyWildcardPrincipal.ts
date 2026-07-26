@@ -1,5 +1,5 @@
-import { asStatements, isWildcardPrincipal } from '../../policy.js';
 import type { PolicyStatement } from '../../policy.js';
+import { asStatements, isWildcardPrincipal } from '../../policy.js';
 import type { Rule } from '../../types';
 
 const hasMeaningfulCondition = (condition: unknown): boolean =>
