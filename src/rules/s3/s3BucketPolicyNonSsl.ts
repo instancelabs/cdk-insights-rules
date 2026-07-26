@@ -1,5 +1,5 @@
-import { asStatements, isFalsyConditionValue } from '../../policy.js';
 import type { PolicyStatement } from '../../policy.js';
+import { asStatements, isFalsyConditionValue } from '../../policy.js';
 import type { Rule } from '../../types';
 
 const actionsCoverAllS3 = (action: unknown): boolean => {

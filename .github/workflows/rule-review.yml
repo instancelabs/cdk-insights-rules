@@ -48,20 +48,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the trusted base (never the PR head)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.base.sha }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22.12
           cache: npm
 
       # Installs from the trusted base lockfile (includes the Bedrock SDK).
       - run: npm ci
 
       - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_REVIEW_ROLE_ARN }}
           aws-region: us-east-1
