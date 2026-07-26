@@ -28,19 +28,18 @@ jobs:
       contents: write # create the matching Git tag and GitHub Release
       id-token: write # OIDC trusted publishing + provenance
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 2 # need the previous commit to diff the version
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
-          node-version: 22.12
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.x, which
-      # fails OIDC with a misleading 404. Pinned to a major so the publish job
-      # doesn't silently pick up an unvetted npm release.
-      - run: npm install -g npm@11
+      # Trusted publishing needs npm >= 11.5.1. Keep the npm major explicit so
+      # the publish job cannot silently pick up an unvetted future major.
+      - run: npm install -g npm@11.18.0
 
       - run: npm ci
 
