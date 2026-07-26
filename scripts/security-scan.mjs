@@ -23,12 +23,11 @@
  *
  * Exits non-zero if any file violates the rules.
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const projectRoot = process.cwd();
 const srcDir = join(projectRoot, 'src');
-const rulesPathSegment = join('src', 'rules');
 
 // Bare (non-relative) imports allowed, by file kind. Rule implementations may
 // import nothing external; test files may import the test runner only.

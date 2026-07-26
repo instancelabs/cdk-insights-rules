@@ -25,16 +25,16 @@ jobs:
     # decoupling "merge to main" from "publish to npm".
     environment: release
     permissions:
-      contents: read
+      contents: write # create the matching Git tag and GitHub Release
       id-token: write # OIDC trusted publishing + provenance
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2 # need the previous commit to diff the version
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 22.12
           registry-url: https://registry.npmjs.org
 
       # Trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.x, which
@@ -83,3 +83,14 @@ jobs:
       - name: Publish to npm
         if: steps.version.outputs.changed == 'true'
         run: npm publish --access public
+
+      # Reconcile release metadata independently of publishing. If npm accepted
+      # the package but a later step failed, a workflow re-run can still create
+      # the missing tag/release without attempting to republish the version.
+      - name: Ensure GitHub Release exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          gh release view "$TAG" >/dev/null 2>&1 \
+            || gh release create "$TAG" --target "$GITHUB_SHA" --generate-notes
