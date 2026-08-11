@@ -16,6 +16,7 @@ import { cloudfrontTlsOutdated } from './rules/cloudfront/cloudfrontTlsOutdated.
 import { cloudfrontWafMissing } from './rules/cloudfront/cloudfrontWafMissing.js';
 import { cloudtrailLoggingDisabled } from './rules/cloudtrail/cloudtrailLoggingDisabled.js';
 import { cloudwatchAlarmActionsMissing } from './rules/cloudwatch/cloudwatchAlarmActionsMissing.js';
+import { cloudwatchLogAlarmNotificationDataExposure } from './rules/cloudwatch/cloudwatchLogAlarmNotificationDataExposure.js';
 import { cloudwatchLogsEncryptionDisabled } from './rules/cloudwatch/cloudwatchLogsEncryptionDisabled.js';
 import { cloudwatchLogsRetentionMissing } from './rules/cloudwatch/cloudwatchLogsRetentionMissing.js';
 import { cognitoAdvancedSecurityDisabled } from './rules/cognito/cognitoAdvancedSecurityDisabled.js';
@@ -267,6 +268,7 @@ export const rules: Rule[] = [
   cloudwatchLogsEncryptionDisabled,
   cloudwatchLogsRetentionMissing,
   cloudwatchAlarmActionsMissing,
+  cloudwatchLogAlarmNotificationDataExposure,
   glueConnectionNetworkIsolation,
   glueJobEncryptionMissing,
   route53DnssecDisabled,
