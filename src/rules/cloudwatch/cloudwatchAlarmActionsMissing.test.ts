@@ -7,9 +7,12 @@ describe('cloudwatch-alarm-actions-missing', () => {
   const run = (template: CfnTemplate) =>
     runRules(template, [cloudwatchAlarmActionsMissing]);
 
-  const res = (properties: object): CfnTemplate => ({
+  const res = (
+    properties: object,
+    type = 'AWS::CloudWatch::Alarm'
+  ): CfnTemplate => ({
     Resources: {
-      R: { Type: 'AWS::CloudWatch::Alarm', Properties: { ...properties } },
+      R: { Type: type, Properties: { ...properties } },
     },
   });
 
@@ -35,6 +38,21 @@ describe('cloudwatch-alarm-actions-missing', () => {
           AlarmActions: ['arn:sns'],
           TreatMissingData: 'notBreaching',
         })
+      )
+    ).toHaveLength(0);
+  });
+
+  it('applies the same action and missing-data checks to log alarms', () => {
+    expect(run(res({}, 'AWS::CloudWatch::LogAlarm'))).toHaveLength(2);
+    expect(
+      run(
+        res(
+          {
+            AlarmActions: ['arn:aws:sns:eu-west-2:111122223333:oncall'],
+            TreatMissingData: 'notBreaching',
+          },
+          'AWS::CloudWatch::LogAlarm'
+        )
       )
     ).toHaveLength(0);
   });

@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**131 rules** implemented in the open in this package - 13 critical, 32 high, 55 medium, 31 low.
+**132 rules** implemented in the open in this package - 13 critical, 32 high, 56 medium, 31 low.
 
 > This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (the product runs these same rules, plus template-level checks that need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -63,6 +63,7 @@
 | Rule | Severity | Pillar | Description |
 | --- | --- | --- | --- |
 | [`cloudwatch-alarm-actions-missing`](https://cdkinsights.dev/rules/cloudwatch-alarm-actions-missing) | MEDIUM | Operational Excellence | Detects CloudWatch alarms without alarm actions or missing-data handling. |
+| [`cloudwatch-log-alarm-notification-data-exposure`](https://cdkinsights.dev/rules/cloudwatch-log-alarm-notification-data-exposure) | MEDIUM | Security | Detects CloudWatch Log Alarms configured to include raw query-result log lines in SNS action notifications. |
 
 ## Cognito
 

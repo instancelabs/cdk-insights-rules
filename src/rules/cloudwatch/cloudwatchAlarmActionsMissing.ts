@@ -16,7 +16,7 @@ export const cloudwatchAlarmActionsMissing: Rule = {
       'Detects CloudWatch alarms without alarm actions or missing-data handling.',
     severity: 'MEDIUM',
     wafPillar: 'Operational Excellence',
-    resourceTypes: ['AWS::CloudWatch::Alarm'],
+    resourceTypes: ['AWS::CloudWatch::Alarm', 'AWS::CloudWatch::LogAlarm'],
     awsDocUrl:
       'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html',
     remediationSteps: [
@@ -29,7 +29,10 @@ export const cloudwatchAlarmActionsMissing: Rule = {
     for (const [resourceId, resource] of Object.entries(
       template.Resources ?? {}
     )) {
-      if (resource.Type !== 'AWS::CloudWatch::Alarm') {
+      if (
+        resource.Type !== 'AWS::CloudWatch::Alarm' &&
+        resource.Type !== 'AWS::CloudWatch::LogAlarm'
+      ) {
         continue;
       }
       const props = resource.Properties ?? {};
