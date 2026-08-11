@@ -29,6 +29,7 @@ export { cloudfrontTlsOutdated } from './rules/cloudfront/cloudfrontTlsOutdated.
 export { cloudfrontWafMissing } from './rules/cloudfront/cloudfrontWafMissing.js';
 export { cloudtrailLoggingDisabled } from './rules/cloudtrail/cloudtrailLoggingDisabled.js';
 export { cloudwatchAlarmActionsMissing } from './rules/cloudwatch/cloudwatchAlarmActionsMissing.js';
+export { cloudwatchLogAlarmNotificationDataExposure } from './rules/cloudwatch/cloudwatchLogAlarmNotificationDataExposure.js';
 export { cloudwatchLogsEncryptionDisabled } from './rules/cloudwatch/cloudwatchLogsEncryptionDisabled.js';
 export { cloudwatchLogsRetentionMissing } from './rules/cloudwatch/cloudwatchLogsRetentionMissing.js';
 export { cognitoAdvancedSecurityDisabled } from './rules/cognito/cognitoAdvancedSecurityDisabled.js';
