@@ -1,0 +1,7 @@
+{
+  "repository": "instancelabs/cdk-insights-rules",
+  "releaseMode": "merge-only",
+  "ciWorkflow": "jarvis-checks.yml",
+  "check": "Jarvis quality",
+  "holdReason": null
+}
