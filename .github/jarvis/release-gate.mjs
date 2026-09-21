@@ -15,7 +15,7 @@ export async function releaseGate({repo,config,event,eventName,number,ownerReque
   assert(!ownerReviewed||ownerRequested,'Reviewed releases require owner authentication');
   if(ownerRequested)ownerRequestPolicy(eventName,actor,actorId,approvedHead,pr);
   const wf=await api(`${prefix}/actions/workflows/${config.ciWorkflow}`);
-  const maxPasses=ownerRequested?waitAttempts:1;
+  const maxPasses=waitAttempts;
   for(let attempt=0;attempt<maxPasses;attempt++){
    pr=await api(`${prefix}/pulls/${prNumber}`);assert(pr.state==='open','PR is no longer open; inspect its actual state');
    if(ownerRequested)assert(pr.head.sha===approvedHead,'PR changed after the release request; inspect and request its new commit');
@@ -25,11 +25,11 @@ export async function releaseGate({repo,config,event,eventName,number,ownerReque
    const runs=await api(`${prefix}/actions/workflows/${wf.id}/runs?event=pull_request&head_sha=${pr.head.sha}&per_page=20`);
    const run=runs.workflow_runs[0];
    const pending=!run||run.status!=='completed'||pr.mergeable===null||pr.mergeable_state==='unknown';
-   if(ownerRequested&&pending&&attempt<maxPasses-1){output('state','waiting');if(attempt===0)summary(`Waiting for current-head CI for PR #${prNumber}.`);await wait(20000);continue;}
+   if(pending&&attempt<maxPasses-1){output('state','waiting');if(attempt===0)summary(`Waiting for current-head CI for PR #${prNumber}.`);await wait(20000);continue;}
    assert(run,'Current PR has no trusted CI run');
    const jobs=await pages(`/actions/runs/${run.id}/jobs`,'jobs');
    // A clean mergeable state includes all native required checks and protections.
-   if(ownerRequested&&run.conclusion==='success'&&pr.mergeable_state==='blocked'&&attempt<maxPasses-1){output('state','waiting');await wait(20000);continue;}
+   if(run.conclusion==='success'&&pr.mergeable_state==='blocked'&&attempt<maxPasses-1){output('state','waiting');await wait(20000);continue;}
    pullPolicy(pr,repo,run,wf.id,config.check,jobs,comparison,{allowRepair:ownerRequested,allowReviewed:ownerRequested&&ownerReviewed});
    const files=await pages(`/pulls/${prNumber}/files`);assert(files.length===pr.changed_files,'Complete PR diff required');
    let changes;
