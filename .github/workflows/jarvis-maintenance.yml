@@ -1,18 +1,4 @@
 name: Jarvis dependency maintenance
-on:
-  workflow_run:
-    workflows: ["Jarvis pull request checks"]
-    types: [completed]
-  workflow_dispatch:
-    inputs:
-      pr:
-        description: Existing Dependabot pull request number
-        required: true
-        type: string
-      dry_run:
-        description: Evaluate only; do not merge or deploy
-        default: true
-        type: boolean
 permissions:
   contents: read
 concurrency:
@@ -22,7 +8,7 @@ jobs:
   gate:
     if: vars.JARVIS_AUTO_MAINTENANCE == 'enabled' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     permissions:
       contents: write
       pull-requests: write
@@ -30,42 +16,79 @@ jobs:
     outputs:
       sha: ${{ steps.gate.outputs.sha }}
       pr: ${{ steps.gate.outputs.pr }}
+      state: ${{ steps.gate.outputs.state }}
+      hold_reason: ${{ steps.gate.outputs.hold_reason }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Test maintenance policy
-        run: node --test .github/jarvis/*.checks.mjs
-      - name: Verify eligibility and merge the exact passing commit
-        id: gate
-        run: node .github/jarvis/maintain.mjs
-        env:
-          GH_TOKEN: ${{ github.token }}
-          JARVIS_REPAIR_APP_ID: ${{ vars.JARVIS_REPAIR_APP_ID }}
-          JARVIS_REPAIR_INSTALLATION_ID: ${{ vars.JARVIS_REPAIR_INSTALLATION_ID }}
-          JARVIS_REPAIR_APP_PRIVATE_KEY: ${{ secrets.JARVIS_REPAIR_APP_PRIVATE_KEY }}
-          JARVIS_TELEGRAM_BOT_TOKEN: ${{ secrets.JARVIS_TELEGRAM_BOT_TOKEN }}
-          PR_NUMBER: ${{ inputs.pr }}
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Test maintenance policy
+      run: node --test .github/jarvis/*.checks.mjs
+    - name: Verify eligibility and merge the exact passing commit
+      id: gate
+      run: node .github/jarvis/maintain.mjs
+      env:
+        GH_TOKEN: ${{ github.token }}
+        JARVIS_REPAIR_APP_ID: ${{ vars.JARVIS_REPAIR_APP_ID }}
+        JARVIS_REPAIR_INSTALLATION_ID: ${{ vars.JARVIS_REPAIR_INSTALLATION_ID }}
+        JARVIS_REPAIR_APP_PRIVATE_KEY: ${{ secrets.JARVIS_REPAIR_APP_PRIVATE_KEY }}
+        JARVIS_TELEGRAM_BOT_TOKEN: ${{ secrets.JARVIS_TELEGRAM_BOT_TOKEN }}
+        PR_NUMBER: ${{ inputs.pr }}
+        DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && 'true' || 'false' }}
+        OWNER_REQUESTED: ${{ inputs.owner_requested }}
+        OWNER_REVIEWED: ${{ inputs.owner_reviewed }}
+        EXPECTED_SHA: ${{ inputs.expected_sha }}
   notify:
-    needs: [gate]
-    if: always() && (needs.gate.outputs.sha != '' || needs.gate.result == 'failure')
+    needs:
+    - gate
+    if: always() && (needs.gate.outputs.sha != '' || needs.gate.result == 'failure' || (inputs.owner_requested && needs.gate.outputs.state
+      == 'held'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-      - name: Notify Lee and record the actual outcome
-        run: node .github/jarvis/maintain.mjs notify
-        env:
-          GH_TOKEN: ${{ github.token }}
-          JARVIS_TELEGRAM_BOT_TOKEN: ${{ secrets.JARVIS_TELEGRAM_BOT_TOKEN }}
-          PR_NUMBER: ${{ needs.gate.outputs.pr }}
-          RELEASE_SHA: ${{ needs.gate.outputs.sha }}
-          GATE_RESULT: ${{ needs.gate.result }}
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - name: Notify Lee and record the actual outcome
+      run: node .github/jarvis/maintain.mjs notify
+      env:
+        GH_TOKEN: ${{ github.token }}
+        JARVIS_TELEGRAM_BOT_TOKEN: ${{ secrets.JARVIS_TELEGRAM_BOT_TOKEN }}
+        PR_NUMBER: ${{ needs.gate.outputs.pr }}
+        RELEASE_SHA: ${{ needs.gate.outputs.sha }}
+        GATE_RESULT: ${{ needs.gate.result }}
+        RELEASE_STATE: ${{ needs.gate.outputs.state }}
+        HOLD_REASON: ${{ needs.gate.outputs.hold_reason }}
+'on':
+  workflow_run:
+    workflows:
+    - Jarvis pull request checks
+    types:
+    - completed
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Existing pull request number
+        required: true
+        type: string
+      dry_run:
+        description: Evaluate only; do not merge or deploy
+        default: true
+        type: boolean
+      owner_requested:
+        description: Owner-authenticated release of a bounded dependency update or Jarvis repair
+        type: boolean
+        default: false
+      owner_reviewed:
+        description: Lee explicitly reviewed and approved this exact PR commit
+        type: boolean
+        default: false
+      expected_sha:
+        description: Exact approved PR head commit for an owner release
+        type: string
+        required: false

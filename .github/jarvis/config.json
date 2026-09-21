@@ -3,5 +3,8 @@
   "releaseMode": "merge-only",
   "ciWorkflow": "jarvis-checks.yml",
   "check": "Jarvis quality",
-  "holdReason": null
+  "holdReason": null,
+  "releasePolicyVersion": 2,
+  "ownerRequestedReleases": true,
+  "ownerReviewedReleases": true
 }
