@@ -37,7 +37,7 @@ const functionRefOf = (functionName: unknown): string | undefined => {
 
 interface InvocationInfo {
   asyncInvoked: Set<string>;
-  eventSourceOnly: Set<string>;
+  streamFailureMissing: Set<string>;
   asyncFailureHandled: Set<string>;
 }
 
@@ -45,7 +45,7 @@ const detectInvocations = (
   resources: Record<string, CfnResource>
 ): InvocationInfo => {
   const asyncInvoked = new Set<string>();
-  const eventSource = new Set<string>();
+  const streamFailureMissing = new Set<string>();
   const asyncFailureHandled = new Set<string>();
   for (const resource of Object.values(resources)) {
     if (resource.Type === 'AWS::Lambda::Permission') {
@@ -60,8 +60,21 @@ const detectInvocations = (
       }
     } else if (resource.Type === 'AWS::Lambda::EventSourceMapping') {
       const fn = functionRefOf(resource.Properties?.FunctionName);
-      if (fn) {
-        eventSource.add(fn);
+      const source = resource.Properties?.EventSourceArn;
+      const sourceId = functionRefOf(source);
+      const sourceType = sourceId ? resources[sourceId]?.Type : undefined;
+      const stream =
+        sourceType === 'AWS::Kinesis::Stream' ||
+        sourceType === 'AWS::DynamoDB::Table' ||
+        (typeof source === 'string' &&
+          /^arn:[^:]+:(kinesis|dynamodb):/.test(source));
+      if (
+        fn &&
+        stream &&
+        resource.Properties?.Enabled !== false &&
+        !resource.Properties?.DestinationConfig?.OnFailure?.Destination
+      ) {
+        streamFailureMissing.add(fn);
       }
     } else if (resource.Type === 'AWS::Lambda::EventInvokeConfig') {
       const fn = functionRefOf(resource.Properties?.FunctionName);
@@ -73,10 +86,7 @@ const detectInvocations = (
       }
     }
   }
-  const eventSourceOnly = new Set(
-    [...eventSource].filter((fn) => !asyncInvoked.has(fn))
-  );
-  return { asyncInvoked, eventSourceOnly, asyncFailureHandled };
+  return { asyncInvoked, streamFailureMissing, asyncFailureHandled };
 };
 
 /**
@@ -84,8 +94,9 @@ const detectInvocations = (
  *
  * Async-invoked functions (EventBridge, SNS, S3, ...) drop the event after
  * retries unless a DeadLetterConfig or an EventInvokeConfig OnFailure
- * destination captures it. Poll-based sources (SQS/Kinesis) need an
- * OnFailure destination on the EventSourceMapping instead. Functions whose
+ * destination captures it. Kinesis/DynamoDB streams use an
+ * OnFailure destination on their mapping. SQS uses the source queue RedrivePolicy,
+ * which is checked by sqs-queue-no-dlq, not Lambda DeadLetterConfig. Functions whose
  * invocation mode cannot be inferred from the template are NOT flagged -
  * they may be sync-invoked from another stack. (The product flags those as
  * "unknown"; the open rule stays conservative.)
@@ -103,13 +114,13 @@ export const lambdaDlqMissing: Rule = {
       'https://docs.aws.amazon.com/lambda/latest/dg/invocation-async.html#invocation-dlq',
     remediationSteps: [
       'Configure DeadLetterConfig (SQS/SNS) or an EventInvokeConfig OnFailure destination for async-invoked functions',
-      'For SQS/Kinesis event sources, set DestinationConfig.OnFailure on the EventSourceMapping',
+      'For Kinesis/DynamoDB streams, use mapping DestinationConfig.OnFailure; SQS uses source queue RedrivePolicy',
     ],
   },
 
   check: (template, report) => {
     const resources = template.Resources ?? {};
-    const { asyncInvoked, eventSourceOnly, asyncFailureHandled } =
+    const { asyncInvoked, streamFailureMissing, asyncFailureHandled } =
       detectInvocations(resources);
 
     for (const [resourceId, resource] of Object.entries(resources)) {
@@ -119,11 +130,9 @@ export const lambdaDlqMissing: Rule = {
       if (isCdkInternalLogicalId(resourceId)) {
         continue;
       }
-      if (resource.Properties?.DeadLetterConfig?.TargetArn) {
-        continue;
-      }
       if (
         asyncInvoked.has(resourceId) &&
+        !resource.Properties?.DeadLetterConfig?.TargetArn &&
         !asyncFailureHandled.has(resourceId)
       ) {
         report(resourceId, {
@@ -132,12 +141,13 @@ export const lambdaDlqMissing: Rule = {
           recommendation:
             'Configure DeadLetterConfig or an EventInvokeConfig OnFailure destination so failed async events are captured instead of dropped after retries.',
         });
-      } else if (eventSourceOnly.has(resourceId)) {
+      }
+      if (streamFailureMissing.has(resourceId)) {
         report(resourceId, {
           issue:
-            'Lambda function consumes an event source mapping without a failure destination.',
+            'Lambda function consumes a Kinesis/DynamoDB stream mapping without a failure destination.',
           recommendation:
-            'Set DestinationConfig.OnFailure on the EventSourceMapping - function-level DLQs do not apply to poll-based sources like SQS/Kinesis.',
+            'Set DestinationConfig.OnFailure on the Kinesis/DynamoDB EventSourceMapping. Function-level DLQs do not apply to stream polling; for SQS, configure the source queue RedrivePolicy instead.',
         });
       }
     }

@@ -1,6 +1,6 @@
 import type { Rule } from '../../types';
 
-/** Ports whose exposure to the internet is a near-certain incident. */
+/** Management and data-service ports that need restricted source access. */
 const DANGEROUS_PORTS: Record<number, string> = {
   22: 'SSH',
   3389: 'RDP',
@@ -49,19 +49,16 @@ const exposedDangerousServices = (rule: IngressRule): string[] => {
 /**
  * security-group-unrestricted-ingress
  *
- * An ingress rule open to 0.0.0.0/0 or ::/0 exposes whatever is behind the
- * security group to the entire internet. The finding calls out management and
- * database ports (SSH, RDP, MySQL, ...) explicitly, since those are the ones
- * that get boxes compromised within hours. Inspects both inline
- * SecurityGroupIngress rules and standalone AWS::EC2::SecurityGroupIngress
- * resources.
+ * Reviews unrestricted source ranges. Individual HTTP/HTTPS ports alone do
+ * not establish a defect; retain checks for management ports, mixed port
+ * ranges and all-traffic rules. Routing and addressing are not inferred.
  */
 export const securityGroupUnrestrictedIngress: Rule = {
   metadata: {
     ruleId: 'security-group-unrestricted-ingress',
     name: 'Security Group Unrestricted Ingress',
     description:
-      'Detects security group ingress rules open to the whole internet (0.0.0.0/0 or ::/0).',
+      'Detects ingress from any source except individual TCP web ports 80/443, whose intended exposure requires application context.',
     severity: 'HIGH',
     wafPillar: 'Security',
     resourceTypes: [
@@ -80,7 +77,15 @@ export const securityGroupUnrestrictedIngress: Rule = {
 
   check: (template, report) => {
     const flag = (resourceId: string, rules: IngressRule[]): void => {
-      const open = rules.filter(isOpenToInternet);
+      const open = rules.filter(
+        (rule) =>
+          isOpenToInternet(rule) &&
+          !(
+            isTcp(rule.IpProtocol) &&
+            (rule.FromPort === 80 || rule.FromPort === 443) &&
+            rule.ToPort === rule.FromPort
+          )
+      );
       if (open.length === 0) {
         return;
       }
@@ -89,7 +94,7 @@ export const securityGroupUnrestrictedIngress: Rule = {
         ? ` - including ${[...new Set(dangerous)].join(', ')}`
         : '';
       report(resourceId, {
-        issue: `Security group allows unrestricted ingress from the internet (0.0.0.0/0 or ::/0)${detail}.`,
+        issue: `Security group permits ingress from any source address (0.0.0.0/0 or ::/0)${detail}. Actual internet reachability also depends on routing and resource addressing.`,
         recommendation:
           'Restrict the ingress rule to specific CIDR ranges or security group references; use SSM Session Manager, a bastion, or VPN for management access instead of exposing ports publicly.',
       });

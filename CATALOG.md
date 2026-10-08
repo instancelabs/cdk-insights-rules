@@ -1,6 +1,6 @@
 # Open Rule Catalog
 
-**132 rules** implemented in the open in this package - 13 critical, 32 high, 56 medium, 31 low.
+**132 rules** implemented in the open in this package - 13 critical, 32 high, 53 medium, 34 low.
 
 > This is the open catalog of the rules the [CDK Insights](https://cdkinsights.dev/rules) product runs (the product runs these same rules, plus template-level checks that need its synth pipeline). [Propose or contribute a rule →](CONTRIBUTING.md)
 
@@ -90,7 +90,7 @@
 | [`ebs-volume-unencrypted`](https://cdkinsights.dev/rules/ebs-volume-unencrypted) | HIGH | Security | Detects EBS volumes without encryption at rest. |
 | [`ec2-imdsv2-not-enforced`](https://cdkinsights.dev/rules/ec2-imdsv2-not-enforced) | HIGH | Security | Detects launch templates and launch configurations that do not require IMDSv2 (MetadataOptions.HttpTokens is not "required"), leaving instances exposed to SSRF-based credential theft. |
 | [`ec2-instance-public-ip`](https://cdkinsights.dev/rules/ec2-instance-public-ip) | HIGH | Security | Detects EC2 instances whose NetworkInterfaces set AssociatePublicIpAddress to true, exposing the instance directly to the internet. |
-| [`security-group-unrestricted-ingress`](https://cdkinsights.dev/rules/security-group-unrestricted-ingress) | HIGH | Security | Detects security group ingress rules open to the whole internet (0.0.0.0/0 or ::/0). |
+| [`security-group-unrestricted-ingress`](https://cdkinsights.dev/rules/security-group-unrestricted-ingress) | HIGH | Security | Detects ingress from any source except individual TCP web ports 80/443, whose intended exposure requires application context. |
 | [`ec2-instance-type-outdated`](https://cdkinsights.dev/rules/ec2-instance-type-outdated) | MEDIUM | Performance Efficiency | Detects EC2 instances on the previous-generation t2 family. |
 | [`vpc-default-security-group-rules-present`](https://cdkinsights.dev/rules/vpc-default-security-group-rules-present) | MEDIUM | Security | Detects standalone security group rules attached to a VPC default security group (GroupId referencing Fn::GetAtt DefaultSecurityGroup). CIS requires the default group to have no rules. |
 | [`vpc-flow-logs-missing`](https://cdkinsights.dev/rules/vpc-flow-logs-missing) | MEDIUM | Security | Detects VPCs without flow logs configured. |
@@ -275,12 +275,12 @@
 | [`s3-bucket-policy-public-read`](https://cdkinsights.dev/rules/s3-bucket-policy-public-read) | CRITICAL | Security | Detects S3 bucket policies that allow object reads to a wildcard principal with no scoping condition - the bucket contents are publicly downloadable. |
 | [`s3-bucket-policy-self-lockout`](https://cdkinsights.dev/rules/s3-bucket-policy-self-lockout) | CRITICAL | Security | Detects bucket policies whose blanket Deny statements would lock the account out of its own bucket. |
 | [`s3-bucket-policy-non-ssl`](https://cdkinsights.dev/rules/s3-bucket-policy-non-ssl) | HIGH | Security | Detects S3 bucket policies without a Deny statement for non-TLS (aws:SecureTransport=false) requests. |
-| [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | MEDIUM | Security | Detects S3 buckets without server access logging configured. |
-| [`s3-bucket-encryption-aws-managed`](https://cdkinsights.dev/rules/s3-bucket-encryption-aws-managed) | MEDIUM | Security | Detects S3 buckets without an explicit BucketEncryption configuration (SSE-S3 default applies, not customer-controlled). |
 | [`s3-bucket-public-access`](https://cdkinsights.dev/rules/s3-bucket-public-access) | MEDIUM | Security | Detects S3 buckets that do not explicitly enable all four Block Public Access settings. New buckets are protected by service defaults since April 2023; explicit configuration makes the protection visible and portable. |
 | [`s3-bucket-versioning-disabled`](https://cdkinsights.dev/rules/s3-bucket-versioning-disabled) | MEDIUM | Reliability | Detects S3 buckets without versioning enabled, leaving overwritten or deleted objects unrecoverable. |
-| [`s3-lifecycle-policy-missing`](https://cdkinsights.dev/rules/s3-lifecycle-policy-missing) | MEDIUM | Cost Optimization | Detects S3 buckets without lifecycle rules. |
+| [`s3-bucket-access-logging-disabled`](https://cdkinsights.dev/rules/s3-bucket-access-logging-disabled) | LOW | Security | Detects S3 buckets without server access logging configured. |
+| [`s3-bucket-encryption-aws-managed`](https://cdkinsights.dev/rules/s3-bucket-encryption-aws-managed) | LOW | Security | Detects S3 buckets without an explicit BucketEncryption configuration (SSE-S3 default applies, not customer-controlled). |
 | [`s3-intelligent-tiering`](https://cdkinsights.dev/rules/s3-intelligent-tiering) | LOW | Cost Optimization | Detects S3 buckets not using Intelligent-Tiering for automatic cost optimization. |
+| [`s3-lifecycle-policy-missing`](https://cdkinsights.dev/rules/s3-lifecycle-policy-missing) | LOW | Cost Optimization | Detects S3 buckets without lifecycle rules. |
 | [`s3-replication-missing`](https://cdkinsights.dev/rules/s3-replication-missing) | LOW | Reliability | Detects production/critical-named S3 buckets without cross-region replication. |
 
 ## SNS

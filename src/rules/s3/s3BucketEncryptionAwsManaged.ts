@@ -14,7 +14,7 @@ export const s3BucketEncryptionAwsManaged: Rule = {
     name: 'S3 Bucket Encryption Not Customer-Configured',
     description:
       'Detects S3 buckets without an explicit BucketEncryption configuration (SSE-S3 default applies, not customer-controlled).',
-    severity: 'MEDIUM',
+    severity: 'LOW',
     wafPillar: 'Security',
     resourceTypes: ['AWS::S3::Bucket'],
     awsDocUrl:
@@ -37,7 +37,7 @@ export const s3BucketEncryptionAwsManaged: Rule = {
           issue:
             'S3 bucket has no explicit encryption configuration (the SSE-S3 default applies).',
           recommendation:
-            'Configure BucketEncryption explicitly - use SSE-KMS with a customer-managed key where key rotation and access must be auditable.',
+            'New S3 uploads use SSE-S3 by default. Declare BucketEncryption if needed for configuration policy; choose customer-managed KMS only when key-control or audit requirements justify its permissions and cost.',
         });
       }
     }

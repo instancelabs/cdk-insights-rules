@@ -37,13 +37,14 @@ describe('lambda-dlq-missing', () => {
           Type: 'AWS::Lambda::EventSourceMapping',
           Properties: {
             FunctionName: { 'Fn::GetAtt': ['Fn', 'Arn'] },
-            EventSourceArn: 'arn:aws:sqs:eu-west-2:1:q',
+            EventSourceArn:
+              'arn:aws:kinesis:eu-west-2:111122223333:stream/events',
           },
         },
       },
     });
     expect(findings).toHaveLength(1);
-    expect(findings[0].issue).toContain('event source mapping');
+    expect(findings[0].issue).toContain('stream mapping');
   });
 
   it('does not flag DLQs, OnFailure destinations, sync-only, or unknown-mode functions', () => {
