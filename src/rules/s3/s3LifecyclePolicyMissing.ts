@@ -3,15 +3,14 @@ import type { Rule } from '../../types';
 /**
  * s3-lifecycle-policy-missing
  *
- * A bucket with no lifecycle rules never transitions or expires anything -
- * storage (and noncurrent versions, on versioned buckets) grows forever.
+ * Lifecycle rules are optional; application-managed retention may already exist.
  */
 export const s3LifecyclePolicyMissing: Rule = {
   metadata: {
     ruleId: 's3-lifecycle-policy-missing',
     name: 'S3 Lifecycle Policy Missing',
     description: 'Detects S3 buckets without lifecycle rules.',
-    severity: 'MEDIUM',
+    severity: 'LOW',
     wafPillar: 'Cost Optimization',
     resourceTypes: ['AWS::S3::Bucket'],
     awsDocUrl:
@@ -33,7 +32,7 @@ export const s3LifecyclePolicyMissing: Rule = {
         report(resourceId, {
           issue: 'S3 bucket has no lifecycle policy configured.',
           recommendation:
-            'Add lifecycle rules to transition cold data to cheaper storage classes and expire noncurrent versions.',
+            'Confirm retention and access requirements and measured storage usage before choosing transitions or expiration. Do not introduce an arbitrary deletion period.',
         });
       }
     }

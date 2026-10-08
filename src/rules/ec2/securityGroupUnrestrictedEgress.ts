@@ -40,9 +40,9 @@ export const securityGroupUnrestrictedEgress: Rule = {
       ) {
         report(resourceId, {
           issue:
-            'Security group allows unrestricted egress to the internet (0.0.0.0/0).',
+            'Security group permits egress to any destination address on the configured protocols and ports (0.0.0.0/0 or ::/0). This does not imply all outbound ports are allowed.',
           recommendation:
-            'Where egress filtering matters (exfiltration controls, compliance), restrict outbound rules to specific destinations; otherwise suppress - allow-all outbound is the CDK default.',
+            'Review required outbound protocols, ports and destinations. Restrict destination ranges where workload or egress-control requirements justify it; internet routing is not established by this rule.',
         });
       }
     }

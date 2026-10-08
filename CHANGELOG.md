@@ -3,6 +3,12 @@
 All notable changes to this package are documented here. This project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2026-10-08
+
+- Correct Lambda recovery checks: SQS uses source-queue redrive, while stream mappings use their own failure destination. Recognize configured stream destinations and keep independent async warnings.
+- Stop treating individual public TCP 80/443 rules as confirmed ingress defects; retain management, mixed-range and all-traffic warnings. Describe allowed addresses/ports without asserting internet reachability.
+- Treat optional S3 encryption configuration, access logging and lifecycle choices as LOW advice, with conditional guidance and no arbitrary expiration recommendation.
+
 ## [0.6.0] - 2026-07-25
 
 Consistency hardening from an external review of `0.5.0` (full framework + all
