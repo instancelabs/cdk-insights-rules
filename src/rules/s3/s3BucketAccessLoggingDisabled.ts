@@ -3,15 +3,14 @@ import type { Rule } from '../../types';
 /**
  * s3-bucket-access-logging-disabled
  *
- * Server access logs are the only record of object-level access for
- * forensics without CloudTrail data events. CIS AWS Foundations 2.1.2.
+ * Server access logging is one audit option; other coverage may exist.
  */
 export const s3BucketAccessLoggingDisabled: Rule = {
   metadata: {
     ruleId: 's3-bucket-access-logging-disabled',
     name: 'S3 Bucket Access Logging Disabled',
     description: 'Detects S3 buckets without server access logging configured.',
-    severity: 'MEDIUM',
+    severity: 'LOW',
     wafPillar: 'Security',
     resourceTypes: ['AWS::S3::Bucket'],
     awsDocUrl:
@@ -35,7 +34,7 @@ export const s3BucketAccessLoggingDisabled: Rule = {
       report(resourceId, {
         issue: 'S3 bucket has no server access logging configured.',
         recommendation:
-          'Set LoggingConfiguration.DestinationBucketName to a dedicated log bucket so object-level access is recorded for forensics (CIS 2.1.2).',
+          'Check existing audit coverage, including CloudTrail data events, and retention requirements. If server access logs are needed, set LoggingConfiguration.DestinationBucketName to a dedicated log bucket.',
       });
     }
   },

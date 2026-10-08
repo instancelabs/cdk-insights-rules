@@ -41,8 +41,8 @@ describe('security-group-unrestricted-ingress', () => {
             SecurityGroupIngress: [
               {
                 IpProtocol: 'tcp',
-                FromPort: 443,
-                ToPort: 443,
+                FromPort: 22,
+                ToPort: 22,
                 CidrIpv6: '::/0',
               },
             ],
