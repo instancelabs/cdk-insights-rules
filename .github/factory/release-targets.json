@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "repository": "instancelabs/cdk-insights-rules",
+  "targets": [
+    {
+      "id": "cdk-insights-rules-npm",
+      "kind": "npm",
+      "packageName": "@instance-labs/cdk-insights-rules",
+      "access": "public",
+      "channels": [
+        "latest"
+      ]
+    }
+  ]
+}
