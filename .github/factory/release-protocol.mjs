@@ -1,7 +1,8 @@
 // Canonical source: instancelabs/software-factory, packages/factory-local/workflows.
 // Repository copies and their target maps are pinned in the factory release catalogue.
 import { spawnSync } from "node:child_process";
-import { appendFileSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -14,8 +15,10 @@ const object = (value) => {
   assert(value && typeof value === "object" && !Array.isArray(value), "Expected an object");
   return value;
 };
+const sourceTag = "software-factory:source-commit";
+const actionTag = "software-factory:action-id";
 
-export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env }) => {
+export const createReleaseProtocol = ({ run, read, write, output, now, sleep, http, env }) => {
   const checkedOut = () => run("git", ["rev-parse", "HEAD"]).stdout.trim();
   const catalogue = (commit) =>
     decode(run("git", ["show", `${commit}:.github/factory/release-targets.json`]).stdout);
@@ -121,6 +124,63 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
       versionFor(value.target, value.commit);
     return value;
   };
+  const stamp = () => {
+    const { target, commit } = guard();
+    assert(
+      env.FACTORY_ACTION_ID && target.kind === "cloudformation" && typeof write === "function",
+      "Only an approved factory CloudFormation release may bind a deployment assembly",
+    );
+    const assembly = object(decode(read("cdk.out/manifest.json")));
+    const configuration = object(decode(read("cdk.json")));
+    const artifacts = Object.entries(object(assembly.artifacts));
+    assert(
+      !artifacts.some(([, artifact]) => artifact.type === "cdk:cloud-assembly"),
+      "Nested cloud assemblies need an explicitly qualified release route",
+    );
+    const stacks = artifacts.filter(([, artifact]) => artifact.type === "aws:cloudformation:stack");
+    assert(stacks.length > 0 && stacks.length <= 50, "Deployment assembly stack scope is invalid");
+    let override;
+    if (configuration.tags !== undefined) {
+      assert(Array.isArray(configuration.tags), "CDK CLI tag overrides must use Key/Value entries");
+      override = Object.fromEntries(
+        configuration.tags.map((tag) => {
+          assert(
+            typeof tag.Key === "string" && typeof tag.Value === "string",
+            "Invalid CDK tag override",
+          );
+          return [tag.Key, tag.Value];
+        }),
+      );
+    }
+    const names = [];
+    for (const [id, artifact] of stacks) {
+      const properties = object(artifact.properties);
+      const environment = /^aws:\/\/([^/]+)\/([^/]+)$/.exec(artifact.environment);
+      assert(
+        environment && environment[1] === target.accountId && environment[2] === target.region,
+        "Deployment assembly selects another account or region",
+      );
+      names.push(properties.stackName ?? id);
+      const existing =
+        override && Object.keys(override).length ? override : object(properties.tags ?? {});
+      assert(
+        Object.values(existing).every((value) => typeof value === "string"),
+        "Invalid assembly stack tags",
+      );
+      properties.tags = { ...existing, [sourceTag]: commit, [actionTag]: env.FACTORY_ACTION_ID };
+    }
+    assert(
+      target.stacks?.length > 0 && target.stacks.every((name) => names.includes(name)),
+      "Deployment assembly does not contain every enrolled stack",
+    );
+    // Deploy the already-synthesized assembly, including from existing wrapper scripts.
+    // This keeps the source markers in CDK's actual stack properties, not a later AWS write.
+    configuration.app = "cdk.out";
+    configuration.tags = [];
+    write("cdk.out/manifest.json", `${JSON.stringify(assembly, null, 2)}\n`);
+    write("cdk.json", `${JSON.stringify(configuration, null, 2)}\n`);
+    return { sourceCommit: commit, actionId: env.FACTORY_ACTION_ID, stacks: names };
+  };
   const predeploy = () => {
     const value = guard();
     identity(value.target);
@@ -223,7 +283,7 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
     output("verify", "true");
     return { ...value, artifact, alreadyPublished: existing.found };
   };
-  const stackSample = (target) => {
+  const stackSample = (target, commit) => {
     assert(
       Array.isArray(target.stacks) && target.stacks.length > 0 && target.stacks.length <= 50,
       "Expected stack coverage is absent or unbounded",
@@ -232,6 +292,8 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
     const seen = new Set();
     let functions = 0;
     const outputs = {};
+    const revisions = new Map();
+    let sourceMatches = true;
     while (queue.length) {
       const name = queue.shift();
       if (seen.has(name)) continue;
@@ -244,6 +306,20 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
           ["CREATE_COMPLETE", "UPDATE_COMPLETE", "IMPORT_COMPLETE"].includes(stack.StackStatus),
         "Stack did not complete successfully",
       );
+      const updated = stack.LastUpdatedTime ?? stack.CreationTime;
+      if (typeof stack.StackId !== "string" || typeof updated !== "string")
+        throw new Error("Stack revision evidence is unavailable");
+      revisions.set(`stack:${stack.StackId}`, updated);
+      if (target.stacks.includes(name)) {
+        const tags = stack.Tags ?? [];
+        sourceMatches &&= [
+          [sourceTag, commit],
+          [actionTag, env.FACTORY_ACTION_ID],
+        ].every(
+          ([key, value]) =>
+            tags.filter((tag) => tag.Key === key && tag.Value === value).length === 1,
+        );
+      }
       for (const item of stack.Outputs || []) outputs[item.OutputKey] = item.OutputValue;
       let next;
       let pages = 0;
@@ -269,18 +345,32 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
               "--function-name",
               resource.PhysicalResourceId,
               "--query",
-              "{State:State,LastUpdateStatus:LastUpdateStatus}",
+              "{State:State,LastUpdateStatus:LastUpdateStatus,RevisionId:RevisionId,CodeSha256:CodeSha256}",
             ]);
             assert(
               state.State === "Active" && state.LastUpdateStatus === "Successful",
               "A deployed function is not ready",
             );
+            if (
+              typeof state.RevisionId !== "string" ||
+              !state.RevisionId ||
+              typeof state.CodeSha256 !== "string" ||
+              !state.CodeSha256
+            )
+              throw new Error("Function revision evidence is unavailable");
+            revisions.set(`lambda:${resource.PhysicalResourceId}`, [
+              state.RevisionId,
+              state.CodeSha256,
+            ]);
           }
         }
         next = page.NextToken;
       } while (next);
     }
-    return { stacks: seen.size, functions, outputs };
+    const revision = createHash("sha256")
+      .update(JSON.stringify([...revisions].sort(([left], [right]) => left.localeCompare(right))))
+      .digest("hex");
+    return { stacks: seen.size, functions, outputs, sourceMatches, revision };
   };
   const alarmSample = (target) => {
     assert(target.alarms?.length > 0, "Expected alarm coverage is absent");
@@ -435,10 +525,18 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
       if (criteria.at(-1).status === "passed") {
         const samples = [];
         for (let sample = 0; sample < 3; sample++) {
-          const result = { runtime: null, alarms: null, endpoint: null };
+          const result = {
+            runtime: null,
+            alarms: null,
+            endpoint: null,
+            revision: null,
+            sourceMatches: false,
+          };
           try {
             if (target.kind === "cloudformation") {
-              const state = stackSample(target);
+              const state = stackSample(target, commit);
+              result.revision = state.revision;
+              result.sourceMatches = state.sourceMatches;
               result.runtime = `${state.stacks} stacks and ${state.functions} functions ready`;
               if (target.apiOutput) {
                 const base = state.outputs[target.apiOutput];
@@ -482,6 +580,7 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
             }
           } catch (error) {
             result.runtime = error;
+            result.revision = error;
             if (target.apiOutput || target.kind === "amplify") result.endpoint = error;
           }
           if (target.alarms?.length) {
@@ -499,6 +598,20 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
           if (failure) throw failure.runtime;
           return "Three successful target/runtime observations over at least sixty seconds";
         });
+        if (target.kind === "cloudformation")
+          await check("deployed-revision", () => {
+            const failure = samples.find((sample) => sample.revision instanceof Error);
+            if (failure) throw failure.revision;
+            assert(
+              samples.every((sample) => sample.sourceMatches),
+              "Deployed source/action markers do not match this release",
+            );
+            assert(
+              samples.every((sample) => sample.revision && sample.revision === samples[0].revision),
+              "Deployed stack or function revision changed during observation",
+            );
+            return "Exact source/action markers and stable deployed revisions passed all three observations";
+          });
         if (target.apiOutput || target.kind === "amplify")
           await check("endpoint-health", () => {
             const failure = samples.find((sample) => sample.endpoint instanceof Error);
@@ -545,7 +658,7 @@ export const createReleaseProtocol = ({ run, read, output, now, sleep, http, env
     );
     return receipt;
   };
-  return { guard, predeploy, pack, observe };
+  return { guard, predeploy, stamp, pack, observe };
 };
 
 const main = async () => {
@@ -564,6 +677,7 @@ const main = async () => {
   const protocol = createReleaseProtocol({
     run,
     read: (path) => readFileSync(path, "utf8"),
+    write: (path, value) => writeFileSync(path, value, "utf8"),
     output: (key, value) => {
       assert(/^[a-z_]+$/.test(key) && !/[\r\n]/.test(value), "Invalid workflow output");
       if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `${key}=${value}\n`);
@@ -606,12 +720,13 @@ const main = async () => {
   const mode = process.argv[2];
   if (mode === "guard") protocol.guard();
   else if (mode === "predeploy") protocol.predeploy();
+  else if (mode === "stamp") protocol.stamp();
   else if (mode === "pack") protocol.pack();
   else if (mode === "observe") {
     const result = await protocol.observe();
     console.log(`FACTORY_RELEASE_EVIDENCE ${JSON.stringify(result)}`);
     if (result.criteria.some((item) => item.status !== "passed")) process.exitCode = 1;
-  } else throw new Error("Select guard, predeploy, pack or observe");
+  } else throw new Error("Select guard, predeploy, stamp, pack or observe");
 };
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href)
   main().catch((error) => {

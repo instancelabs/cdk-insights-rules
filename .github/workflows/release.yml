@@ -184,3 +184,7 @@ env:
   FACTORY_DEADLINE: ${{ inputs.factory_deadline }}
   FACTORY_VERSION: ${{ inputs.factory_version }}
   FACTORY_CHANNEL: ${{ inputs.factory_channel || 'latest' }}
+concurrency:
+  group: release-${{ github.repository }}-distribution
+  queue: max
+  cancel-in-progress: false
