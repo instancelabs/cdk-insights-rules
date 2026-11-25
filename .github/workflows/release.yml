@@ -12,7 +12,30 @@ name: Release
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - .github/**
   workflow_dispatch:
+    inputs:
+      factory_action_id:
+        description: Exact approved factory action; leave empty for ordinary manual releases
+        type: string
+        required: false
+      factory_source_sha:
+        description: Immutable source and workflow commit approved by the factory
+        type: string
+        required: false
+      factory_deadline:
+        description: Original factory execution deadline (UTC)
+        type: string
+        required: false
+      factory_version:
+        description: Exact reviewed package version
+        type: string
+        required: false
+      factory_channel:
+        description: Approved npm distribution channel
+        type: string
+        required: false
 
 permissions:
   contents: read
@@ -31,6 +54,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 2 # need the previous commit to diff the version
+          ref: ${{ inputs.factory_source_sha || github.sha }}
+      - name: Verify factory release identity
+        run: node .github/factory/release-protocol.mjs guard
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
@@ -78,18 +104,83 @@ jobs:
               echo "✅ version changed: $PREV → $CURR."
             fi
           fi
-
+      - name: Pack and verify the exact npm artifact
+        id: factory_pack
+        if: ${{ steps.version.outputs.changed == 'true' || inputs.factory_action_id != '' }}
+        run: node .github/factory/release-protocol.mjs pack
       - name: Publish to npm
-        if: steps.version.outputs.changed == 'true'
-        run: npm publish --access public
+        if: ${{ (steps.version.outputs.changed == 'true' || inputs.factory_action_id != '') && steps.factory_pack.outputs.already_published != 'true' }}
+        env:
+          FACTORY_TARBALL: ${{ steps.factory_pack.outputs.tarball }}
+          NPM_CONFIG_FETCH_RETRIES: "0"
+        run: |
+          node .github/factory/release-protocol.mjs guard
+          npm publish "$FACTORY_TARBALL" --tag "$FACTORY_CHANNEL" --access public --registry=https://registry.npmjs.org
 
       # Reconcile release metadata independently of publishing. If npm accepted
       # the package but a later step failed, a workflow re-run can still create
       # the missing tag/release without attempting to republish the version.
+      - name: Bind the version tag to the reviewed commit
+        if: ${{ inputs.factory_action_id != '' || steps.factory_pack.outputs.verify == 'true' }}
+        env:
+          VERSION: ${{ format('v{0}', steps.version.outputs.version) }}
+        run: |
+          node .github/factory/release-protocol.mjs guard
+          REMOTE=$(git ls-remote --refs origin "refs/tags/$VERSION")
+          if [ -n "$REMOTE" ]; then
+            git fetch --no-tags origin "refs/tags/$VERSION"
+            ACTUAL=$(git rev-parse "FETCH_HEAD^{commit}")
+            if [ "$ACTUAL" != "$GITHUB_SHA" ]; then
+              echo "::error::Version tag identifies another source commit"
+              exit 1
+            fi
+          else
+            git tag "$VERSION" "$GITHUB_SHA"
+            git push origin "refs/tags/$VERSION"
+          fi
       - name: Ensure GitHub Release exists
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          node .github/factory/release-protocol.mjs guard
           TAG="v${{ steps.version.outputs.version }}"
           gh release view "$TAG" >/dev/null 2>&1 \
             || gh release create "$TAG" --target "$GITHUB_SHA" --generate-notes
+    timeout-minutes: 15
+    if: "${{ (true) && !(github.event_name == 'push' && github.ref_type == 'branch' && startsWith(github.event.head_commit.message, 'chore(factory-release): ')) }}"
+    outputs:
+      factory_integrity: ${{ steps.factory_pack.outputs.integrity }}
+      factory_verify: ${{ steps.factory_pack.outputs.verify }}
+  factory-observe:
+    name: Factory post-release verification
+    needs:
+      - release
+    if: ${{ always() && needs['release'].outputs.factory_verify == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      FACTORY_RELEASE_RESULT: ${{ needs['release'].result }}
+      GH_TOKEN: ${{ github.token }}
+      FACTORY_EXPECTED_INTEGRITY: ${{ needs['release'].outputs.factory_integrity }}
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_READ_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.factory_source_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+      - name: Observe the released target without application writes
+        run: node .github/factory/release-protocol.mjs observe
+run-name: ${{ inputs.factory_action_id && format('Factory release {0}', inputs.factory_action_id) || github.workflow }}
+env:
+  FACTORY_TARGET: cdk-insights-rules-npm
+  FACTORY_ACTION_ID: ${{ inputs.factory_action_id }}
+  FACTORY_SOURCE_SHA: ${{ inputs.factory_source_sha }}
+  FACTORY_DEADLINE: ${{ inputs.factory_deadline }}
+  FACTORY_VERSION: ${{ inputs.factory_version }}
+  FACTORY_CHANNEL: ${{ inputs.factory_channel || 'latest' }}
